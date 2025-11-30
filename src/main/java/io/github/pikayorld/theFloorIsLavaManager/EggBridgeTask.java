@@ -16,6 +16,12 @@ import static io.github.pikayorld.theFloorIsLavaManager.BlockColorUtils.getWoolB
 
 public class EggBridgeTask implements Runnable {
 
+    private final Plugin plugin;
+
+    public EggBridgeTask(Plugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public void run() {
         Server server = Bukkit.getServer();

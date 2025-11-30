@@ -24,7 +24,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(), this);
+        getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
 
         dangerManager = new DangerManager(this);
 
@@ -55,7 +55,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             world.setTime(0);
         }
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, EggBridgeTask::new, 1,1);
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new EggBridgeTask(this), 1,1);
+
+        new TheFloorIsLavaCrafts().setCrafts(this);
 
         this.getLogger().info("RisingDamage activé !");
     }
