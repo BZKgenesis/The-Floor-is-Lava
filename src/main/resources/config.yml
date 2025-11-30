@@ -1,10 +1,11 @@
 danger:
   start-level: -64          # couche de départ
-  end-level: 63          # couche de fin
-  increase-mode: 1         #façon d'avancer 0: nombre de tick par couche avec couche de départ et couche de fin (total-time = (end-level - start-level)*increase-every ticks)
-                           #                1: nombre de tick pour toute la monté avec couche de départ et couche de fin (increase-every = total-time / (end-level - start-leve)
-  increase-every: 200     # ticks avant +1 (200 ticks = 10 sec)
-  total-time: 24000       # duré total de la monté (effectif en increase-mode = 1) 24000 = 20min
-  damage: 1.0             # dégâts (1 = 1 cœur)
-  damage-every: 40        # tous les 20 ticks = 1 seconde
-  particles: true         # afficher les particules
+  end-level: 250           # couche de fin
+  total-time: 24000        # duré total de la monté (effectif en increase-mode = 1) 24000 = 20min
+  damage: 1.0              # dégâts (1 = 1 cœur)
+  damage-every: 40         # tous les 20 ticks = 1 seconde
+  place-lava: true         # active la lave
+  show-alert: true         # active l'alerte proche de la lave
+  lava-margin: 30          # marge de lave en dehors des bordures
+  increase-size: 2         # a partir de combien de nouvelle couche de lave disponible on place la lave
+  lava-rising-delay: 20    # le delay avant que la 2eme phase se lance
