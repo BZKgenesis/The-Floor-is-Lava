@@ -55,6 +55,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             world.setTime(0);
         }
 
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, EggBridgeTask::new, 1,1);
+
         this.getLogger().info("RisingDamage activé !");
     }
 
