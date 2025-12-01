@@ -148,9 +148,12 @@ public class TheFloorIslavaListener implements Listener {
     }
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
+        plugin.getLogger().info("OnDeath with respawn");
         if (plugin.getDangerManagerInstance().getNoRespawn()){
+            plugin.getLogger().info("OnDeath no respawn");
             Player player = event.getEntity();
             Location deathLocation = player.getLocation();
+            event.getEntity().getWorld().strikeLightningEffect(event.getEntity().getLocation());
 
             // Empêche le respawn auto si jamais tu l'as modifié ailleurs
             if (event.getDamageSource().getCausingEntity() instanceof Player assassin){
@@ -164,11 +167,8 @@ public class TheFloorIslavaListener implements Listener {
                 event.getDrops().clear(); // si tu veux pas qu'ils droppent, sinon retire
             }
 
-
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                player.setGameMode(GameMode.SPECTATOR);
-                player.teleport(deathLocation);
-            });
+            event.getEntity().setGameMode(GameMode.SPECTATOR);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> { event.getEntity().spigot().respawn(); }, 4L);
         }
     }
 

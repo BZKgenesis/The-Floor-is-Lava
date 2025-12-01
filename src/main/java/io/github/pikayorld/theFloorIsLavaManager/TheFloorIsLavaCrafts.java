@@ -4,6 +4,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.Weapon;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -56,16 +57,17 @@ public class TheFloorIsLavaCrafts {
         ItemStack patateItem = ItemStack.of(Material.BAKED_POTATO);
 
         ShapelessRecipe patateRecipe = new ShapelessRecipe(patateKey, patateItem);
-            patateRecipe.addIngredient(Material.DIRT);
+            patateRecipe.addIngredient( new RecipeChoice.MaterialChoice(Material.DIRT,Material.SAND,Material.RED_SAND));
         plugin.getServer().addRecipe(patateRecipe);
 
         Plugin firebalPlugin = Bukkit.getPluginManager().getPlugin("ThrowableFireballs");
         if (firebalPlugin!=null){
             NamespacedKey fireballKey = new NamespacedKey(plugin, "fireball");
-            ItemStack fireballItem = ItemStack.of(Material.FIRE_CHARGE);
+            ItemStack fireballItem = ItemStack.of(Material.FIRE_CHARGE,2);
                 ItemMeta fireballMeta = fireballItem.getItemMeta();
                 fireballMeta.getPersistentDataContainer().set(new NamespacedKey(firebalPlugin,"throwable_fireballs"), PersistentDataType.STRING, "fireballxyz");
                 fireballItem.setItemMeta(fireballMeta);
+                fireballItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Fire Ball").color(TextColor.color(255,165,0)));
 
             ShapelessRecipe fireballRecipe = new ShapelessRecipe(fireballKey, fireballItem);
                 fireballRecipe.addIngredient(Material.COBBLESTONE);
