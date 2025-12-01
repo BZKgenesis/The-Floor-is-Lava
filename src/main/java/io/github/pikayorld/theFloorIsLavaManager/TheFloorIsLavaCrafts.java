@@ -1,7 +1,5 @@
 package io.github.pikayorld.theFloorIsLavaManager;
 
-import com.destroystokyo.paper.MaterialTags;
-import io.papermc.paper.datacomponent.DataComponentBuilder;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.Weapon;
@@ -17,7 +15,6 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.util.io.BukkitObjectInputStream;
 
 import java.util.List;
 
@@ -115,6 +112,17 @@ public class TheFloorIsLavaCrafts {
             popupTowerRecipe.setIngredient('B', Material.IRON_INGOT);
             popupTowerRecipe.setIngredient('C', Material.CHEST);
         plugin.getServer().addRecipe(popupTowerRecipe);
+
+
+        NamespacedKey teamInvlKey = new NamespacedKey(plugin, "teamInv");
+        ItemStack teamInvItem = TeamInventoryManager.getInstance().getTeamInventoryItem();
+
+        ShapedRecipe teamInvRecipe = new ShapedRecipe(teamInvlKey, teamInvItem);
+        teamInvRecipe.shape("ABA","BCB","ABA");
+        teamInvRecipe.setIngredient('A', Material.DIAMOND);
+        teamInvRecipe.setIngredient('B', Material.IRON_INGOT);
+        teamInvRecipe.setIngredient('C', Material.CHEST);
+        plugin.getServer().addRecipe(teamInvRecipe);
 
     }
 

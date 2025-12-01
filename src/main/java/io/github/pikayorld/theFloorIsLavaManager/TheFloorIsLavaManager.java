@@ -128,4 +128,12 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         }
     }
 
+    public double getFallDamageReduction(){
+        return dangerManager.fallDamageReduction;
+    }
+
+    public DangerManager getDangerManagerInstance(){
+        return dangerManager;
+    }
+
 }

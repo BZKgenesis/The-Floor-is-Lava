@@ -10,19 +10,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.Team;
+
+import java.util.List;
 
 import static io.github.pikayorld.theFloorIsLavaManager.BlockColorUtils.getWoolBlockByPlayer;
 
 
 public class TheFloorIslavaListener implements Listener {
 
-    private final Plugin plugin;
+    private final TheFloorIsLavaManager plugin;
 
-    public TheFloorIslavaListener(Plugin plugin) {
+    public TheFloorIslavaListener(TheFloorIsLavaManager plugin) {
         this.plugin = plugin;
     }
 
@@ -52,6 +56,7 @@ public class TheFloorIslavaListener implements Listener {
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"ciseaux"));
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"enderPearl"));
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"popupTower"));
+        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"teamInv"));
     }
 
     @EventHandler
@@ -95,5 +100,89 @@ public class TheFloorIslavaListener implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        if (!event.hasItem()) return;
+
+        ItemStack item = event.getItem();
+        if (item == null) return;
+        if (!TeamInventoryManager.getInstance().isTeamInventoryItem(item)) return;
+
+        event.setCancelled(true);
+
+        Player player = event.getPlayer();
+        String team = getTeamOf(player); // À TOI d’implémenter selon ton plugin d’équipes
+
+        if (team == null) {
+            player.sendMessage("§cT'as pas d'équipe, donc pas de coffre partagé.");
+            return;
+        }
+
+        TeamInventory inv = TeamInventoryManager.getInstance().getTeamInventory(team);
+        player.openInventory(inv.getInventory());
+    }
+
+    private String getTeamOf(Player p){
+        if (p!= null){
+            Team team = plugin.getServer().getScoreboardManager().getMainScoreboard().getEntryTeam(p.getName());
+            if (team != null){
+                return team.getName();
+            }
+        }
+        return null;
+    }
+
+    @EventHandler
+    public void onFallDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player player &&
+                event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+
+            if (player.getInventory().getBoots() != null &&
+                    player.getInventory().getBoots().getType() == Material.LEATHER_BOOTS) {
+
+                event.setDamage(event.getDamage() * plugin.getFallDamageReduction()); // 80% de réduction
+            }
+        }
+    }
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        if (plugin.getDangerManagerInstance().getNoRespawn()){
+            Player player = event.getEntity();
+            Location deathLocation = player.getLocation();
+
+            // Empêche le respawn auto si jamais tu l'as modifié ailleurs
+            if (event.getDamageSource().getCausingEntity() instanceof Player assassin){
+                for (int slotId = 0; slotId < 36; slotId++){
+                    ItemStack stack = player.getInventory().getItem(slotId);
+                    if (stack!=null && shouldGiveItem(stack)){
+                        assassin.give(stack);
+                    }
+                }
+                event.setKeepInventory(true);
+                event.getDrops().clear(); // si tu veux pas qu'ils droppent, sinon retire
+            }
+
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                player.setGameMode(GameMode.SPECTATOR);
+                player.teleport(deathLocation);
+            });
+        }
+    }
+
+    private boolean shouldGiveItem(ItemStack stack){
+        List<Material> materials = List.of(Material.DIAMOND, Material.GOLD_INGOT,Material.IRON_INGOT,Material.COPPER_INGOT,Material.AMETHYST_SHARD,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.EGG,Material.SNOWBALL,Material.COBBLESTONE,Material.DIRT,Material.BAKED_POTATO,Material.GRAY_WOOL);
+        if (TeamInventoryManager.getInstance().isTeamInventoryItem(stack)){
+            return true;
+        }
+        if (PopupTower.isPopupTower(stack)){
+            return true;
+        }
+        if (materials.contains(stack.getType())){
+            return true;
+        }
+        return false;
     }
 }

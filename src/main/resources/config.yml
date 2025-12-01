@@ -16,3 +16,4 @@ danger:
   border-resize-time: 300                   # temps que met la bordure pour passer de sa taille pendant la phase de préparation à sa taille pendant la monter (en secondes)
   disable-pvp-during-preparation: true      # si le pvp est désactivé pendant la phase de préparation
   keepinventory-during-preparation: true    # si keepInventory est activé pendant la phase de préparation
+  falldamage-reduction: 0.8                 # facteur de dégat de chute (0.8 : 0.8*falldamage)

@@ -44,6 +44,8 @@ public class DangerManager {
     private final boolean disablePvpDuringPreparation;
     private final boolean keepinventoryDuringPreparation;
 
+    public double fallDamageReduction = 1.0;
+
     private int increaseTask = -1;
     private int damageTask = -1;
     private int particleTask = -1;
@@ -51,6 +53,8 @@ public class DangerManager {
     private int phase2Task = -1;
 
     private boolean isPaused = false;
+
+    private boolean noRespawn = false;
 
 
 
@@ -79,6 +83,7 @@ public class DangerManager {
         borderResizeTime = plugin.getConfig().getInt("danger.border-resize-time");
         disablePvpDuringPreparation = plugin.getConfig().getBoolean("danger.disable-pvp-during-preparation");
         keepinventoryDuringPreparation = plugin.getConfig().getBoolean("danger.keepinventory-during-preparation");
+        fallDamageReduction = plugin.getConfig().getDouble("danger.falldamage-reduction");
 
         if (mindangerLevel < surfaceLevel){
             increaseAmount = increaseAmountBelow;
@@ -118,6 +123,7 @@ public class DangerManager {
         if (disablePvpDuringPreparation){
             TheFloorIsLavaManager.pvp = false;
         }
+        setNoRespawn(false);
 
         TheFloorIsLavaManager.sendMessage("Le jeu commence !");
         if (keepinventoryDuringPreparation)
@@ -184,6 +190,7 @@ public class DangerManager {
         // Tâche qui augmente le niveau
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::setIncreaseTask, 0, 1);
         TheFloorIsLavaManager.pvp = true;
+        setNoRespawn(true);
 
         // Tâche qui inflige les dégâts
         damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
@@ -200,6 +207,7 @@ public class DangerManager {
             TheFloorIsLavaManager.sendMessage("Les inventaires ne sont plus sauvegardés");
         if (disablePvpDuringPreparation)
             TheFloorIsLavaManager.sendMessage("Le PvP est activé");
+        TheFloorIsLavaManager.sendMessage("Le respawn est désactivé");
         TheFloorIsLavaManager.sendMessage("La zone se rétrécit");
 
         if (placeLava){
@@ -278,5 +286,13 @@ public class DangerManager {
                 task.cancel();
             }
         }, 1, 1);
+    }
+
+    public void setNoRespawn(boolean v){
+        noRespawn = v;
+    }
+
+    public boolean getNoRespawn(){
+        return noRespawn;
     }
 }
