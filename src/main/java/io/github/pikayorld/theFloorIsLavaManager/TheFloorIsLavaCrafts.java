@@ -43,14 +43,23 @@ public class TheFloorIsLavaCrafts {
 
 
         NamespacedKey eggBridgeKey = new NamespacedKey(plugin, "eggBridge");
-        ItemStack eggBridgeItem = ItemStack.of(Material.EGG);
-            eggBridgeItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Pont oeuf"));
+        ItemStack eggBridgeItem = EggBridge.giveEggBridgeItem();
 
         ShapedRecipe eggBridgeRecipe = new ShapedRecipe(eggBridgeKey, eggBridgeItem);
             eggBridgeRecipe.shape("AAA","ABA","AAA");
             eggBridgeRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(woolMaterials));
             eggBridgeRecipe.setIngredient('B', new RecipeChoice.MaterialChoice(ressourceMaterials));
         plugin.getServer().addRecipe(eggBridgeRecipe);
+
+
+        NamespacedKey snowballPlateKey = new NamespacedKey(plugin, "snowballPlate");
+        ItemStack snowballPlateItem = SnowballPlate.giveSnowballPlate();
+
+        ShapedRecipe snowballPlateRecipe = new ShapedRecipe(snowballPlateKey, snowballPlateItem);
+        snowballPlateRecipe.shape("AAA","ABA","AAA");
+        snowballPlateRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(woolMaterials));
+        snowballPlateRecipe.setIngredient('B', Material.IRON_INGOT);
+        plugin.getServer().addRecipe(snowballPlateRecipe);
 
 
         NamespacedKey patateKey = new NamespacedKey(plugin, "patate");

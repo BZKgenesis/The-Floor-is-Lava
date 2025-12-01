@@ -2,8 +2,10 @@ package io.github.pikayorld.theFloorIsLavaManager;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Egg;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -11,13 +13,18 @@ import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
 
 import java.util.List;
+import java.util.Objects;
 
 import static io.github.pikayorld.theFloorIsLavaManager.BlockColorUtils.getWoolBlockByPlayer;
 
@@ -57,6 +64,7 @@ public class TheFloorIslavaListener implements Listener {
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"enderPearl"));
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"popupTower"));
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"teamInv"));
+        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"snowballPlate"));
     }
 
     @EventHandler
@@ -172,6 +180,56 @@ public class TheFloorIslavaListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onEggBridgeLaunch(ProjectileLaunchEvent event){
+        if (!(event.getEntity() instanceof Egg egg)) return;
+        if (!(egg.getShooter() instanceof Player p)) return;
+
+        ItemStack item = p.getInventory().getItemInMainHand();
+        if (!EggBridge.isEggBridgeItem(item)) return;
+        event.getEntity().getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "eggBridgeEntity"), PersistentDataType.STRING, "eggBridgeEntity");
+    }
+    @EventHandler
+    public void onSnowballPlateLaunch(ProjectileLaunchEvent event){
+        if (!(event.getEntity() instanceof Snowball snowball)) return;
+        if (!(snowball.getShooter() instanceof Player p)) return;
+
+        ItemStack item = p.getInventory().getItemInMainHand();
+        if (!SnowballPlate.isSnowballPlateItem(item)) return;
+        event.getEntity().getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "snowballPlateEntity"), PersistentDataType.STRING, "snowballPlateEntity");
+    }
+
+    @EventHandler
+    public void onSnowballHit(ProjectileHitEvent event){
+        if (!(event.getEntity() instanceof Snowball snowball)) return;
+        if (!(Objects.equals(snowball.getPersistentDataContainer().get(new NamespacedKey(plugin, "snowballPlateEntity"), PersistentDataType.STRING), "snowballPlateEntity"))) return;
+        if (!(snowball.getShooter() instanceof Player p)) return;
+
+        Location loc = snowball.getLocation().getBlock().getLocation();
+        Block block = loc.getBlock();
+        fillAround(loc, 4, BlockColorUtils.getWoolBlockByPlayer(p));
+    }
+
+    private void fillAround(Location center, int radius, Material material) {
+        World world = center.getWorld();
+        int cx = center.getBlockX();
+        int cy = center.getBlockY();
+        int cz = center.getBlockZ();
+
+        for (int x = cx - radius; x <= cx + radius; x++) {
+            for (int y = cy - radius; y <= cy + radius; y++) {
+                for (int z = cz - radius; z <= cz + radius; z++) {
+                    Block b = world.getBlockAt(x, y, z);
+
+                    // Si tu veux éviter de remplacer n’importe quoi :
+                    // if (b.getType() == Material.AIR) { ... }
+
+                    b.setType(material, false);
+                }
+            }
+        }
+    }
+
     private boolean shouldGiveItem(ItemStack stack){
         List<Material> materials = List.of(Material.DIAMOND, Material.GOLD_INGOT,Material.IRON_INGOT,Material.COPPER_INGOT,Material.AMETHYST_SHARD,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.EGG,Material.SNOWBALL,Material.COBBLESTONE,Material.DIRT,Material.BAKED_POTATO,Material.GRAY_WOOL);
         if (TeamInventoryManager.getInstance().isTeamInventoryItem(stack)){
@@ -185,4 +243,6 @@ public class TheFloorIslavaListener implements Listener {
         }
         return false;
     }
+
+
 }
