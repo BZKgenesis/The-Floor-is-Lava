@@ -9,9 +9,9 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
-import java.io.File;
 
 public class TheFloorIsLavaCommands {
     private static int getLevel(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
@@ -52,7 +52,7 @@ public class TheFloorIsLavaCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    public static LiteralCommandNode<CommandSourceStack> registerTflCommands(DangerManager dangerManager){
+    public static LiteralCommandNode<CommandSourceStack> registerTflCommands(DangerManager dangerManager, Plugin plugin){
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("tfl");
         root.then(Commands.literal("getLevel")
             .requires(sender -> sender.getSender().isOp())
@@ -77,56 +77,23 @@ public class TheFloorIsLavaCommands {
         root.then(Commands.literal("getSpeed")
             .requires(sender -> sender.getSender().isOp())
             .executes( ctx -> getSpeed(ctx,dangerManager)));
+        root.then(Commands.literal("givePopupTower")
+                .requires(sender -> sender.getSender().isOp())
+                .executes( ctx -> {
+
+                    if ( ctx.getSource().getExecutor() instanceof Player player){
+                        player.give(PopupTower.givePopupTower());
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }));
         root.then(Commands.literal("resetWorld")
                 .requires(sender -> sender.getSender().isOp())
                 .executes( ctx -> {
-                    World world = Bukkit.getWorld("world");
-                    if (world != null){
-                        world.setTime(0);
-                        Bukkit.unloadWorld(world, false); // false = ne sauvegarde pas
-                        File worldDataFolder = new File(Bukkit.getWorldContainer(), "world/data");
-                        File worldEntitesFolder = new File(Bukkit.getWorldContainer(), "world/entities");
-                        File worldLevel = new File(Bukkit.getWorldContainer(), "world/level.dat");
-                        File worldLevelOld = new File(Bukkit.getWorldContainer(), "world/level.dat_old");
-                        File worldPlayerDataFolder = new File(Bukkit.getWorldContainer(), "world/playerdata");
-                        File worldPoi = new File(Bukkit.getWorldContainer(), "world/poi");
-                        File worldRegion = new File(Bukkit.getWorldContainer(), "world/region");
-                        File worldSessionLock = new File(Bukkit.getWorldContainer(), "world/session.lock");
-                        File worldUidDat = new File(Bukkit.getWorldContainer(), "world/uid.dat");
-                        boolean error = !deleteRecursively(worldDataFolder);
-                        if (!deleteRecursively(worldEntitesFolder))
-                            error = true;
-                        if (!deleteRecursively(worldLevel))
-                            error = true;
-                        if (!deleteRecursively(worldLevelOld))
-                            error = true;
-                        if (!deleteRecursively(worldPlayerDataFolder))
-                            error = true;
-                        if (!deleteRecursively(worldPoi))
-                            error = true;
-                        if (!deleteRecursively(worldRegion))
-                            error = true;
-                        if (!deleteRecursively(worldSessionLock))
-                            error = true;
-                        if (!deleteRecursively(worldUidDat))
-                            error = true;
-                        if (error){
-                            Bukkit.getLogger().warning("Tous les fichiers du monde n'ont pas pu etre reset");
-                        }
-                        Bukkit.getServer().restart();
-                    }
+                    TheFloorIsLavaManager.worldToReset = "world";
+                    Bukkit.getServer().restart();
                     return  Command.SINGLE_SUCCESS;
                 }));
         return root.build();
     }
 
-    public static boolean deleteRecursively(File file) {
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File f : files) deleteRecursively(f);
-            }
-        }
-        return file.delete();
-    }
 }

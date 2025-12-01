@@ -25,8 +25,12 @@ public class DangerManager {
     private int Old_dangerLevelPlaced;
     private int maxdangerLevel;
     private int mindangerLevel;
+    private int surfaceLevel;
     private double increaseAmount;
-    private int totalTime;
+    private double increaseAmountBelow;
+    private double increaseAmountAbove;
+    private int totalTimeBelow;
+    private int totalTimeAbove;
     private final double damage;
     private final int damageEvery;
     private final boolean placeLava;
@@ -34,6 +38,11 @@ public class DangerManager {
     private final int lavaMargin;
     private final int increaseSize;
     private final int lavaRisingDelay;
+    private final int borderSizePreRise;
+    private final int borderSizeDuringRise;
+    private final int borderResizeTime;
+    private final boolean disablePvpDuringPreparation;
+    private final boolean keepinventoryDuringPreparation;
 
     private int increaseTask = -1;
     private int damageTask = -1;
@@ -53,8 +62,11 @@ public class DangerManager {
 
         mindangerLevel = plugin.getConfig().getInt("danger.start-level");
         maxdangerLevel = plugin.getConfig().getInt("danger.end-level");
-        totalTime = plugin.getConfig().getInt("danger.total-time");
-        increaseAmount = (double) (maxdangerLevel - mindangerLevel) /totalTime;
+        surfaceLevel = plugin.getConfig().getInt("danger.surface-level");
+        totalTimeBelow = plugin.getConfig().getInt("danger.total-time-below-surface");
+        totalTimeAbove = plugin.getConfig().getInt("danger.total-time-above-surface");
+        increaseAmountBelow = (double) (surfaceLevel - mindangerLevel) /totalTimeBelow;
+        increaseAmountAbove = (double) (maxdangerLevel - surfaceLevel) /totalTimeAbove;
         damage = plugin.getConfig().getDouble("danger.damage");
         damageEvery = plugin.getConfig().getInt("danger.damage-every");
         placeLava = plugin.getConfig().getBoolean("danger.place-lava");
@@ -62,6 +74,17 @@ public class DangerManager {
         lavaMargin = plugin.getConfig().getInt("danger.lava-margin");
         increaseSize = plugin.getConfig().getInt("danger.increase-size");
         lavaRisingDelay = plugin.getConfig().getInt("danger.lava-rising-delay");
+        borderSizePreRise = plugin.getConfig().getInt("danger.border-size-prerise");
+        borderSizeDuringRise = plugin.getConfig().getInt("danger.border-size-during-rise");
+        borderResizeTime = plugin.getConfig().getInt("danger.border-resize-time");
+        disablePvpDuringPreparation = plugin.getConfig().getBoolean("danger.disable-pvp-during-preparation");
+        keepinventoryDuringPreparation = plugin.getConfig().getBoolean("danger.keepinventory-during-preparation");
+
+        if (mindangerLevel < surfaceLevel){
+            increaseAmount = increaseAmountBelow;
+        }else{
+            increaseAmount = increaseAmountAbove;
+        }
 
         dangerLevel = mindangerLevel;
 
@@ -70,6 +93,11 @@ public class DangerManager {
 
     private void setIncreaseTask(){
         if (dangerLevel < maxdangerLevel){
+            if(dangerLevel < surfaceLevel){
+                increaseAmount = increaseAmountBelow;
+            }else{
+                increaseAmount = increaseAmountAbove;
+            }
             dangerLevel=dangerLevel+ (double)increaseAmount;
         }else{
             Bukkit.getScheduler().cancelTask(increaseTask);
@@ -79,13 +107,43 @@ public class DangerManager {
     public void start() {
         isPaused = false;
         World world = Bukkit.getServer().getWorlds().getFirst();
-        world.getWorldBorder().setSize(200);
-        world.getWorldBorder().setCenter(world.getSpawnLocation());
+        world.getWorldBorder().setSize(borderSizePreRise);
+        world.getWorldBorder().setCenter(0,0);
         Bukkit.getScheduler().cancelTask(damageTask);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
+        if (keepinventoryDuringPreparation)
+            world.setGameRule(GameRule.KEEP_INVENTORY, true);
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE,true);
+        world.setGameRule(GameRule.DO_FIRE_TICK,false);
         if (particleTask != -1) Bukkit.getScheduler().cancelTask(particleTask);
+        if (disablePvpDuringPreparation){
+            TheFloorIsLavaManager.pvp = false;
+        }
+
+        TheFloorIsLavaManager.sendMessage("Le jeu commence !");
+        if (keepinventoryDuringPreparation)
+            TheFloorIsLavaManager.sendMessage("Les inventaires sont sauvegardés (keepInventory)");
+        if (disablePvpDuringPreparation)
+            TheFloorIsLavaManager.sendMessage("Le PvP est désactivé");
+
+        TheFloorIsLavaManager.sendMessage("La lave va commencer à monter dans " + lavaRisingDelay/(20*60) + " minutes");
+
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers 0 0 50 "+borderSizePreRise/2+" under 200 true @a[gamemode=!creative]");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[gamemode=!creative] at @s run spawnpoint");
+
+        if (lavaRisingDelay > 6000) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 5 minutes..."),lavaRisingDelay-6000 );
+        if (lavaRisingDelay > 3600) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 3 minutes..."),lavaRisingDelay-3600 );
+        if (lavaRisingDelay > 1200) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 1 minutes..."),lavaRisingDelay-1200 );
+        if (lavaRisingDelay > 600) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 30 secondes..."),lavaRisingDelay-600 );
+        if (lavaRisingDelay > 200) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 10 secondes..."),lavaRisingDelay-200 );
+        if (lavaRisingDelay > 100) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 5 secondes..."),lavaRisingDelay-100 );
+        if (lavaRisingDelay > 80) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 4 secondes..."),lavaRisingDelay-80 );
+        if (lavaRisingDelay > 60) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 3 secondes..."),lavaRisingDelay-60 );
+        if (lavaRisingDelay > 40) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 2 secondes..."),lavaRisingDelay-40 );
+        if (lavaRisingDelay > 20) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 1 secondes..."),lavaRisingDelay-20 );
+
 
         phase2Task = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this::startPhase2,lavaRisingDelay);
+
     }
 
     public void stop() {
@@ -125,6 +183,7 @@ public class DangerManager {
             world.setGameRule(GameRule.KEEP_INVENTORY, false);
         // Tâche qui augmente le niveau
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::setIncreaseTask, 0, 1);
+        TheFloorIsLavaManager.pvp = true;
 
         // Tâche qui inflige les dégâts
         damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
@@ -134,13 +193,26 @@ public class DangerManager {
                 }
             }
         }, 20, damageEvery);
-        plugin.getServer().getWorlds().getFirst().getWorldBorder().setSize(75,5*60);
+        plugin.getServer().getWorlds().getFirst().getWorldBorder().setSize(borderSizeDuringRise,borderResizeTime);
 
+        TheFloorIsLavaManager.sendMessage("!!ATTENTION!! La lave commence à monter !");
+        if (keepinventoryDuringPreparation)
+            TheFloorIsLavaManager.sendMessage("Les inventaires ne sont plus sauvegardés");
+        if (disablePvpDuringPreparation)
+            TheFloorIsLavaManager.sendMessage("Le PvP est activé");
+        TheFloorIsLavaManager.sendMessage("La zone se rétrécit");
 
         if (placeLava){
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
                 public void run(){
                     if (Old_dangerLevelPlaced+increaseSize < round(dangerLevel)){
+                        double diff = increaseSize/increaseAmount;
+                        if (diff > 100){
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va monter dans 3 secondes..."),round(diff)-60 );
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va monter dans 2 secondes..."),round(diff)-40 );
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va monter dans 1 secondes..."),round(diff)-20 );
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave monte !!"),round(diff) );
+                        }
                         World world = plugin.getServer().getWorlds().getFirst();
                         Location wbCenter = world.getWorldBorder().getCenter();
                         double wbSize = world.getWorldBorder().getSize();
@@ -191,6 +263,8 @@ public class DangerManager {
             }, 0, DISPLAY_PERIOD);
         }
     }
+
+
 
     private void startBatchPlacement(List<Block> blocks) {
         final int batchSize = 2000;
