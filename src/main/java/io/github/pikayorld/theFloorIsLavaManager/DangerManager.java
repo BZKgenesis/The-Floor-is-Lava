@@ -56,6 +56,10 @@ public class DangerManager {
 
     private boolean noRespawn = false;
 
+    private boolean hasStarted = false;
+
+    private List<Player> playerInGame;
+
 
 
 
@@ -85,6 +89,8 @@ public class DangerManager {
         keepinventoryDuringPreparation = plugin.getConfig().getBoolean("danger.keepinventory-during-preparation");
         fallDamageReduction = plugin.getConfig().getDouble("danger.falldamage-reduction");
 
+        playerInGame = new ArrayList<>();
+
         if (mindangerLevel < surfaceLevel){
             increaseAmount = increaseAmountBelow;
         }else{
@@ -111,6 +117,7 @@ public class DangerManager {
 
     public void start() {
         isPaused = false;
+        hasStarted = true;
         World world = Bukkit.getServer().getWorlds().getFirst();
         world.getWorldBorder().setSize(borderSizePreRise);
         world.getWorldBorder().setCenter(0,0);
@@ -123,6 +130,7 @@ public class DangerManager {
         if (disablePvpDuringPreparation){
             TheFloorIsLavaManager.pvp = false;
         }
+        playerInGame.addAll(plugin.getServer().getOnlinePlayers());
         setNoRespawn(false);
 
         TheFloorIsLavaManager.sendMessage("Le jeu commence !");
@@ -288,11 +296,20 @@ public class DangerManager {
         }, 1, 1);
     }
 
+    public boolean isPlayerInGame(Player player){
+        return playerInGame.contains(player);
+    }
+
     public void setNoRespawn(boolean v){
         noRespawn = v;
     }
-
     public boolean getNoRespawn(){
         return noRespawn;
+    }
+    public void setHasStarted(boolean v){
+        hasStarted = v;
+    }
+    public boolean getHasStarted(){
+        return hasStarted;
     }
 }

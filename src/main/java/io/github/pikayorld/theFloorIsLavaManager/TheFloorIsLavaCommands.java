@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -52,7 +53,7 @@ public class TheFloorIsLavaCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    public static LiteralCommandNode<CommandSourceStack> registerTflCommands(DangerManager dangerManager, Plugin plugin){
+    public static LiteralCommandNode<CommandSourceStack> registerTflCommands(DangerManager dangerManager, TheFloorIsLavaManager plugin){
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("tfl");
         root.then(Commands.literal("getLevel")
             .requires(sender -> sender.getSender().isOp())
@@ -92,6 +93,13 @@ public class TheFloorIsLavaCommands {
                     TheFloorIsLavaManager.worldToReset = "world";
                     Bukkit.getServer().restart();
                     return  Command.SINGLE_SUCCESS;
+                }));
+        root.then(Commands.literal("openMenu")
+                .executes( ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player){
+                        TeamGUI.openMainMenu(plugin,player);
+                    }
+                    return Command.SINGLE_SUCCESS;
                 }));
         return root.build();
     }

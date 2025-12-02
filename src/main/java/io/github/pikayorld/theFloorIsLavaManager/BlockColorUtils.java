@@ -1,5 +1,6 @@
 package io.github.pikayorld.theFloorIsLavaManager;
 
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -41,5 +42,11 @@ public class BlockColorUtils {
             return blockColor.get(TextColor.nearestColorTo(keys, team.color()));
         }
         return DEFAULT_WOOL_COLOR;
+    }
+
+    public static Material getWoolBlockByNamedTextColor(NamedTextColor color){
+
+        List<TextColor> keys = blockColor.keySet().stream().toList();
+        return blockColor.get(TextColor.nearestColorTo(keys,color));
     }
 }

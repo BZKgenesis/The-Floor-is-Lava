@@ -142,6 +142,7 @@ public class PopupTower {
         for (int y = 0; y<LAYOUT.length;y++){
             for (int z = 0; z<LAYOUT[y].length;z++){
                 for (int x = 0; x<LAYOUT[y][z].length; x++){
+
                     setBlockRelative(pos, x-SIZE_X/2,y,z-SIZE_Z/2,blocks_layout.get(LAYOUT[y][z][x]),rotation);
                 }
             }
@@ -177,6 +178,7 @@ public class PopupTower {
                 break;
         }
         Block block = origin.getBlock().getRelative(X,Y,Z);
+        if (block.getType() != Material.AIR && mat == Material.AIR) return;
         block.setType(mat);
         if (block.getBlockData() instanceof Directional directional){
             directional.setFacing(facing.getOppositeFace());

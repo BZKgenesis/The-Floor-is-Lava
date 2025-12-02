@@ -1,5 +1,7 @@
 package io.github.pikayorld.theFloorIsLavaManager;
 
+import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
+import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamManagerItem;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Egg;
@@ -53,6 +55,13 @@ public class TheFloorIslavaListener implements Listener {
         if (event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME) < 100 && world != null){
             Location spawnPos = new Location (world,0.5,281,0.5);
             event.getPlayer().teleport(spawnPos);
+            if (!plugin.getDangerManagerInstance().getHasStarted()){
+                event.getPlayer().getInventory().clear();
+                event.getPlayer().give(TeamManagerItem.giveTeamManagerItem());
+            }
+        }
+        if (plugin.getDangerManagerInstance().getHasStarted() && !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
+            event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
 
         event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"batte"));
@@ -111,7 +120,7 @@ public class TheFloorIslavaListener implements Listener {
     }
 
     @EventHandler
-    public void onInteract(PlayerInteractEvent event) {
+    public void onTeamInvInteract(PlayerInteractEvent event) {
         if (!event.hasItem()) return;
 
         ItemStack item = event.getItem();
@@ -130,6 +139,24 @@ public class TheFloorIslavaListener implements Listener {
 
         TeamInventory inv = TeamInventoryManager.getInstance().getTeamInventory(team);
         player.openInventory(inv.getInventory());
+    }
+
+    @EventHandler
+    public void onTeamManagerInteract(PlayerInteractEvent event) {
+        if (!event.hasItem()) return;
+
+        ItemStack item = event.getItem();
+        if (item == null) return;
+        if (!TeamManagerItem.isTeamManagerItem(item)) return;
+        if (plugin.getDangerManagerInstance().getHasStarted()) return;
+
+        event.setCancelled(true);
+
+        Player player = event.getPlayer();
+        String team = getTeamOf(player); // À TOI d’implémenter selon ton plugin d’équipes
+
+
+        TeamGUI.openMainMenu(plugin, event.getPlayer());
     }
 
     private String getTeamOf(Player p){
@@ -217,16 +244,16 @@ public class TheFloorIslavaListener implements Listener {
         int cz = center.getBlockZ();
 
         for (int x = cx - radius; x <= cx + radius; x++) {
-            for (int y = cy - radius; y <= cy + radius; y++) {
-                for (int z = cz - radius; z <= cz + radius; z++) {
-                    Block b = world.getBlockAt(x, y, z);
+            for (int z = cz - radius; z <= cz + radius; z++) {
+                Block b = world.getBlockAt(x, cy, z);
 
-                    // Si tu veux éviter de remplacer n’importe quoi :
-                    // if (b.getType() == Material.AIR) { ... }
-
+                // Si tu veux éviter de remplacer n’importe quoi :
+                if (!b.getType().isSolid()) {
                     b.setType(material, false);
                 }
+
             }
+
         }
     }
 

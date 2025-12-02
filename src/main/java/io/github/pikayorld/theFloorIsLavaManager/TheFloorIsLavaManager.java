@@ -1,6 +1,8 @@
 package io.github.pikayorld.theFloorIsLavaManager;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
+import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamManager;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
@@ -13,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.structure.Structure;
 import org.bukkit.structure.StructureManager;
 
@@ -27,6 +30,7 @@ import static io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaCommands.r
 public final class TheFloorIsLavaManager extends JavaPlugin {
 
     private DangerManager dangerManager;
+    private TeamManager teamManager;
 
     public static boolean pvp;
 
@@ -38,8 +42,14 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
+        getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
 
         dangerManager = new DangerManager(this);
+        teamManager = new TeamManager(this);
+
+        for(Team team : getServer().getScoreboardManager().getMainScoreboard().getTeams()){
+            team.unregister();
+        }
 
         LiteralCommandNode<CommandSourceStack> buildCommand = registerTflCommands(dangerManager, this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
@@ -134,6 +144,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     public DangerManager getDangerManagerInstance(){
         return dangerManager;
+    }
+    public TeamManager getTeamManager(){
+        return teamManager;
     }
 
 }
