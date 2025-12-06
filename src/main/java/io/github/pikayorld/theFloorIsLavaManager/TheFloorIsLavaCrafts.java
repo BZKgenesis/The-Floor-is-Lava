@@ -56,7 +56,7 @@ public class TheFloorIsLavaCrafts {
         ItemStack snowballPlateItem = SnowballPlate.giveSnowballPlate();
 
         ShapedRecipe snowballPlateRecipe = new ShapedRecipe(snowballPlateKey, snowballPlateItem);
-        snowballPlateRecipe.shape("AAA","ABA","AAA");
+        snowballPlateRecipe.shape(" A ","ABA"," A ");
         snowballPlateRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(woolMaterials));
         snowballPlateRecipe.setIngredient('B', Material.IRON_INGOT);
         plugin.getServer().addRecipe(snowballPlateRecipe);
@@ -81,6 +81,7 @@ public class TheFloorIsLavaCrafts {
             ShapelessRecipe fireballRecipe = new ShapelessRecipe(fireballKey, fireballItem);
                 fireballRecipe.addIngredient(Material.COBBLESTONE);
                 fireballRecipe.addIngredient(Material.GUNPOWDER);
+                fireballRecipe.addIngredient(Material.IRON_INGOT);
             plugin.getServer().addRecipe(fireballRecipe);
         }
 
