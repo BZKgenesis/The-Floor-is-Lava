@@ -2,15 +2,15 @@ package io.github.pikayorld.theFloorIsLavaManager;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Rotation;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -143,14 +143,14 @@ public class PopupTower {
             for (int z = 0; z<LAYOUT[y].length;z++){
                 for (int x = 0; x<LAYOUT[y][z].length; x++){
 
-                    setBlockRelative(pos, x-SIZE_X/2,y,z-SIZE_Z/2,blocks_layout.get(LAYOUT[y][z][x]),rotation);
+                    setBlockRelative(pos, x-SIZE_X/2,y,z-SIZE_Z/2,blocks_layout.get(LAYOUT[y][z][x]),rotation, p);
                 }
             }
         }
 
     }
 
-    private static void setBlockRelative(Location origin, int x,int y,int z, Material mat, Rotation rotation){
+    private static void setBlockRelative(Location origin, int x,int y,int z, Material mat, Rotation rotation, Player p){
         int Z = z;
         int X = x;
         int Y = y;
@@ -178,6 +178,10 @@ public class PopupTower {
                 break;
         }
         Block block = origin.getBlock().getRelative(X,Y,Z);
+        BlockState blockState = block.getState();
+        BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(block, blockState, block, new ItemStack(mat), p, true, EquipmentSlot.HAND);
+        Bukkit.getPluginManager().callEvent(blockPlaceEvent);
+        if (blockPlaceEvent.isCancelled()) return;
         if (block.getType() != Material.AIR && mat == Material.AIR) return;
         block.setType(mat);
         if (block.getBlockData() instanceof Directional directional){
