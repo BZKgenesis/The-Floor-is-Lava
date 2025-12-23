@@ -4,9 +4,11 @@ import io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,12 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 public class ShopGUI implements Listener {
 
     private static final int SIZE = 54;
     private static final int[] RESULT_SLOTS = {
-            10, 11, 12, 13, 14, 15, 16,
-            19, 20, 21, 22, 23, 24, 25
+            0, 9, 18, 27, 36
     };
 
     private static final List<ShopRecipe> RECIPES = new ArrayList<>();
@@ -81,17 +85,17 @@ public class ShopGUI implements Listener {
                             }
                         }
                     }
-                    for (Map.Entry<Character,ItemStack> recipeChoice : recipeShaped.getIngredientMap().entrySet()){
-                        if (recipeChoice.getValue() !=null){
-                            plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
-                            if (choices.containsRecipeChoice(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()))){
-                                choices.addAmount(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()),1);
-                            }else{
-                                IngredientEntry ingredientEntry = new IngredientEntry(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()),1);
-                                choices.put(ingredientEntry);
-                            }
-                        }
-                    }
+//                    for (Map.Entry<Character,ItemStack> recipeChoice : recipeShaped.getIngredientMap().entrySet()){
+//                        if (recipeChoice.getValue() !=null){
+//                            plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
+//                            if (choices.containsRecipeChoice(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()))){
+//                                choices.addAmount(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()),1);
+//                            }else{
+//                                IngredientEntry ingredientEntry = new IngredientEntry(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()),1);
+//                                choices.put(ingredientEntry);
+//                            }
+//                        }
+//                    }
                 }
                 if (recipe instanceof ShapelessRecipe recipeShaped){
                     plugin.getLogger().info("recipe shapeless : "+recipe_key);
@@ -128,13 +132,13 @@ public class ShopGUI implements Listener {
             display.setLore(List.of("§aClique pour échanger"));
             inv.setItem(RESULT_SLOTS[i], display);
 
-            int base = RESULT_SLOTS[i] - 9;
+            int base = RESULT_SLOTS[i];
             int slot = base;
 
             for (IngredientEntry ing : recipe.ingredients) {
                 IngredientDisplay d = buildDisplay(ing);
                 animated.put(slot, d);
-                inv.setItem(slot, d.options.get(0));
+                inv.setItem(slot+2, d.options.get(0));
                 slot++;
             }
         }
@@ -146,7 +150,7 @@ public class ShopGUI implements Listener {
         p.openInventory(inv);
 
         BukkitRunnable r = animationRunnable(inv, animated);
-        r.runTaskTimer(plugin, 0L, 20L);
+        r.runTaskTimer(plugin, 10L, 10L);
         RUNNABLES.put(inv, r);
     }
     private static IngredientDisplay buildDisplay(IngredientEntry ing) {
@@ -197,6 +201,10 @@ public class ShopGUI implements Listener {
         return it;
     }
 
+    private static int getMaxPages(){
+        return RECIPES.size()/ RESULT_SLOTS.length;
+    }
+
     private static int page(InventoryClickEvent e) {
         String title = e.getView().getTitle();
 
@@ -204,7 +212,7 @@ public class ShopGUI implements Listener {
         int end = title.indexOf(")", start);
 
         try {
-            return Math.max(0, Integer.parseInt(title.substring(start, end)) - 1);
+            return max(0, Integer.parseInt(title.substring(start, end)) - 1);
         } catch (Exception ex) {
             return 0;
         }
@@ -232,24 +240,25 @@ public class ShopGUI implements Listener {
                     IngredientDisplay d = e.getValue();
                     if (d.options.size() <= 1) continue;
 
-                    d.index = (d.index + 1) % d.options.size();
+                    d.index = (d.index + 2) % d.options.size();
                     ItemStack show = d.options.get(d.index).clone();
                     show.setAmount(d.amount);
-                    inv.setItem(e.getKey(), show);
+                    inv.setItem(e.getKey()+1, show);
                 }
             }
         };
     }
     @EventHandler
     public void onClick(InventoryClickEvent e) {
+        if (e.getClickedInventory() instanceof PlayerInventory) return;
         if (!e.getView().getTitle().startsWith("§6Shop")) return;
         e.setCancelled(true);
 
         Player p = (Player) e.getWhoClicked();
         Inventory inv = e.getInventory();
 
-        if (e.getSlot() == 45) open(p, page(e)-1);
-        if (e.getSlot() == 53) open(p, page(e)+1);
+        if (e.getSlot() == 45) open(p, max(page(e)-1,0));
+        if (e.getSlot() == 53) open(p, min(getMaxPages(),page(e)+1));
 
         int idx = indexFromSlot(e.getSlot(), page(e));
         if (idx < 0 || idx >= RECIPES.size()) return;
@@ -258,12 +267,14 @@ public class ShopGUI implements Listener {
 
         if (!canPay(p, recipe)) {
             p.sendMessage("§cIngrédients insuffisants.");
+            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
             return;
         }
 
         pay(p, recipe);
         p.getInventory().addItem(recipe.result.clone());
         p.sendMessage("§aÉchange réussi.");
+        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
     }
     private static boolean canPay(Player p, ShopRecipe r) {
         for (IngredientEntry ing : r.ingredients) {
