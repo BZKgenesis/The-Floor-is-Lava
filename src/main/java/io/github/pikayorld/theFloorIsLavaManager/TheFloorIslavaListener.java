@@ -2,6 +2,7 @@ package io.github.pikayorld.theFloorIsLavaManager;
 
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamManagerItem;
+import io.github.pikayorld.theFloorIsLavaManager.shop.ShopGUI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Egg;
@@ -58,6 +59,7 @@ public class TheFloorIslavaListener implements Listener {
             if (!plugin.getDangerManagerInstance().getHasStarted()){
                 event.getPlayer().getInventory().clear();
                 event.getPlayer().give(TeamManagerItem.giveTeamManagerItem());
+                event.getPlayer().give(ShopGUI.giveShopItem());
             }
         }
         if (plugin.getDangerManagerInstance().getHasStarted() && !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
@@ -149,6 +151,19 @@ public class TheFloorIslavaListener implements Listener {
 
 
         TeamGUI.openMainMenu(plugin, event.getPlayer());
+    }
+
+    @EventHandler
+    public void onShopInteract(PlayerInteractEvent event) {
+        if (!event.hasItem()) return;
+
+        ItemStack item = event.getItem();
+        if (item == null) return;
+        if (!ShopGUI.isShopItem(item)) return;
+
+        event.setCancelled(true);
+
+        ShopGUI.open(event.getPlayer(),0);
     }
 
     private String getTeamOf(Player p){

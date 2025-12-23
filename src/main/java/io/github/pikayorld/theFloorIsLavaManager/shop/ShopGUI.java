@@ -1,10 +1,12 @@
 package io.github.pikayorld.theFloorIsLavaManager.shop;
 
 import io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaManager;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -85,17 +87,6 @@ public class ShopGUI implements Listener {
                             }
                         }
                     }
-//                    for (Map.Entry<Character,ItemStack> recipeChoice : recipeShaped.getIngredientMap().entrySet()){
-//                        if (recipeChoice.getValue() !=null){
-//                            plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
-//                            if (choices.containsRecipeChoice(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()))){
-//                                choices.addAmount(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()),1);
-//                            }else{
-//                                IngredientEntry ingredientEntry = new IngredientEntry(new RecipeChoice.MaterialChoice(recipeChoice.getValue().getType()),1);
-//                                choices.put(ingredientEntry);
-//                            }
-//                        }
-//                    }
                 }
                 if (recipe instanceof ShapelessRecipe recipeShaped){
                     plugin.getLogger().info("recipe shapeless : "+recipe_key);
@@ -275,6 +266,27 @@ public class ShopGUI implements Listener {
         p.getInventory().addItem(recipe.result.clone());
         p.sendMessage("§aÉchange réussi.");
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
+    }
+
+    public static ItemStack giveShopItem(){
+        ItemStack it = new ItemStack(Material.BOOK);
+        it.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        ItemMeta meta = it.getItemMeta();
+        meta.setDisplayName("§6Shop");
+        meta.setLore(List.of("§7Ouvre le menu du shop"));
+        it.setItemMeta(meta);
+        return it;
+    }
+
+    public static boolean isShopItem(ItemStack stack) {
+        if (stack.getType() == Material.BOOK) {
+            ItemMeta meta = stack.getItemMeta();
+            if (meta != null && meta.hasDisplayName()) {
+                String name = meta.getDisplayName();
+                return name.contains("Shop");
+            }
+        }
+        return false;
     }
     private static boolean canPay(Player p, ShopRecipe r) {
         for (IngredientEntry ing : r.ingredients) {

@@ -96,8 +96,12 @@ public class TheFloorIsLavaCommands {
                     Bukkit.getServer().restart();
                     return  Command.SINGLE_SUCCESS;
                 }));
-        root.then(Commands.literal("openMenu")
+        root.then(Commands.literal("team")
                 .executes( ctx -> {
+                    if (plugin.getDangerManagerInstance().getHasStarted()){
+                        ctx.getSource().getSender().sendMessage("§cVous ne pouvez pas gérer votre équipe pendant une partie !");
+                        return Command.SINGLE_SUCCESS;
+                    }
                     if (ctx.getSource().getExecutor() instanceof Player player){
                         TeamGUI.openMainMenu(plugin,player);
                     }

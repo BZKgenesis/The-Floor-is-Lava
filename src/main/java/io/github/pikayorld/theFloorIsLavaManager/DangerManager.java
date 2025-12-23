@@ -1,9 +1,11 @@
 package io.github.pikayorld.theFloorIsLavaManager;
 
+import io.github.pikayorld.theFloorIsLavaManager.shop.ShopGUI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.Color;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.joml.Vector3i;
@@ -143,6 +145,15 @@ public class DangerManager {
 
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers 0 0 50 "+borderSizePreRise/2+" under 200 true @a[gamemode=!creative]");
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[gamemode=!creative] at @s run spawnpoint");
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.setHealth(p.getAttribute(Attribute.MAX_HEALTH).getValue());
+            p.setFoodLevel(20);
+            p.setSaturation(20);
+            p.setExhaustion(0);
+            p.getInventory().clear();
+            p.getInventory().setArmorContents(null);
+            p.give(ShopGUI.giveShopItem());
+        }
 
         if (lavaRisingDelay > 6000) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 5 minutes..."),lavaRisingDelay-6000 );
         if (lavaRisingDelay > 3600) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 3 minutes..."),lavaRisingDelay-3600 );
