@@ -3,6 +3,8 @@ package io.github.pikayorld.theFloorIsLavaManager;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamManager;
+import io.github.pikayorld.theFloorIsLavaManager.shop.ShopCommand;
+import io.github.pikayorld.theFloorIsLavaManager.shop.ShopGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
@@ -29,15 +31,20 @@ import static io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaCommands.r
 
 public final class TheFloorIsLavaManager extends JavaPlugin {
 
+    public static String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
+
     private DangerManager dangerManager;
     private TeamManager teamManager;
 
     public static boolean pvp;
 
+
     public static String worldToReset = "";
 
     @Override
     public void onEnable() {
+
+        Bukkit.getPluginManager().registerEvents(new ShopGUI(), this);
         pvp = true;
         saveDefaultConfig();
 
@@ -89,6 +96,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             healthObjective = getServer().getScoreboardManager().getMainScoreboard().registerNewObjective("tfl.health", "health", "", RenderType.HEARTS);
         }
         healthObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+        ShopGUI.loadRecipes();
 
         this.getLogger().info("RisingDamage activé !");
     }
@@ -148,5 +156,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     public TeamManager getTeamManager(){
         return teamManager;
     }
+
 
 }

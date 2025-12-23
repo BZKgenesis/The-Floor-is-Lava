@@ -63,17 +63,9 @@ public class TheFloorIslavaListener implements Listener {
         if (plugin.getDangerManagerInstance().getHasStarted() && !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
             event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
-
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"batte"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"eggBridge"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"patate"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"blocs_en_plus"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"fireball"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"ciseaux"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"enderPearl"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"popupTower"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"teamInv"));
-        event.getPlayer().discoverRecipe(new NamespacedKey(plugin,"snowballPlate"));
+        for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
+            event.getPlayer().discoverRecipe(new NamespacedKey(plugin,recipe_key));
+        }
     }
 
     @EventHandler

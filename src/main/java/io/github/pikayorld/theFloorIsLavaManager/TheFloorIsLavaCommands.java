@@ -7,6 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
+import io.github.pikayorld.theFloorIsLavaManager.shop.ShopCommand;
+import io.github.pikayorld.theFloorIsLavaManager.shop.ShopGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -101,6 +103,13 @@ public class TheFloorIsLavaCommands {
                     }
                     return Command.SINGLE_SUCCESS;
                 }));
+        root.then(Commands.literal("shop")
+                .executes(ctx ->{
+                  if (ctx.getSource().getExecutor() instanceof Player p){
+                        ShopGUI.open(p,0);
+                  }
+                  return Command.SINGLE_SUCCESS;
+                } ));
         return root.build();
     }
 
