@@ -1,0 +1,7 @@
+{
+    "pack":{
+        "description":"Pack de ressource du plugin The Floor Is Lava",
+        "min_format":69,
+        "max_format":75
+    }
+}

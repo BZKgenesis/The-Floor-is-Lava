@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback":{
+      "type": "model",
+      "model": "item/arrow"
+    },
+    "cases": [
+      {
+        "when":  "right",
+        "model": {
+          "type": "model",
+          "model": "item/arrow_right"
+        }
+      },
+      {
+        "when":  "left",
+        "model": {
+          "type": "model",
+          "model": "item/arrow_left"
+        }
+      }
+    ]
+  }
+}

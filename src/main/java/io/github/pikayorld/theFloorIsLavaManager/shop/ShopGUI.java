@@ -2,6 +2,7 @@ package io.github.pikayorld.theFloorIsLavaManager.shop;
 
 import io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -17,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,8 +137,8 @@ public class ShopGUI implements Listener {
         }
 
         // boutons
-        inv.setItem(45, navItem("§e← Précédent"));
-        inv.setItem(53, navItem("§eSuivant →"));
+        inv.setItem(45, navItem("§e← Précédent", ArrowDirection.LEFT));
+        inv.setItem(53, navItem("§eSuivant →", ArrowDirection.RIGHT));
 
         p.openInventory(inv);
 
@@ -184,8 +186,17 @@ public class ShopGUI implements Listener {
         return options;
     }
 
-    private static ItemStack navItem(String name) {
+    enum ArrowDirection {
+        LEFT, RIGHT
+    }
+
+    private static ItemStack navItem(String name, ArrowDirection direction) {
         ItemStack it = new ItemStack(Material.ARROW);
+        switch (direction){
+            case LEFT -> it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("left"));
+            case RIGHT -> it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("right"));
+        }
+
         ItemMeta meta = it.getItemMeta();
         meta.setDisplayName(name);
         it.setItemMeta(meta);
