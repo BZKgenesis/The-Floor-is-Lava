@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback":{
+      "type": "model",
+      "model": "block/green_wool"
+    },
+    "cases": [
+      {
+        "when":  "create_team",
+        "model": {
+          "type": "model",
+          "model": "item/green_wool_create_team"
+        }
+      },
+      {
+        "when":  "confirm_leaving",
+        "model": {
+          "type": "model",
+          "model": "item/green_wool_confirm_leaving"
+        }
+      },
+      {
+        "when":  "accept_request",
+        "model": {
+          "type": "model",
+          "model": "item/green_wool_accept_request"
+        }
+      }
+    ]
+  }
+}

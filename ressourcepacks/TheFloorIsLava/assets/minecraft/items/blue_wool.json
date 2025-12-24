@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback":{
+      "type": "model",
+      "model": "block/blue_wool"
+    },
+    "cases": [
+      {
+        "when":  "manage_team",
+        "model": {
+          "type": "model",
+          "model": "item/blue_wool_manage_team"
+        }
+      }
+    ]
+  }
+}

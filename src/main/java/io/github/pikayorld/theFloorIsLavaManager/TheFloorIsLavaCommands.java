@@ -107,13 +107,6 @@ public class TheFloorIsLavaCommands {
                     }
                     return Command.SINGLE_SUCCESS;
                 }));
-        root.then(Commands.literal("shop")
-                .executes(ctx ->{
-                  if (ctx.getSource().getExecutor() instanceof Player p){
-                        ShopGUI.open(p,0);
-                  }
-                  return Command.SINGLE_SUCCESS;
-                } ));
         return root.build();
     }
 

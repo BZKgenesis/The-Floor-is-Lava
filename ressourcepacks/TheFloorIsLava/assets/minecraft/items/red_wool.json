@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback":{
+      "type": "model",
+      "model": "block/red_wool"
+    },
+    "cases": [
+      {
+        "when":  "deny_leaving",
+        "model": {
+          "type": "model",
+          "model": "item/red_wool_deny_leaving"
+        }
+      },
+      {
+        "when":  "kick",
+        "model": {
+          "type": "model",
+          "model": "item/red_wool_kick"
+        }
+      }
+    ]
+  }
+}

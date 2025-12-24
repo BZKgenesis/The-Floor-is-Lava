@@ -3,6 +3,7 @@ package io.github.pikayorld.theFloorIsLavaManager.shop;
 import io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -24,8 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 public class ShopGUI implements Listener {
 
@@ -127,6 +127,11 @@ public class ShopGUI implements Listener {
 
             int base = RESULT_SLOTS[i];
             int slot = base;
+
+            ItemStack resultItem = new ItemStack(Material.PAPER);
+            resultItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("result").build());
+            resultItem.setData(DataComponentTypes.ITEM_NAME, Component.empty());
+            inv.setItem(slot+1, resultItem);
 
             for (IngredientEntry ing : recipe.ingredients) {
                 IngredientDisplay d = buildDisplay(ing);
@@ -242,10 +247,10 @@ public class ShopGUI implements Listener {
                     IngredientDisplay d = e.getValue();
                     if (d.options.size() <= 1) continue;
 
-                    d.index = (d.index + 2) % d.options.size();
+                    d.index = (d.index+1) % d.options.size();
                     ItemStack show = d.options.get(d.index).clone();
                     show.setAmount(d.amount);
-                    inv.setItem(e.getKey()+1, show);
+                    inv.setItem(e.getKey()+2, show);
                 }
             }
         };

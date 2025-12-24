@@ -3,6 +3,7 @@ package io.github.pikayorld.theFloorIsLavaManager.Teams;
 import io.github.pikayorld.theFloorIsLavaManager.BlockColorUtils;
 import io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.xml.crypto.Data;
 import java.util.UUID;
 
 
@@ -41,14 +43,14 @@ public class TeamGUI implements Listener {
 
 
         if (team == null) {
-            inv.setItem(11, createItem(Material.GREEN_WOOL, "Créer une équipe"));
-            inv.setItem(15, createItem(Material.LIGHT_BLUE_WOOL, "Rejoindre une équipe"));
+            inv.setItem(11, createItem(Material.GREEN_WOOL, "Créer une équipe", "create_team"));
+            inv.setItem(15, createItem(Material.LIGHT_BLUE_WOOL, "Rejoindre une équipe", "join_team"));
         } else {
             if (p.getName().equals(team.getName())){
-                inv.setItem(13, createItem(Material.BLUE_WOOL, "Gérer mon équipe"));
-                inv.setItem(15, createItem(Material.PAPER, "Demandes reçues"));
+                inv.setItem(13, createItem(Material.BLUE_WOOL, "Gérer mon équipe", "manage_team"));
+                inv.setItem(15, createItem(Material.PAPER, "Demandes reçues", "request_menu"));
             }
-            inv.setItem(11, createItem(Material.BARRIER, "Quitter l'équipe"));
+            inv.setItem(11, createItem(Material.BARRIER, "Quitter l'équipe", "leave_team"));
         }
         p.openInventory(inv);
     }
@@ -56,8 +58,8 @@ public class TeamGUI implements Listener {
 
     public static void openConfirmLeaveMenu(Player p) {
         Inventory inv = Bukkit.createInventory(null, 27, "Quitter l'équipe ?");
-        inv.setItem(11, createItem(Material.GREEN_WOOL, "Oui"));
-        inv.setItem(15, createItem(Material.RED_WOOL, "Non"));
+        inv.setItem(11, createItem(Material.GREEN_WOOL, "Oui", "confirm_leaving"));
+        inv.setItem(15, createItem(Material.RED_WOOL, "Non", "deny_leaving"));
         p.openInventory(inv);
     }
     public static void openRequestsMenu(TeamManager teamManager, Player p) {
@@ -66,7 +68,7 @@ public class TeamGUI implements Listener {
         for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(teamManager.getPlayerTeam(p.getUniqueId()).getName())){
             Player target = Bukkit.getServer().getPlayer(playerUuid);
             if (target!=null){
-                ItemStack item = createItem(Material.GREEN_WOOL, target.getName());
+                ItemStack item = createItem(Material.GREEN_WOOL, target.getName(), "accept_request");
                 item.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Accepter la demande")).build());
                 inv.setItem(i, item);
                 i++;
@@ -81,7 +83,7 @@ public class TeamGUI implements Listener {
             for (UUID playerUuid : teamManager.getPlayerTeam(p.getUniqueId()).getMembers()){
                 Player target = Bukkit.getServer().getPlayer(playerUuid);
                 if (target!=null && !target.getName().equals(p.getName())){
-                    inv.setItem(i, createItem(Material.RED_WOOL, target.getName()));
+                    inv.setItem(i, createItem(Material.RED_WOOL, target.getName(), "kick"));
                     i++;
                 }
             }
@@ -112,11 +114,18 @@ public class TeamGUI implements Listener {
     }
 
     private static ItemStack createItem(Material mat, String name) {
-        return createItem(mat, name, null);
+        return createItem(mat, name, null, "");
     }
 
-    private static ItemStack createItem(Material mat, String name, String id) {
+    private static ItemStack createItem(Material mat, String name, String customModelData) {
+        return createItem(mat, name, null, customModelData);
+    }
+
+    private static ItemStack createItem(Material mat, String name, String id, String customModelData) {
         ItemStack it = new ItemStack(mat);
+        if (!customModelData.isBlank()){
+            it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(customModelData).build());
+        }
         ItemMeta m = it.getItemMeta();
         m.setDisplayName("§e" + name);
         if (id != null)

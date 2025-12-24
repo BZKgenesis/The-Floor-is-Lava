@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback":{
+      "type": "model",
+      "model": "item/paper"
+    },
+    "cases": [
+      {
+        "when":  "request_menu",
+        "model": {
+          "type": "model",
+          "model": "item/paper_request_menu"
+        }
+      },
+      {
+        "when":  "result",
+        "model": {
+          "type": "model",
+          "model": "item/paper_result"
+        }
+      }
+    ]
+  }
+}

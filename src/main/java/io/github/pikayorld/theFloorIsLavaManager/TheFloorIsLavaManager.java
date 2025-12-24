@@ -1,11 +1,13 @@
 package io.github.pikayorld.theFloorIsLavaManager;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamGUI;
 import io.github.pikayorld.theFloorIsLavaManager.Teams.TeamManager;
 import io.github.pikayorld.theFloorIsLavaManager.shop.ShopCommand;
 import io.github.pikayorld.theFloorIsLavaManager.shop.ShopGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -60,6 +62,15 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
         LiteralCommandNode<CommandSourceStack> buildCommand = registerTflCommands(dangerManager, this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
+
+        LiteralCommandNode<CommandSourceStack> ShopBuildCommand = Commands.literal("shop")
+                .executes(ctx ->{
+                    if (ctx.getSource().getExecutor() instanceof Player p){
+                        ShopGUI.open(p,0);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                } ).build();
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(ShopBuildCommand));
         World world = Bukkit.getWorld("world");
         StructureManager manager = Bukkit.getStructureManager();
 

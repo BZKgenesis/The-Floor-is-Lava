@@ -5,7 +5,7 @@ import org.bukkit.inventory.RecipeChoice;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IngredientEntries {
+public class   IngredientEntries {
     public List<IngredientEntry> ingredients;
 
     public  IngredientEntries(){

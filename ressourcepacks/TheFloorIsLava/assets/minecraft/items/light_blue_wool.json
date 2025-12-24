@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback":{
+      "type": "model",
+      "model": "block/light_blue_wool"
+    },
+    "cases": [
+      {
+        "when":  "join_team",
+        "model": {
+          "type": "model",
+          "model": "item/light_blue_wool_join_team"
+        }
+      }
+    ]
+  }
+}
