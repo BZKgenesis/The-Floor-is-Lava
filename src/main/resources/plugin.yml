@@ -1,4 +1,5 @@
 name: TheFloorIsLavaManager
 version: '1.0.0'
 main: io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaManager
+bootstrapper: io.github.pikayorld.theFloorIsLavaManager.TheFloorIsLavaBootstrap
 api-version: '1.21'
