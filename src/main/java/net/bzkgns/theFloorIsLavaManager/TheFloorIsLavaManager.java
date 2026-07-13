@@ -99,9 +99,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
             Location spawnPos = new Location(world,0,281,0);
             world.setSpawnLocation(spawnPos);
-            world.setGameRule(GameRule.SPAWN_RADIUS, 0);
+            world.setGameRule(GameRules.RESPAWN_RADIUS, 0);
             world.setTime(0);
-            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE,false);
+            world.setGameRule(GameRules.ADVANCE_TIME,false);
         }
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new EggBridgeTask(this), 1,1);

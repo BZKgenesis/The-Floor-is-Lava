@@ -125,9 +125,9 @@ public class DangerManager {
         world.getWorldBorder().setCenter(0,0);
         Bukkit.getScheduler().cancelTask(damageTask);
         if (keepinventoryDuringPreparation)
-            world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE,true);
-        world.setGameRule(GameRule.DO_FIRE_TICK,false);
+            world.setGameRule(GameRules.KEEP_INVENTORY, true);
+        world.setGameRule(GameRules.ADVANCE_TIME,true);
+        world.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER,0);
         if (particleTask != -1) Bukkit.getScheduler().cancelTask(particleTask);
         if (disablePvpDuringPreparation){
             TheFloorIsLavaManager.pvp = false;
@@ -205,7 +205,7 @@ public class DangerManager {
     private void startPhase2(){
         World world = Bukkit.getWorld("world");
         if (world != null)
-            world.setGameRule(GameRule.KEEP_INVENTORY, false);
+            world.setGameRule(GameRules.KEEP_INVENTORY, false);
         // Tâche qui augmente le niveau
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::setIncreaseTask, 0, 1);
         TheFloorIsLavaManager.pvp = true;
@@ -219,7 +219,7 @@ public class DangerManager {
                 }
             }
         }, 20, damageEvery);
-        plugin.getServer().getWorlds().getFirst().getWorldBorder().setSize(borderSizeDuringRise,borderResizeTime);
+        plugin.getServer().getWorlds().getFirst().getWorldBorder().changeSize(borderSizeDuringRise,borderResizeTime);
 
         TheFloorIsLavaManager.sendMessage("!!ATTENTION!! La lave commence à monter !");
         if (keepinventoryDuringPreparation)

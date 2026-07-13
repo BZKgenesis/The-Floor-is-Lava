@@ -1,0 +1,4 @@
+
+[submodule "resourcepack"]
+	path = resourcepack
+	url = https://github.com/BzkGenesis/TheFloorIsLava-ResourcePack.git
