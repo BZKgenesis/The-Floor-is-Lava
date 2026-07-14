@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.Items;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;

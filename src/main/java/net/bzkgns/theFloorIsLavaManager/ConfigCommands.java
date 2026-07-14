@@ -6,6 +6,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerConfig;
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerConfigKey;
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -15,9 +18,10 @@ import org.bukkit.entity.Player;
  * /tfl config get <cle>           -> affiche un paramètre
  * /tfl config set <cle> <valeur>  -> modifie un paramètre (refusé si une partie est en cours)
  * /tfl config gui                 -> ouvre l'éditeur graphique (ConfigGUI)
- *
+ * <p>
  * Ajouter un paramètre = l'ajouter dans DangerConfigKey, rien à changer ici.
  */
+@SuppressWarnings("SameReturnValue")
 public class ConfigCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> registerConfigNode(DangerManager dangerManager) {
@@ -29,7 +33,7 @@ public class ConfigCommands {
 
         configNode.then(Commands.literal("get")
                 .then(Commands.argument("cle", StringArgumentType.word())
-                        .suggests((ctx, builder) -> {
+                        .suggests((_, builder) -> {
                             for (DangerConfigKey k : DangerConfigKey.values()) builder.suggest(k.getKey());
                             return builder.buildFuture();
                         })
@@ -37,7 +41,7 @@ public class ConfigCommands {
 
         configNode.then(Commands.literal("set")
                 .then(Commands.argument("cle", StringArgumentType.word())
-                        .suggests((ctx, builder) -> {
+                        .suggests((_, builder) -> {
                             for (DangerConfigKey k : DangerConfigKey.values()) builder.suggest(k.getKey());
                             return builder.buildFuture();
                         })

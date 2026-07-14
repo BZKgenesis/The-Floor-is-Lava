@@ -2,7 +2,6 @@ package net.bzkgns.theFloorIsLavaManager.Teams;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

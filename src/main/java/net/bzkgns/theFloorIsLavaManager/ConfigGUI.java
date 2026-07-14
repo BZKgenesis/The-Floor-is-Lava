@@ -1,5 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager;
 
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerConfig;
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerConfigKey;
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,7 +21,7 @@ import java.util.List;
  * même style que TeamGUI/ShopGUI). Un item par paramètre de DangerConfigKey :
  * - clic gauche  = +1 (Shift = +10)
  * - clic droit   = -1 (Shift = -10)
- *
+ * <p>
  * Reste inopérante si DangerManager#canEditConfig() est false (partie en cours),
  * pour ne jamais laisser modifier la config en plein jeu.
  */

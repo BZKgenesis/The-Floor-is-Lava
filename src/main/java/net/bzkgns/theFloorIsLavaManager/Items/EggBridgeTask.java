@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.Items;
 
 
 import org.bukkit.*;
@@ -11,7 +11,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;
 
-import static net.bzkgns.theFloorIsLavaManager.BlockColorUtils.getWoolBlockByPlayer;
+import static net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils.getWoolBlockByPlayer;
 
 public class EggBridgeTask implements Runnable {
 

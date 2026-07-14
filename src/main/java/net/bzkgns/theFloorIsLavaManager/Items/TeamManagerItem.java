@@ -1,10 +1,11 @@
-package net.bzkgns.theFloorIsLavaManager.Teams;
+package net.bzkgns.theFloorIsLavaManager.Items;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -12,8 +13,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
 
-public class TeamManagerItem {
-    public static boolean isTeamManagerItem(ItemStack stack){
+@SuppressWarnings("UnstableApiUsage")
+public class TeamManagerItem extends CustomItem {
+    public TeamManagerItem() {
+        super("teamManager");
+    }
+
+    @Override
+    public boolean isItem(ItemStack stack){
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
         if (stack.getType() == Material.PAPER){
             if(stack.getPersistentDataContainer().has(new NamespacedKey(plugin, "teamManager"))){
@@ -24,7 +31,13 @@ public class TeamManagerItem {
 
     }
 
-    public static ItemStack giveTeamManagerItem(){
+    @Override
+    public CraftingRecipe getRecipe() {
+        return null;
+    }
+
+    @Override
+    public ItemStack giveItem(){
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
         ItemStack teamManagerStack = new ItemStack(Material.PAPER);
         teamManagerStack.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);

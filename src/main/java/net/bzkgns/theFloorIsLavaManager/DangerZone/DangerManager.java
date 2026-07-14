@@ -1,11 +1,15 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.DangerZone;
 
-import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.GameState;
+import net.bzkgns.theFloorIsLavaManager.Items.ShopItem;
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.Utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.Color;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.joml.Vector3i;
@@ -15,6 +19,7 @@ import java.util.List;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.round;
+import static net.bzkgns.theFloorIsLavaManager.Utils.TextUtils.formatTime;
 
 public class DangerManager {
 
@@ -99,37 +104,40 @@ public class DangerManager {
         playerInGame.addAll(plugin.getServer().getOnlinePlayers());
         noRespawn = false;
 
-        TheFloorIsLavaManager.sendMessage("Le jeu commence !");
+        TextUtils.sendMessage("Le jeu commence !");
         if (config.isKeepInventoryDuringPreparation())
-            TheFloorIsLavaManager.sendMessage("Les inventaires sont sauvegardés (keepInventory)");
+            TextUtils.sendMessage("Les inventaires sont sauvegardés (keepInventory)");
         if (config.isDisablePvpDuringPreparation())
-            TheFloorIsLavaManager.sendMessage("Le PvP est désactivé");
+            TextUtils.sendMessage("Le PvP est désactivé");
 
         int lavaRisingDelay = config.getLavaRisingDelay();
-        TheFloorIsLavaManager.sendMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes");
+        TextUtils.sendMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes");
 
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers 0 0 50 " + config.getBorderSizePreRise() / 2 + " under 200 true @a[gamemode=!creative]");
+
+
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:tfl_game run spreadplayers 0 0 50 " + config.getBorderSizePreRise() / 2 + " under 200 true @a[gamemode=!creative]");
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[gamemode=!creative] at @s run spawnpoint");
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.setHealth(p.getAttribute(Attribute.MAX_HEALTH).getValue());
+            AttributeInstance healthAttribute = p.getAttribute(Attribute.MAX_HEALTH);
+            if (healthAttribute == null) {
+                plugin.getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + p.getName());
+                continue;
+            }
+            p.setHealth(healthAttribute.getValue());
             p.setFoodLevel(20);
             p.setSaturation(20);
             p.setExhaustion(0);
             p.getInventory().clear();
             p.getInventory().setArmorContents(null);
-            p.give(ShopGUI.giveShopItem());
+            p.give(new ShopItem().giveItem());
         }
-
-        if (lavaRisingDelay > 6000) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 5 minutes..."), lavaRisingDelay - 6000);
-        if (lavaRisingDelay > 3600) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 3 minutes..."), lavaRisingDelay - 3600);
-        if (lavaRisingDelay > 1200) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 1 minutes..."), lavaRisingDelay - 1200);
-        if (lavaRisingDelay > 600) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 30 secondes..."), lavaRisingDelay - 600);
-        if (lavaRisingDelay > 200) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 10 secondes..."), lavaRisingDelay - 200);
-        if (lavaRisingDelay > 100) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 5 secondes..."), lavaRisingDelay - 100);
-        if (lavaRisingDelay > 80) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 4 secondes..."), lavaRisingDelay - 80);
-        if (lavaRisingDelay > 60) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 3 secondes..."), lavaRisingDelay - 60);
-        if (lavaRisingDelay > 40) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 2 secondes..."), lavaRisingDelay - 40);
-        if (lavaRisingDelay > 20) Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va commencer à monter dans 1 secondes..."), lavaRisingDelay - 20);
+        //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
+        int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
+        for (int d : delay) {
+            if (lavaRisingDelay > d) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va commencer à monter dans " + formatTime(d, TextUtils.TimeFormat.SHORTEST) + "..."), lavaRisingDelay - d);
+            }
+        }
 
         phase2Task = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this::startPhase2, lavaRisingDelay);
         return true;
@@ -152,7 +160,7 @@ public class DangerManager {
 
     /** Ne gère la pause que pendant la montée de la lave (RISING). Renvoie false sinon. */
     public boolean pause() {
-        if (state != GameState.RISING) {
+        if (state != GameState.RISING && state != GameState.PREPARING) {
             return false;
         }
         stateBeforePause = state;
@@ -256,10 +264,10 @@ public class DangerManager {
 
         double diff = increaseSize / increaseAmount;
         if (diff > 100) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va monter dans 3 secondes..."), round(diff) - 60);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va monter dans 2 secondes..."), round(diff) - 40);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave va monter dans 1 secondes..."), round(diff) - 20);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TheFloorIsLavaManager.sendActionBar("La lave monte !!"), round(diff));
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va monter dans 3 secondes..."), round(diff) - 60);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va monter dans 2 secondes..."), round(diff) - 40);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va monter dans 1 secondes..."), round(diff) - 20);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave monte !!"), round(diff));
         }
 
         World world = plugin.getWorldManager().getGameWorld();
@@ -275,7 +283,7 @@ public class DangerManager {
             for (int x = edgeMin.x; x <= edgeMax.x; ++x) {
                 for (int y = edgeMin.y; y <= edgeMax.y; ++y) {
                     for (int z = edgeMin.z; z <= edgeMax.z; ++z) {
-                        Block block = (new Location(world, (double) x, (double) y, (double) z)).getBlock();
+                        Block block = (new Location(world, x, y, z)).getBlock();
                         if (block.getType() == Material.AIR) {
                             toUpdate.add(block);
                         }
@@ -299,15 +307,19 @@ public class DangerManager {
         noRespawn = true;
 
         damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, config.getDamageEvery());
+        if (world == null){
+            plugin.getLogger().warning("Impossible de récupérer le monde de jeu pour démarrer la phase 2");
+            return;
+        }
         world.getWorldBorder().changeSize(config.getBorderSizeDuringRise(), config.getBorderResizeTime() * 20L);
 
-        TheFloorIsLavaManager.sendMessage("!!ATTENTION!! La lave commence à monter !");
+        TextUtils.sendMessage("!!ATTENTION!! La lave commence à monter !");
         if (config.isKeepInventoryDuringPreparation())
-            TheFloorIsLavaManager.sendMessage("Les inventaires ne sont plus sauvegardés");
+            TextUtils.sendMessage("Les inventaires ne sont plus sauvegardés");
         if (config.isDisablePvpDuringPreparation())
-            TheFloorIsLavaManager.sendMessage("Le PvP est activé");
-        TheFloorIsLavaManager.sendMessage("Le respawn est désactivé");
-        TheFloorIsLavaManager.sendMessage("La zone se rétrécit");
+            TextUtils.sendMessage("Le PvP est activé");
+        TextUtils.sendMessage("Le respawn est désactivé");
+        TextUtils.sendMessage("La zone se rétrécit");
 
         if (config.isPlaceLava()) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 1, 1);

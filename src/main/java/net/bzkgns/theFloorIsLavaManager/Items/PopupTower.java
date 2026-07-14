@@ -1,7 +1,5 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.Items;
 
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -9,18 +7,14 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.inventory.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import static net.bzkgns.theFloorIsLavaManager.BlockColorUtils.getWoolBlockByPlayer;
+import static net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils.getWoolBlockByPlayer;
 
+@SuppressWarnings("UnstableApiUsage")
 public class PopupTower {
 
     public static final int[][][] LAYOUT = {
@@ -107,30 +101,9 @@ public class PopupTower {
             }
     };
 
-    private static final TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
-    public static ItemStack givePopupTower(){
-        ItemStack popupTowerStack = new ItemStack(Material.CHEST);
-        popupTowerStack.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
-        popupTowerStack.setData(DataComponentTypes.ITEM_NAME, Component.text("Popup Tower"));
-        ItemMeta popupTowerMeta = popupTowerStack.getItemMeta();
-        popupTowerMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "popup"), PersistentDataType.STRING, "popupTower");
-        popupTowerStack.setItemMeta(popupTowerMeta);
-
-        return popupTowerStack;
-    }
-
-    public static boolean isPopupTower(ItemStack stack){
-        if (stack.getType() == Material.CHEST){
-            if(stack.getPersistentDataContainer().has(new NamespacedKey(plugin, "popup"))){
-                return Objects.equals(stack.getPersistentDataContainer().get(new NamespacedKey(plugin, "popup"), PersistentDataType.STRING), "popupTower");
-            }
-        }
-        return false;
-    }
-
     public static void placePopupTower(Player p, Location pos, Rotation rotation){
 
-        Map<Integer, Material> blocks_layout = new HashMap<Integer, Material>();
+        Map<Integer, Material> blocks_layout = new HashMap<>();
 
         blocks_layout.put(0,Material.AIR);
         blocks_layout.put(1,getWoolBlockByPlayer(p));
@@ -148,16 +121,12 @@ public class PopupTower {
 
     }
 
-    private static void setBlockRelative(Location origin, int x,int y,int z, Material mat, Rotation rotation, Player p){
+    private static void setBlockRelative(Location origin, int x, int Y, int z, Material mat, Rotation rotation, Player p){
         int Z = z;
         int X = x;
-        int Y = y;
         BlockFace facing = BlockFace.NORTH;
         switch (rotation){
             case Rotation.NONE:
-                Z = z;
-                X = x;
-                facing = BlockFace.NORTH;
                 break;
             case Rotation.CLOCKWISE :
                 Z = x;

@@ -26,9 +26,6 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import org.bukkit.Bukkit;
 
-import java.io.File;
-import java.io.IOException;
-
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.*;
 
 public class WorldManager {
@@ -41,11 +38,16 @@ public class WorldManager {
 
     private boolean resettingWorld = false;
 
+    public boolean isGameWorldLoaded = false;
+
+    private Location oldSpawn;
+
     public void resetRandomWorld(){
         resetRandomWorld(0);
     }
 
     public void resetRandomWorld(long seed) {
+        isGameWorldLoaded = false;
         plugin.getDangerManagerInstance().stop();
 
         resettingWorld = true;
@@ -77,6 +79,7 @@ public class WorldManager {
         creator.seed(seed==0?new Random().nextLong():seed);
 
         recreateWorld(creator,players);
+        isGameWorldLoaded = true;
     }
 
     private void recreateWorld(WorldCreator creator, List<Player> players) {
@@ -87,7 +90,7 @@ public class WorldManager {
         World newWorld = Bukkit.createWorld(creator);
 
         if (newWorld == null) {
-            plugin.getLogger().severe("Impossible de créer le monde.");
+            plugin.getLogger().severe("Impossible de creer le monde.");
             resettingWorld = false;
             return;
         }
@@ -154,6 +157,8 @@ public class WorldManager {
 
         Location spawn = new Location(world,0.5,281,0.5);
 
+        oldSpawn = world.getSpawnLocation();
+
         world.setSpawnLocation(spawn);
         world.setGameRule(GameRules.RESPAWN_RADIUS,0);
         world.setTime(0);
@@ -192,7 +197,9 @@ public class WorldManager {
 
     private void extractZip(File zipFile, File destination) throws IOException {
         if (!destination.exists()) {
-            destination.mkdirs();
+            if (!destination.mkdirs()){
+                throw new IOException("Impossible de créer le dossier de destination : " + destination.getAbsolutePath());
+            }
         }
 
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile.toPath()))) {
@@ -208,9 +215,13 @@ public class WorldManager {
                 }
 
                 if (entry.isDirectory()) {
-                    outFile.mkdirs();
+                    if (!outFile.mkdirs()){
+                        throw new IOException("Impossible de créer le dossier : " + outFile.getAbsolutePath());
+                    }
                 } else {
-                    outFile.getParentFile().mkdirs();
+                    if(!outFile.getParentFile().mkdirs()){
+                        throw new IOException("Impossible de créer le dossier parent : " + outFile.getParentFile().getAbsolutePath());
+                    }
                     Files.copy(zis, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
                 zis.closeEntry();
@@ -223,14 +234,14 @@ public class WorldManager {
         Path tflGameDim = mapRoot.resolve(GAME_WORLD);
 
         if (Files.isDirectory(tflGameDim)) {
-            plugin.getLogger().info("Dimension \"" + GAME_WORLD + "\" trouvée dans la map, utilisation de celle-ci.");
+            plugin.getLogger().info("Dimension \"" + GAME_WORLD + "\" trouvee dans la map, utilisation de celle-ci.");
             return tflGameDim;
         }
 
         Path overworldDim = mapRoot.resolve("overworld");
 
         if (Files.isDirectory(overworldDim)) {
-            plugin.getLogger().info("Dimension \"" + GAME_WORLD + "\" introuvable, utilisation du dossier \"overworld\" trouvé dans la map.");
+            plugin.getLogger().info("Dimension \"" + GAME_WORLD + "\" introuvable, utilisation du dossier \"overworld\" trouve dans la map.");
             return overworldDim;
         }
 
@@ -243,14 +254,14 @@ public class WorldManager {
 
             if (levelDatPath.isPresent()) {
                 Path trueRoot = levelDatPath.get().getParent().resolve("dimensions").resolve("minecraft").resolve("overworld");
-                plugin.getLogger().info("Fichier level.dat trouvé. Utilisation du dossier : " + trueRoot.getFileName());
+                plugin.getLogger().info("Fichier level.dat trouve. Utilisation du dossier : " + trueRoot.getFileName());
                 return trueRoot;
             }
         } catch (IOException e) {
             plugin.getLogger().warning("Erreur lors de la recherche du fichier level.dat : " + e.getMessage());
         }
 
-        plugin.getLogger().info("Dimension introuvable et aucun level.dat détecté, utilisation de la racine de la map par défaut.");
+        plugin.getLogger().info("Dimension introuvable et aucun level.dat detecte, utilisation de la racine de la map par defaut.");
         return mapRoot;
     }
 
@@ -258,6 +269,7 @@ public class WorldManager {
 
         plugin.getDangerManagerInstance().stop();
 
+        isGameWorldLoaded = false;
         resettingWorld = true;
 
         World oldWorld = getGameWorld();
@@ -267,7 +279,7 @@ public class WorldManager {
         if (oldWorld == null) {
             oldWorld = Bukkit.createWorld(new WorldCreator(GAME_WORLD));
             if (oldWorld == null) {
-                plugin.getLogger().severe("Impossible de résoudre le dossier de dimension !");
+                plugin.getLogger().severe("Impossible de resoudre le dossier de dimension !");
                 resettingWorld = false;
                 return;
             }
@@ -340,10 +352,13 @@ public class WorldManager {
             throw new RuntimeException(e);
         } finally {
             if (tempExtractDir != null) {
-                deleteRecursively(tempExtractDir.toFile());
+                if (!deleteRecursively(tempExtractDir.toFile())){
+                    plugin.getLogger().warning("Impossible de supprimer le dossier temporaire : " + tempExtractDir.toAbsolutePath());
+                }
             }
         }
 
+        isGameWorldLoaded = true;
         recreateWorld(
                 new WorldCreator(GAME_WORLD),
                 players,
@@ -365,6 +380,10 @@ public class WorldManager {
         return resettingWorld;
     }
 
+    public boolean isGameWorldLoaded() {
+        return isGameWorldLoaded;
+    }
+
     public World getLobbyWorld(){
         return Bukkit.getWorld(TheFloorIsLavaManager.LOBBY_WORLD);
     }
@@ -377,6 +396,27 @@ public class WorldManager {
         return Stream.of(Objects.requireNonNull(new File(MAPS_FOLDER).listFiles()))
                 .map(File::getName)
                 .collect(Collectors.toSet());
+    }
+
+    public Location getLobbySpawnLocation(){
+        World lobby = getLobbyWorld();
+        if(lobby == null){
+            return null;
+        }
+        return lobby.getSpawnLocation();
+    }
+
+    public Location getPreGameSpawnLocation(){
+        World game = getGameWorld();
+        if(game == null){
+            return null;
+        }
+        return game.getSpawnLocation();
+    }
+
+    public Location getDefaultSpawnLocation(){
+        plugin.getLogger().warning("getDefaultSpawnLocation() ne devrait pas être appeler, quelque chose ne va pas.");
+        return oldSpawn;
     }
 
 
@@ -412,7 +452,7 @@ public class WorldManager {
                 plugin.getLogger().warning("La dimension 'minecraft:tfl_game' est introuvable dans le world_gen_settings de la map. Test avec overworld...");
                 tflGameDimensionTagOpt = sourceDimensions.getCompound("minecraft:overworld");
                 if (tflGameDimensionTagOpt.isEmpty()) {
-                    plugin.getLogger().warning("La dimension 'minecraft:overworld' est également introuvable dans le world_gen_settings de la map. Aucune dimension valide à fusionner.");
+                    plugin.getLogger().warning("La dimension 'minecraft:overworld' est egalement introuvable dans le world_gen_settings de la map. Aucune dimension valide à fusionner.");
                     return;
                 }
             }
@@ -452,11 +492,14 @@ public class WorldManager {
             // 4. Sauvegarder le fichier fusionné sur le serveur
             File parentDir = targetFile.getParentFile();
             if (parentDir != null && !parentDir.exists()) {
-                parentDir.mkdirs();
+                if (!parentDir.mkdirs()){
+                    plugin.getLogger().severe("Impossible de créer le dossier parent pour world_gen_settings.dat : " + parentDir.getAbsolutePath());
+                    return;
+                }
             }
 
             NbtIo.writeCompressed(targetRoot, targetFile.toPath());
-            plugin.getLogger().info("La configuration de la dimension 'minecraft:tfl_game' a été fusionnée avec succès !");
+            plugin.getLogger().info("La configuration de la dimension 'minecraft:tfl_game' a ete fusionnee avec succes !");
 
         } catch (IOException e) {
             plugin.getLogger().severe("Erreur lors de la fusion du fichier world_gen_settings.dat : " + e.getMessage());

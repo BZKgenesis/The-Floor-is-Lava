@@ -1,9 +1,11 @@
-package net.bzkgns.theFloorIsLavaManager.shop;
+package net.bzkgns.theFloorIsLavaManager.Shop;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -23,7 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.*;
+import static net.bzkgns.theFloorIsLavaManager.Utils.TextUtils.plainText;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ShopGUI implements Listener {
 
     private static final int SIZE = 54;
@@ -34,6 +38,7 @@ public class ShopGUI implements Listener {
     private static final List<ShopRecipe> RECIPES = new ArrayList<>();
     private static final Map<Inventory, BukkitRunnable> RUNNABLES = new HashMap<>();
 
+    @SuppressWarnings("unused")
     public static Map<ItemStack, List<RecipeChoice>> getAvailableRecipes(TheFloorIsLavaManager plugin){
         Map<ItemStack, List<RecipeChoice>> recipes = new HashMap<>();
         for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
@@ -43,14 +48,10 @@ public class ShopGUI implements Listener {
                 List<RecipeChoice> choices = new ArrayList<>();
                 ItemStack result = recipe.getResult();
                 if (recipe instanceof ShapedRecipe recipeShaped){
-                    for (RecipeChoice recipeChoice : recipeShaped.getChoiceMap().values()){
-                        choices.add(recipeChoice);
-                    }
+                    choices.addAll(recipeShaped.getChoiceMap().values());
                 }
                 if (recipe instanceof ShapelessRecipe recipeShaped){
-                    for (RecipeChoice recipeChoice : recipeShaped.getChoiceList()){
-                        choices.add(recipeChoice);
-                    }
+                    choices.addAll(recipeShaped.getChoiceList());
                 }
                 recipes.put(result,choices);
 
@@ -108,7 +109,7 @@ public class ShopGUI implements Listener {
         plugin.getLogger().info("recipe loaded "+RECIPES.size());
     }
     public static void open(Player p, int page) {
-        Inventory inv = Bukkit.createInventory(null, SIZE, "§6Shop §7(Page " + (page+1) + ")");
+        Inventory inv = Bukkit.createInventory(null, SIZE, Component.text("Shop").color(TextColor.fromHexString("#FFAA00")).append(Component.text("(Page " + (page + 1) + ")").color(TextColor.fromHexString("#AAAAAA"))));
         Map<Integer, IngredientDisplay> animated = new HashMap<>();
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
@@ -119,11 +120,10 @@ public class ShopGUI implements Listener {
 
             ShopRecipe recipe = RECIPES.get(start + i);
             ItemStack display = recipe.result.clone();
-            display.setLore(List.of("§aClique pour échanger"));
+            display.lore(List.of(Component.text("Clique pour échanger").color(TextColor.fromHexString("#55FF55"))));
             inv.setItem(RESULT_SLOTS[i], display);
 
-            int base = RESULT_SLOTS[i];
-            int slot = base;
+            int slot = RESULT_SLOTS[i];
 
             ItemStack resultItem = new ItemStack(Material.PAPER);
             resultItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("result").build());
@@ -133,14 +133,14 @@ public class ShopGUI implements Listener {
             for (IngredientEntry ing : recipe.ingredients) {
                 IngredientDisplay d = buildDisplay(ing);
                 animated.put(slot, d);
-                inv.setItem(slot+2, d.options.get(0));
+                inv.setItem(slot+2, d.options.getFirst());
                 slot++;
             }
         }
 
         // boutons
-        inv.setItem(45, navItem("§e← Précédent", ArrowDirection.LEFT));
-        inv.setItem(53, navItem("§eSuivant →", ArrowDirection.RIGHT));
+        inv.setItem(45, navItem(Component.text("← Précédent").color(TextColor.fromHexString("#FFFF55")), ArrowDirection.LEFT));
+        inv.setItem(53, navItem(Component.text("Suivant →").color(TextColor.fromHexString("#FFFF55")), ArrowDirection.RIGHT));
 
         p.openInventory(inv);
 
@@ -192,7 +192,7 @@ public class ShopGUI implements Listener {
         LEFT, RIGHT
     }
 
-    private static ItemStack navItem(String name, ArrowDirection direction) {
+    private static ItemStack navItem(TextComponent name, ArrowDirection direction) {
         ItemStack it = new ItemStack(Material.ARROW);
         switch (direction){
             case LEFT -> it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("left"));
@@ -200,7 +200,7 @@ public class ShopGUI implements Listener {
         }
 
         ItemMeta meta = it.getItemMeta();
-        meta.setDisplayName(name);
+        meta.displayName(name);
         it.setItemMeta(meta);
         return it;
     }
@@ -210,7 +210,7 @@ public class ShopGUI implements Listener {
     }
 
     private static int page(InventoryClickEvent e) {
-        String title = e.getView().getTitle();
+        String title = plainText(e.getView().title());
 
         int start = title.indexOf("Page ") + 5;
         int end = title.indexOf(")", start);
@@ -255,11 +255,10 @@ public class ShopGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getClickedInventory() instanceof PlayerInventory) return;
-        if (!e.getView().getTitle().startsWith("§6Shop")) return;
+        if (!plainText(e.getView().title()).startsWith("Shop")) return;
         e.setCancelled(true);
 
         Player p = (Player) e.getWhoClicked();
-        Inventory inv = e.getInventory();
 
         if (e.getSlot() == 45) open(p, max(page(e)-1,0));
         if (e.getSlot() == 53) open(p, min(getMaxPages(),page(e)+1));
@@ -279,27 +278,6 @@ public class ShopGUI implements Listener {
         p.getInventory().addItem(recipe.result.clone());
         p.sendMessage("§aÉchange réussi.");
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
-    }
-
-    public static ItemStack giveShopItem(){
-        ItemStack it = new ItemStack(Material.BOOK);
-        it.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
-        ItemMeta meta = it.getItemMeta();
-        meta.setDisplayName("§6Shop");
-        meta.setLore(List.of("§7Ouvre le menu du shop"));
-        it.setItemMeta(meta);
-        return it;
-    }
-
-    public static boolean isShopItem(ItemStack stack) {
-        if (stack.getType() == Material.BOOK) {
-            ItemMeta meta = stack.getItemMeta();
-            if (meta != null && meta.hasDisplayName()) {
-                String name = meta.getDisplayName();
-                return name.contains("Shop");
-            }
-        }
-        return false;
     }
     private static boolean canPay(Player p, ShopRecipe r) {
         for (IngredientEntry ing : r.ingredients) {

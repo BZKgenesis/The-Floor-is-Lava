@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.shop;
+package net.bzkgns.theFloorIsLavaManager.Shop;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

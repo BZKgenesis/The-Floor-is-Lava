@@ -16,17 +16,18 @@ import net.kyori.adventure.text.event.ClickEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 
+@SuppressWarnings("UnstableApiUsage")
 public class TheFloorIsLavaBootstrap implements PluginBootstrap {
 
     @Override
     public void bootstrap(BootstrapContext context) {
         // Register a new handler for the compose lifecycle event on the enchantment registry
         context.getLifecycleManager().registerEventHandler(RegistryEvents.DIALOG.compose()
-                .newHandler(event ->  event.registry().register(
-
-                        DialogKeys.create(Key.key("tfl:menu_dialog")),    builder -> builder
+                .newHandler(event -> event.registry().register(
+                        DialogKeys.create(Key.key("tfl:menu_dialog")), builder -> builder
                                 .base(DialogBase.builder(Component.text("Title")).build())
                                 .type(
                                         DialogType.multiAction(List.of(
@@ -38,7 +39,7 @@ public class TheFloorIsLavaBootstrap implements PluginBootstrap {
                                                         .build()
                                         )).build()
                                 )
-        )));
+                )));
 
         context.getLifecycleManager().registerEventHandler(LifecycleEvents.DATAPACK_DISCOVERY.newHandler(
                 event -> {
@@ -46,7 +47,11 @@ public class TheFloorIsLavaBootstrap implements PluginBootstrap {
 
                         // Retrieve the URI of the datapack folder.
 
-                        URI uri = this.getClass().getResource("/tfl").toURI();
+                        URL url = this.getClass().getResource("/tfl");
+                        if (url == null) {
+                            throw new RuntimeException("Datapack folder not found");
+                        }
+                        URI uri = url.toURI();
 
                         // Discover the pack. The ID is set to "provided", which indicates to
 

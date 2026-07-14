@@ -1,11 +1,11 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.DangerZone;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
 /**
  * Regroupe tous les paramètres réglables de la partie (vitesse de montée de la lave,
  * dégâts, taille de bordure, etc.).
- *
+ * <p>
  * Cet objet est volontairement séparé de DangerManager : il ne connaît ni les tâches
  * Bukkit, ni l'état de la partie (LOBBY/PREPARING/RISING). Il peut donc être lu et
  * modifié librement (commande, GUI, plus tard une API REST si besoin) sans jamais
@@ -61,6 +61,7 @@ public class DangerConfig {
     }
 
     /** Persiste les valeurs actuelles dans le config.yml (appeler plugin.saveConfig() ensuite). */
+    @SuppressWarnings("unused")
     public void saveTo(FileConfiguration config) {
         config.set("danger.start-level", startLevel);
         config.set("danger.end-level", endLevel);

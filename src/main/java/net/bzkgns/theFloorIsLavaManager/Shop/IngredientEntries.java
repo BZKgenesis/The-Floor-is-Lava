@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.shop;
+package net.bzkgns.theFloorIsLavaManager.Shop;
 
 import org.bukkit.inventory.RecipeChoice;
 
@@ -12,6 +12,7 @@ public class   IngredientEntries {
         this.ingredients = new ArrayList<>();
     }
 
+    @SuppressWarnings("unused")
     public  IngredientEntries(List<IngredientEntry> entries){
         this.ingredients = entries;
     }

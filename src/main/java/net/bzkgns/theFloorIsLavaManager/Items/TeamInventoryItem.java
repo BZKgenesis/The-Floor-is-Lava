@@ -1,41 +1,25 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.Items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
-public class TeamInventoryManager {
-
-    private static TeamInventoryManager instance = null;
-    private final Plugin plugin;
-    private final Map<String, TeamInventory> teamInventories = new HashMap<>();
-
-    public static TeamInventoryManager getInstance() {
-        if ( instance == null ) {
-            instance = new TeamInventoryManager(JavaPlugin.getPlugin(TheFloorIsLavaManager.class));
-        }
-        return instance;
+@SuppressWarnings("UnstableApiUsage")
+public class TeamInventoryItem extends CustomItem {
+    public TeamInventoryItem() {
+        super("teamInv");
     }
 
-    public TeamInventoryManager(Plugin plugin){
-        this.plugin = plugin;
-    }
-    public TeamInventory getTeamInventory(String teamName) {
-        return teamInventories.computeIfAbsent(teamName,
-                k -> new TeamInventory(plugin,27));
-    }
-
-    public ItemStack getTeamInventoryItem(){
+    @Override
+    public ItemStack giveItem(){
         ItemStack item = new ItemStack(Material.ENDER_CHEST);
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(new NamespacedKey(plugin,"teamInv"), PersistentDataType.STRING, "teamInv");
@@ -45,7 +29,8 @@ public class TeamInventoryManager {
         return item;
     }
 
-    public boolean isTeamInventoryItem(ItemStack stack){
+    @Override
+    public boolean isItem(ItemStack stack){
         if (stack.getType() == Material.ENDER_CHEST){
             if (stack.getPersistentDataContainer().has(new NamespacedKey(plugin,"teamInv"))){
                 return Objects.equals(stack.getPersistentDataContainer().get(new NamespacedKey(plugin, "teamInv"), PersistentDataType.STRING), "teamInv");
@@ -54,4 +39,14 @@ public class TeamInventoryManager {
         return false;
     }
 
+    @Override
+    public CraftingRecipe getRecipe() {
+
+        ShapedRecipe teamInvRecipe = new ShapedRecipe(key, giveItem());
+        teamInvRecipe.shape("ABA","BCB","ABA");
+        teamInvRecipe.setIngredient('A', Material.DIAMOND);
+        teamInvRecipe.setIngredient('B', Material.IRON_INGOT);
+        teamInvRecipe.setIngredient('C', Material.CHEST);
+        return teamInvRecipe;
+    }
 }

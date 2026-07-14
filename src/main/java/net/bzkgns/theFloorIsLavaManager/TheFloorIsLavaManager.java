@@ -2,37 +2,20 @@ package net.bzkgns.theFloorIsLavaManager;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerManager;
+import net.bzkgns.theFloorIsLavaManager.Items.EggBridgeTask;
 import net.bzkgns.theFloorIsLavaManager.Teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.Teams.TeamManager;
-import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.Shop.ShopGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
-import org.bukkit.block.structure.Mirror;
-import org.bukkit.block.structure.StructureRotation;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.RenderType;
-import org.bukkit.scoreboard.Team;
-import org.bukkit.structure.Structure;
-import org.bukkit.structure.StructureManager;
-import org.bukkit.util.BoundingBox;
+import org.bukkit.scoreboard.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-
-import static net.bzkgns.theFloorIsLavaManager.ConfigCommands.registerConfigNode;
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaCommands.registerTflCommands;
 
 public final class TheFloorIsLavaManager extends JavaPlugin {
@@ -52,8 +35,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     public static boolean pvp;
 
 
-    public static String worldToReset = "";
-
     @Override
     public void onEnable() {
         // saveDefaultConfig() et la création de dangerManager doivent précéder toute
@@ -67,7 +48,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         dangerManager = new DangerManager(this);
 
         if (Bukkit.getWorld(GAME_WORLD) == null) {
-            getLogger().info("Création du monde de jeu...");
+            getLogger().info("Creation du monde de jeu...");
             worldManager = new WorldManager(this);
             worldManager.resetRandomWorld();
         } else {
@@ -111,12 +92,12 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
         Objective healthObjective = getServer().getScoreboardManager().getMainScoreboard().getObjective("tfl.health");
         if (healthObjective ==null){
-            healthObjective = getServer().getScoreboardManager().getMainScoreboard().registerNewObjective("tfl.health", "health", "", RenderType.HEARTS);
+            healthObjective = getServer().getScoreboardManager().getMainScoreboard().registerNewObjective("tfl.health", Criteria.HEALTH, Component.text(""), RenderType.HEARTS);
         }
         healthObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
         ShopGUI.loadRecipes();
 
-        this.getLogger().info("RisingDamage activé !");
+        this.getLogger().info("RisingDamage active !");
     }
 
     @Override
@@ -155,24 +136,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         Location spawn = new Location(lobby, 0.5, 100, 0.5);
         lobby.setSpawnLocation(spawn);
 
-        getLogger().info("Monde lobby chargé !");
-    }
-
-    public static void sendMessage(String message){
-        Bukkit.getServer().sendMessage(Component.text("[").color(TextColor.color(255,255,255))
-                .append(Component.text("TFL").color(TextColor.color(255,0,0)))
-                .append(Component.text("]").color(TextColor.color(255,255,255)))
-                .append(Component.text(" " +message).color(TextColor.color(255,255,255))));
-    }
-
-    public static void sendActionBar(String message){
-
-        for (Player player : Bukkit.getServer().getOnlinePlayers()){
-            player.sendActionBar(Component.text("[").color(TextColor.color(255,255,255))
-                    .append(Component.text("TFL").color(TextColor.color(255,0,0)))
-                    .append(Component.text("]").color(TextColor.color(255,255,255)))
-                    .append(Component.text(" " +message).color(TextColor.color(255,255,255))));
-        }
+        getLogger().info("Monde lobby charge !");
     }
 
     public double getFallDamageReduction(){

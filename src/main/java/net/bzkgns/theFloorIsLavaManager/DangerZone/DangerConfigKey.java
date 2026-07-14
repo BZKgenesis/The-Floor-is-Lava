@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.DangerZone;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;

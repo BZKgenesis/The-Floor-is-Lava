@@ -1,8 +1,10 @@
 package net.bzkgns.theFloorIsLavaManager;
 
+import net.bzkgns.theFloorIsLavaManager.Items.*;
 import net.bzkgns.theFloorIsLavaManager.Teams.TeamGUI;
-import net.bzkgns.theFloorIsLavaManager.Teams.TeamManagerItem;
-import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.Items.TeamManagerItem;
+import net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils;
+import net.bzkgns.theFloorIsLavaManager.Shop.ShopGUI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -30,7 +32,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.List;
 import java.util.Objects;
 
-import static net.bzkgns.theFloorIsLavaManager.BlockColorUtils.getWoolBlockByPlayer;
+import static net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils.getWoolBlockByPlayer;
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.GAME_WORLD;
 
 
@@ -70,16 +72,46 @@ public class TheFloorIslavaListener implements Listener {
             event.getPlayer().teleport(spawnPos);
             if (!plugin.getDangerManagerInstance().getHasStarted()){
                 event.getPlayer().getInventory().clear();
-                event.getPlayer().give(TeamManagerItem.giveTeamManagerItem());
-                event.getPlayer().give(ShopGUI.giveShopItem());
+                event.getPlayer().give(new TeamManagerItem().giveItem());
+                event.getPlayer().give(new ShopItem().giveItem());
             }
+        }
+
+        switch (plugin.getDangerManagerInstance().getState()){
+            case LOBBY -> {
+                event.getPlayer().setGameMode(GameMode.ADVENTURE);
+                if (plugin.getWorldManager().isGameWorldLoaded()){
+                    event.getPlayer().teleport(plugin.getWorldManager().getPreGameSpawnLocation());
+                }else{
+                    event.getPlayer().teleport(plugin.getWorldManager().getLobbySpawnLocation());
+                }
+            }
+            case PREPARING, RISING -> {
+                if (plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
+                    event.getPlayer().setGameMode(GameMode.SURVIVAL);
+                    if (!event.getPlayer().getWorld().equals(plugin.getWorldManager().getGameWorld())) {
+                        event.getPlayer().teleport(plugin.getWorldManager().getDefaultSpawnLocation());
+                    }
+                } else {
+                    event.getPlayer().teleport(plugin.getWorldManager().getPreGameSpawnLocation());
+                    event.getPlayer().setGameMode(GameMode.SPECTATOR);
+                }
+            }
+            case PAUSED -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
         if (plugin.getDangerManagerInstance().getHasStarted() &&
                 !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
             event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
+        discoverRecipes(event.getPlayer());
+        if(event.getPlayer().getWorld().equals(plugin.getServer().getWorld("minecraft:overworld"))){
+            event.getPlayer().sendMessage(Component.text("§cTu n'es pas sensé être ici."));
+        }
+    }
+
+    private void discoverRecipes(Player player){
         for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
-            event.getPlayer().discoverRecipe(new NamespacedKey(plugin,recipe_key));
+            player.discoverRecipe(new NamespacedKey(plugin,recipe_key));
         }
     }
 
@@ -90,7 +122,7 @@ public class TheFloorIslavaListener implements Listener {
         if (block.getType().toString().endsWith("WOOL")){
             block.setType(getWoolBlockByPlayer(p));
         }
-        if (PopupTower.isPopupTower(event.getItemInHand())){
+        if (new PopupTowerItem().isItem(event.getItemInHand())){
             Rotation rotation = Rotation.NONE;
             float angle =p.getYaw()+180;
             if (angle<=45 || angle>=315){
@@ -117,8 +149,8 @@ public class TheFloorIslavaListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerDamage(EntityDamageEvent e){
-        if (e.getEntity() instanceof Player victime && e.getDamageSource().getCausingEntity()!=null){
-            if (e.getDamageSource().getCausingEntity() instanceof Player aggresseur){
+        if (e.getEntity() instanceof Player && e.getDamageSource().getCausingEntity()!=null){
+            if (e.getDamageSource().getCausingEntity() instanceof Player){
                 if (!TheFloorIsLavaManager.pvp){
                     e.setCancelled(true);
                 }
@@ -132,7 +164,7 @@ public class TheFloorIslavaListener implements Listener {
 
         ItemStack item = event.getItem();
         if (item == null) return;
-        if (!TeamInventoryManager.getInstance().isTeamInventoryItem(item)) return;
+        if (!new TeamInventoryItem().isItem(item)) return;
 
         event.setCancelled(true);
 
@@ -154,15 +186,10 @@ public class TheFloorIslavaListener implements Listener {
 
         ItemStack item = event.getItem();
         if (item == null) return;
-        if (!TeamManagerItem.isTeamManagerItem(item)) return;
+        if (!new TeamManagerItem().isItem(item)) return;
         if (plugin.getDangerManagerInstance().getHasStarted()) return;
 
         event.setCancelled(true);
-
-        Player player = event.getPlayer();
-        String team = getTeamOf(player); // À TOI d’implémenter selon ton plugin d’équipes
-
-
         TeamGUI.openMainMenu(plugin, event.getPlayer());
     }
 
@@ -172,7 +199,7 @@ public class TheFloorIslavaListener implements Listener {
 
         ItemStack item = event.getItem();
         if (item == null) return;
-        if (!ShopGUI.isShopItem(item)) return;
+        if (!new ShopItem().isItem(item)) return;
 
         event.setCancelled(true);
 
@@ -194,8 +221,8 @@ public class TheFloorIslavaListener implements Listener {
         if (event.getEntity() instanceof Player player &&
                 event.getCause() == EntityDamageEvent.DamageCause.FALL) {
 
-            if (player.getInventory().getBoots() != null &&
-                    player.getInventory().getBoots().getType() == Material.LEATHER_BOOTS) {
+            player.getInventory().getBoots();
+            if (player.getInventory().getBoots().getType() == Material.LEATHER_BOOTS) {
 
                 event.setDamage(event.getDamage() * plugin.getFallDamageReduction()); // 80% de réduction
             }
@@ -207,7 +234,7 @@ public class TheFloorIslavaListener implements Listener {
         if (plugin.getDangerManagerInstance().getNoRespawn()){
             plugin.getLogger().info("OnDeath no respawn");
             Player player = event.getEntity();
-            Location deathLocation = player.getLocation();
+            Location deathLocation = player.getLocation(); //TODO: Save death location for respawn
             event.getEntity().getWorld().strikeLightningEffect(event.getEntity().getLocation());
 
             // Empêche le respawn auto si jamais tu l'as modifié ailleurs
@@ -223,7 +250,7 @@ public class TheFloorIslavaListener implements Listener {
             }
 
             event.getEntity().setGameMode(GameMode.SPECTATOR);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> { event.getEntity().spigot().respawn(); }, 4L);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> event.getEntity().spigot().respawn(), 4L);
         }
     }
 
@@ -233,7 +260,7 @@ public class TheFloorIslavaListener implements Listener {
         if (!(egg.getShooter() instanceof Player p)) return;
 
         ItemStack item = p.getInventory().getItemInMainHand();
-        if (!EggBridge.isEggBridgeItem(item)) return;
+        if (!new EggBridge().isItem(item)) return;
         event.getEntity().getPersistentDataContainer().set(
                 new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class),"eggBridgeEntity"),
                 PersistentDataType.STRING,
@@ -245,7 +272,7 @@ public class TheFloorIslavaListener implements Listener {
         if (!(snowball.getShooter() instanceof Player p)) return;
 
         ItemStack item = p.getInventory().getItemInMainHand();
-        if (!SnowballPlate.isSnowballPlateItem(item)) return;
+        if (!new SnowballPlateItem().isItem(item)) return;
         event.getEntity().getPersistentDataContainer().set(
                 new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "snowballPlateEntity"),
                 PersistentDataType.STRING,
@@ -263,8 +290,7 @@ public class TheFloorIslavaListener implements Listener {
         if (!(snowball.getShooter() instanceof Player p)) return;
 
         Location loc = snowball.getLocation().getBlock().getLocation();
-        Block block = loc.getBlock();
-        fillAround(loc, 4, BlockColorUtils.getWoolBlockByPlayer(p));
+        fillAround(loc, 4, BlockUtils.getWoolBlockByPlayer(p));
     }
 
     private void fillAround(Location center, int radius, Material material) {
@@ -287,10 +313,10 @@ public class TheFloorIslavaListener implements Listener {
 
     private boolean shouldGiveItem(ItemStack stack){
         List<Material> materials = List.of(Material.DIAMOND, Material.GOLD_INGOT,Material.IRON_INGOT,Material.COPPER_INGOT,Material.AMETHYST_SHARD,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.EGG,Material.SNOWBALL,Material.COBBLESTONE,Material.DIRT,Material.BAKED_POTATO,Material.GRAY_WOOL);
-        if (TeamInventoryManager.getInstance().isTeamInventoryItem(stack)){
+        if (new TeamInventoryItem().isItem(stack)){
             return true;
         }
-        if (PopupTower.isPopupTower(stack)){
+        if (new PopupTowerItem().isItem(stack)){
             return true;
         }
         if (materials.contains(stack.getType())){

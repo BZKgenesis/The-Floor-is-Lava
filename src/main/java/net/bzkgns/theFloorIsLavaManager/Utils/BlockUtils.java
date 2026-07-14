@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.Utils;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -11,9 +11,13 @@ import org.bukkit.scoreboard.Team;
 import java.util.HashMap;
 import java.util.List;
 
-public class BlockColorUtils {
+public class BlockUtils {
 
     private static final Material DEFAULT_WOOL_COLOR = Material.LIGHT_GRAY_WOOL;
+
+    public static List<Material> RESOURCE_MATERIALS = List.of(Material.DIAMOND,Material.GOLD_INGOT,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.AMETHYST_SHARD);
+
+    public static List<Material> WOOLS_MATERIALS = List.of(Material.WHITE_WOOL,Material.ORANGE_WOOL,Material.MAGENTA_WOOL,Material.LIGHT_BLUE_WOOL,Material.YELLOW_WOOL,Material.LIME_WOOL,Material.PINK_WOOL,Material.GRAY_WOOL,Material.LIGHT_GRAY_WOOL,Material.CYAN_WOOL,Material.PURPLE_WOOL,Material.BLUE_WOOL,Material.BROWN_WOOL,Material.GREEN_WOOL,Material.RED_WOOL,Material.BLACK_WOOL);
 
     private static final HashMap<TextColor, Material> blockColor = new HashMap<>();
     static {
@@ -49,4 +53,5 @@ public class BlockColorUtils {
         List<TextColor> keys = blockColor.keySet().stream().toList();
         return blockColor.get(TextColor.nearestColorTo(keys,color));
     }
+
 }

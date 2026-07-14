@@ -1,7 +1,5 @@
 package net.bzkgns.theFloorIsLavaManager.Teams;
 
-
-
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -9,19 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-
 import java.util.*;
-
 
 public class TeamManager {
     private final Map<String, TeamData> teams = new HashMap<>();
-    private final TheFloorIsLavaManager plugin;
     private final InviteManager inviteManager;
     private final TeamGUI teamGUI;
 
 
     public TeamManager(TheFloorIsLavaManager plugin) {
-        this.plugin = plugin;
         this.inviteManager = new InviteManager();
         this.teamGUI = new TeamGUI(plugin);
     }
@@ -32,10 +26,6 @@ public class TeamManager {
 
     public InviteManager getInviteManager(){
         return this.inviteManager;
-    }
-
-    public TeamGUI getTeamGUI(){
-        return this.teamGUI;
     }
 
 
