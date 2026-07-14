@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
+import net.minecraft.core.BlockPos;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.canPlaceBlock;
 import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.getWoolBlockByPlayer;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -105,6 +107,8 @@ public class PopupTower {
 
         Map<Integer, Material> blocks_layout = new HashMap<>();
 
+        pos.getBlock().setType(Material.AIR);
+
         blocks_layout.put(0,Material.AIR);
         blocks_layout.put(1,getWoolBlockByPlayer(p));
         blocks_layout.put(2,Material.LADDER);
@@ -113,7 +117,6 @@ public class PopupTower {
         for (int y = 0; y<LAYOUT.length;y++){
             for (int z = 0; z<LAYOUT[y].length;z++){
                 for (int x = 0; x<LAYOUT[y][z].length; x++){
-
                     setBlockRelative(pos, x-SIZE_X/2,y,z-SIZE_Z/2,blocks_layout.get(LAYOUT[y][z][x]),rotation, p);
                 }
             }
@@ -145,6 +148,8 @@ public class PopupTower {
                 break;
         }
         Block block = origin.getBlock().getRelative(X,Y,Z);
+        if (!canPlaceBlock(new BlockPos(block.getX(),block.getY(),block.getZ() )))
+            return;
         BlockState blockState = block.getState();
         BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(block, blockState, block, new ItemStack(mat), p, true, EquipmentSlot.HAND);
         Bukkit.getPluginManager().callEvent(blockPlaceEvent);

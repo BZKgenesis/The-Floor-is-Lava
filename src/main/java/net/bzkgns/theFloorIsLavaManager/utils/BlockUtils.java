@@ -2,6 +2,7 @@ package net.bzkgns.theFloorIsLavaManager.utils;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,6 +11,8 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.HashMap;
 import java.util.List;
+
+import static java.lang.Math.abs;
 
 public class BlockUtils {
 
@@ -52,6 +55,10 @@ public class BlockUtils {
 
         List<TextColor> keys = blockColor.keySet().stream().toList();
         return blockColor.get(TextColor.nearestColorTo(keys,color));
+    }
+
+    public static boolean canPlaceBlock(BlockPos pos){
+        return pos.getY() <= 278 || pos.getY() >= 297 || abs(pos.getX()) >= 15 || abs(pos.getZ()) >= 15;
     }
 
 }
