@@ -35,9 +35,9 @@ public class TeamGUI implements Listener {
     }
 
 
-    public static void openMainMenu(TheFloorIsLavaManager plugin, Player p) {
+    public static void openMainMenu(Player p) {
+        TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 27, Component.text("Menu d'équipe"));
-
 
         TeamManager tm = plugin.getTeamManager();
         TeamData team = tm.getPlayerTeam(p.getUniqueId());
@@ -63,7 +63,8 @@ public class TeamGUI implements Listener {
         inv.setItem(15, createItem(Material.RED_WOOL, "Non", "deny_leaving"));
         p.openInventory(inv);
     }
-    public static void openRequestsMenu(TeamManager teamManager, Player p) {
+    public static void openRequestsMenu(Player p) {
+        TeamManager teamManager = TheFloorIsLavaManager.getInstance().getTeamManager();
         Inventory inv = Bukkit.createInventory(null, 54, Component.text("Demandes en attente"));
         int i = 0;
         for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(teamManager.getPlayerTeam(p.getUniqueId()).getName())){
@@ -71,10 +72,12 @@ public class TeamGUI implements Listener {
             if (target!=null){
                 ItemStack item = createItem(Material.GREEN_WOOL, target.getName(), "accept_request");
                 item.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Accepter la demande")).build());
-                inv.setItem(i, item);
+                if (i < 45)
+                    inv.setItem(i, item);
                 i++;
             }
         }
+        inv.setItem(45, createBackItem());
         p.openInventory(inv);
     }
     public static void openManageMenu(TeamManager teamManager, Player p) {
@@ -84,10 +87,12 @@ public class TeamGUI implements Listener {
             for (UUID playerUuid : teamManager.getPlayerTeam(p.getUniqueId()).getMembers()){
                 Player target = Bukkit.getServer().getPlayer(playerUuid);
                 if (target!=null && !target.getName().equals(p.getName())){
-                    inv.setItem(i, createItem(Material.RED_WOOL, target.getName(), "kick"));
+                    if (i < 45)
+                        inv.setItem(i, createItem(Material.RED_WOOL, target.getName(), "kick"));
                     i++;
                 }
             }
+            inv.setItem(45, createBackItem());
             p.openInventory(inv);
         }
     }
@@ -106,10 +111,12 @@ public class TeamGUI implements Listener {
                     }
                 }
                 item.setData(DataComponentTypes.LORE, lore.build());
-                inv.setItem(i, item);
+                if (i < 45)
+                    inv.setItem(i, item);
             }
             i++;
         }
+        inv.setItem(45, createBackItem());
         p.openInventory(inv);
     }
 
@@ -134,75 +141,113 @@ public class TeamGUI implements Listener {
         return it;
     }
 
+    private static ItemStack createBackItem() {
+        ItemStack it = new ItemStack(Material.ARROW);
+        it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("back").build());
+        ItemMeta m = it.getItemMeta();
+        m.displayName(Component.text("Retour").color(TextColor.fromHexString("#FF5555")));
+        it.setItemMeta(m);
+        return it;
+    }
+
+    private static boolean isBackItem(ItemStack stack) {
+        if (stack.getType() == Material.ARROW) {
+            ItemMeta meta = stack.getItemMeta();
+            if (meta != null && meta.hasCustomModelDataComponent()) {
+                String customModelData = meta.getCustomModelDataComponent().getStrings().getFirst();
+                return customModelData.equals("back");
+            }
+        }
+        return false;
+    }
+
 
     @EventHandler
-    public void onClick(InventoryClickEvent e) {
+    public void onClick(InventoryClickEvent event) {
         if (plugin.getDangerManagerInstance().getHasStarted()) return;
-        Player p = (Player) e.getWhoClicked();
-        if (plainText(e.getView().title()).equals("Menu d'équipe")) {
-            e.setCancelled(true);
-            if (e.getCurrentItem() == null) return;
-            Component nameComponent = e.getCurrentItem().getItemMeta().displayName();
+        Player player = (Player) event.getWhoClicked();
+        if (plainText(event.getView().title()).equals("Menu d'équipe")) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null) return;
+            Component nameComponent = event.getCurrentItem().getItemMeta().displayName();
             if (nameComponent == null) return;
             String name = plainText(nameComponent);
 
 
             if (name.contains("Créer")) {
-                plugin.getTeamManager().createTeamForPlayer(p);
-                plugin.getLogger().info( p.getName() + " a créé une équipe");
-                p.closeInventory();
+                plugin.getTeamManager().createTeamForPlayer(player);
+                plugin.getLogger().info( player.getName() + " a créé une équipe");
+                player.closeInventory();
             }
 
             if (name.contains("Gérer")) {
-                openManageMenu(plugin.getTeamManager(), p);
+                openManageMenu(plugin.getTeamManager(), player);
             }
 
             if (name.contains("Rejoindre")) {
-                openAskJoinMenu(plugin.getTeamManager(), p);
+                openAskJoinMenu(plugin.getTeamManager(), player);
             }
 
             if (name.contains("Demandes")) {
-                openRequestsMenu(plugin.getTeamManager(), p);
+                openRequestsMenu(player);
             }
 
             if (name.contains("Quitter")) {
-                openConfirmLeaveMenu(p);
+                openConfirmLeaveMenu(player);
             }
         }
 
 
-        if (plainText(e.getView().title()).equals("Quitter l'équipe ?")) {
-            e.setCancelled(true);
-            if (e.getCurrentItem() == null) return;
-            Component displayName = e.getCurrentItem().getItemMeta().displayName();
+        if (plainText(event.getView().title()).equals("Quitter l'équipe ?")) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null) return;
+            Component displayName = event.getCurrentItem().getItemMeta().displayName();
             if (displayName == null) return;
             String name = plainText(displayName);
 
 
             if (name.contains("Oui")) {
-                plugin.getTeamManager().removePlayerFromTeam(p);
-                p.sendMessage("§cTu as quitté ton équipe.");
-                p.closeInventory();
+                plugin.getTeamManager().removePlayerFromTeam(player);
+                player.sendMessage("§cTu as quitté ton équipe.");
+                openMainMenu(player);
             } else if (name.contains("Non")) {
-                p.closeInventory();
+                openMainMenu(player);
             }
         }
 
 
-        if (plainText(e.getView().title()).equals("Demandes en attente")) {
-            e.setCancelled(true);
-            if (e.getCurrentItem() == null) return;
+        if (plainText(event.getView().title()).equals("Demandes en attente")) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null) return;
 
+            if (isBackItem(event.getCurrentItem())) {
+                openMainMenu(player);
+                return;
+            }
 
-            String targetName = plainText(e.getCurrentItem().getItemMeta().displayName()).substring(2);
+            String targetName = plainText(event.getCurrentItem().getItemMeta().displayName());
             Player target = Bukkit.getPlayer(targetName);
             plugin.getLogger().info(targetName);
             if (target == null) return;
 
 
-            TeamData team = plugin.getTeamManager().getPlayerTeam(p.getUniqueId());
+
+
+            TeamData team = plugin.getTeamManager().getPlayerTeam(player.getUniqueId());
             if (team == null) return;
 
+            if (!plugin.getTeamManager().getInviteManager().hasInvite(target.getUniqueId(), team.getName())) {
+                plugin.getLogger().info("no request found for " + targetName);
+                return;
+            }
+
+            if (event.isRightClick()){
+                plugin.getTeamManager().getInviteManager().remove(target.getUniqueId());
+                target.sendMessage("§cTa demande a été refusée !");
+                player.sendMessage("§cDemande refusée.");
+                openRequestsMenu(player);
+                return;
+            }
 
             team.acceptRequest(target.getUniqueId());
             plugin.getTeamManager().addPlayerToVanillaTeam(target, team.getName());
@@ -210,19 +255,23 @@ public class TeamGUI implements Listener {
 
 
             target.sendMessage("§aTa demande a été acceptée !");
-            p.sendMessage("§aJoueur ajouté à l'équipe.");
-            p.closeInventory();
+            player.sendMessage("§aJoueur ajouté à l'équipe.");
         }
 
 
-        if (plainText(e.getView().title()).equals("Demander à rejoindre une équipe")) {
+        if (plainText(event.getView().title()).equals("Demander à rejoindre une équipe")) {
             plugin.getLogger().info("Demander à rejoindre une équipe");
-            e.setCancelled(true);
-            if (e.getCurrentItem() == null) return;
-            plugin.getLogger().info("currentItem" + e.getCurrentItem().getItemMeta().displayName());
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null) return;
+            plugin.getLogger().info("currentItem" + event.getCurrentItem().getItemMeta().displayName());
 
 
-            String targetName = plainText(e.getCurrentItem().getItemMeta().displayName());
+            if (isBackItem(event.getCurrentItem())) {
+                openMainMenu(player);
+                return;
+            }
+
+            String targetName = plainText(event.getCurrentItem().getItemMeta().displayName());
 
 
             TeamData teamAsked = plugin.getTeamManager().getTeam(targetName);
@@ -231,41 +280,45 @@ public class TeamGUI implements Listener {
                 plugin.getLogger().info("teamAsked is null pour " + targetName);
                 return;
             }
-            plugin.getLogger().info(p.getName() + " à demandé de rejoindre " + teamAsked.getName());
+            plugin.getLogger().info(player.getName() + " à demandé de rejoindre " + teamAsked.getName());
 
-            plugin.getTeamManager().getInviteManager().sendRequest(p.getUniqueId(), teamAsked.getName());
+            plugin.getTeamManager().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getName());
 
 
-            p.sendMessage("§aLa demande a été envoyé");
+            player.sendMessage("§aLa demande a été envoyé");
             for (UUID memberUuid : teamAsked.getMembers()){
                 Player member = plugin.getServer().getPlayer(memberUuid);
                 if (member == null) continue;
-                member.sendMessage(Component.text("demande reçu de " + p.getName()));
+                member.sendMessage(Component.text("demande reçu de " + player.getName()));
             }
-            p.closeInventory();
+            player.closeInventory();
         }
 
 
-        if (plainText(e.getView().title()).equals("Kick des membres")) {
-            e.setCancelled(true);
-            if (e.getCurrentItem() == null) return;
-            plugin.getLogger().info("currentItem");
+        if (plainText(event.getView().title()).equals("Kick des membres")) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null) return;
 
 
-            String targetName = plainText(e.getCurrentItem().getItemMeta().displayName()).substring(2);
+            if (isBackItem(event.getCurrentItem())) {
+                openMainMenu(player);
+                return;
+            }
+
+            String targetName = plainText(event.getCurrentItem().getItemMeta().displayName()).substring(2);
 
 
             Player kickedPlayer = plugin.getServer().getPlayer(targetName);
             if (kickedPlayer == null) return;
             plugin.getLogger().info("kick" + kickedPlayer.getName());
 
-            TeamData team = plugin.getTeamManager().getTeam(p.getName());
+            TeamData team = plugin.getTeamManager().getTeam(player.getName());
             if (team == null) return;
             plugin.getTeamManager().removePlayerFromTeam(kickedPlayer);
 
 
-            p.sendMessage("§aLe joueur " + targetName + " a été expulsé de l'équipe");
-            p.closeInventory();
+            player.sendMessage("§aLe joueur " + targetName + " a été expulsé de l'équipe");
+            player.closeInventory();
         }
     }
 }

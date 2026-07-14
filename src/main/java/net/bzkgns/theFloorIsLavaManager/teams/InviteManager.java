@@ -31,6 +31,10 @@ public class InviteManager {
         }
     }
 
+    public boolean hasInvite(UUID uuid, String teamName) {
+        return invites.getOrDefault(uuid, "").equals(teamName);
+    }
+
 
     @SuppressWarnings("unused")
     public String getInvite(UUID uuid) {

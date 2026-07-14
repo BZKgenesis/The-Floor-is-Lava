@@ -143,7 +143,7 @@ public class TheFloorIsLavaCommands {
                         return Command.SINGLE_SUCCESS;
                     }
                     if (ctx.getSource().getExecutor() instanceof Player player){
-                        TeamGUI.openMainMenu(plugin,player);
+                        TeamGUI.openMainMenu(player);
                     }
                     return Command.SINGLE_SUCCESS;
                 }));

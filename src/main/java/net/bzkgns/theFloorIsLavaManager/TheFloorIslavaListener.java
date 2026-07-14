@@ -190,7 +190,7 @@ public class TheFloorIslavaListener implements Listener {
         if (plugin.getDangerManagerInstance().getHasStarted()) return;
 
         event.setCancelled(true);
-        TeamGUI.openMainMenu(plugin, event.getPlayer());
+        TeamGUI.openMainMenu(event.getPlayer());
     }
 
     @EventHandler
