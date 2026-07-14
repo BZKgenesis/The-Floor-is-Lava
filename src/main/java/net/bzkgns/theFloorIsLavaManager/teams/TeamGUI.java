@@ -149,6 +149,7 @@ public class TeamGUI implements Listener {
 
             if (name.contains("Créer")) {
                 plugin.getTeamManager().createTeamForPlayer(p);
+                plugin.getLogger().info( p.getName() + " a créé une équipe");
                 p.closeInventory();
             }
 
@@ -160,11 +161,9 @@ public class TeamGUI implements Listener {
                 openAskJoinMenu(plugin.getTeamManager(), p);
             }
 
-
             if (name.contains("Demandes")) {
                 openRequestsMenu(plugin.getTeamManager(), p);
             }
-
 
             if (name.contains("Quitter")) {
                 openConfirmLeaveMenu(p);
@@ -217,22 +216,27 @@ public class TeamGUI implements Listener {
 
 
         if (plainText(e.getView().title()).equals("Demander à rejoindre une équipe")) {
+            plugin.getLogger().info("Demander à rejoindre une équipe");
             e.setCancelled(true);
             if (e.getCurrentItem() == null) return;
-            plugin.getLogger().info("currentItem");
+            plugin.getLogger().info("currentItem" + e.getCurrentItem().getItemMeta().displayName());
 
 
-            String targetName = plainText(e.getCurrentItem().getItemMeta().displayName()).substring(2);
+            String targetName = plainText(e.getCurrentItem().getItemMeta().displayName());
 
 
             TeamData teamAsked = plugin.getTeamManager().getTeam(targetName);
-            if (teamAsked == null) return;
-            plugin.getLogger().info("teamAsk" + teamAsked.getName());
+
+            if (teamAsked == null) {
+                plugin.getLogger().info("teamAsked is null pour " + targetName);
+                return;
+            }
+            plugin.getLogger().info(p.getName() + " à demandé de rejoindre " + teamAsked.getName());
 
             plugin.getTeamManager().getInviteManager().sendRequest(p.getUniqueId(), teamAsked.getName());
 
 
-            p.sendMessage("§aTa demande a été envoyé !");
+            p.sendMessage("§aLa demande a été envoyé");
             for (UUID memberUuid : teamAsked.getMembers()){
                 Player member = plugin.getServer().getPlayer(memberUuid);
                 if (member == null) continue;

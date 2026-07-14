@@ -17,7 +17,8 @@ public class InviteManager {
         List<UUID> listOfRequest = new ArrayList<>();
 
         for (Map.Entry<UUID,String> invite : invites.entrySet()){
-            listOfRequest.add(invite.getKey());
+            if (invite.getValue().equals(name))
+                listOfRequest.add(invite.getKey());
         }
         return listOfRequest;
     }
