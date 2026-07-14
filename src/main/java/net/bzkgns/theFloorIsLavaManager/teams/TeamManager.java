@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.teams;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -113,5 +114,13 @@ public class TeamManager {
         Team t = sb.getTeam(teamName);
 
         if (t != null) t.unregister();
+    }
+
+    public static void broadcastTeamMessage(Component message, TeamData team) {
+        for (UUID playerUUID : team.getMembers()){
+            Player player = Bukkit.getServer().getPlayer(playerUUID);
+            if (player != null)
+                player.sendMessage(message);
+        }
     }
 }

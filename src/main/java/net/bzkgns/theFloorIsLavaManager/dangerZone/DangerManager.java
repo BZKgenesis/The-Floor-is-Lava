@@ -105,14 +105,14 @@ public class DangerManager {
         playerInGame.addAll(plugin.getServer().getOnlinePlayers());
         noRespawn = false;
 
-        TextUtils.sendMessage("Le jeu commence !");
+        TextUtils.broadcastMessage(TextUtils.infoMessage("Le jeu commence !"));
         if (config.isKeepInventoryDuringPreparation())
-            TextUtils.sendMessage("Les inventaires sont sauvegardés (keepInventory)");
+            TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires sont sauvegardés (keepInventory)"));
         if (config.isDisablePvpDuringPreparation())
-            TextUtils.sendMessage("Le PvP est désactivé");
+            TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est désactivé"));
 
         int lavaRisingDelay = config.getLavaRisingDelay();
-        TextUtils.sendMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes");
+        TextUtils.broadcastMessage(TextUtils.infoMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes"));
 
 
 
@@ -136,7 +136,8 @@ public class DangerManager {
         int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
         for (int d : delay) {
             if (lavaRisingDelay > d) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va commencer à monter dans " + formatTime(d, TextUtils.TimeFormat.SHORTEST) + "..."), lavaRisingDelay - d);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
+                        () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va commencer à monter dans " + formatTime(d, TextUtils.TimeFormat.SHORTEST) + "...")), lavaRisingDelay - d);
             }
         }
 
@@ -265,10 +266,10 @@ public class DangerManager {
 
         double diff = increaseSize / increaseAmount;
         if (diff > 100) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va monter dans 3 secondes..."), round(diff) - 60);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va monter dans 2 secondes..."), round(diff) - 40);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave va monter dans 1 secondes..."), round(diff) - 20);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar("La lave monte !!"), round(diff));
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va monter dans 2 secondes...")), round(diff) - 40);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va monter dans 3 secondes...")), round(diff) - 60);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va monter dans 1 secondes...")), round(diff) - 20);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave monte !!")), round(diff));
         }
 
         World world = plugin.getWorldManager().getGameWorld();
@@ -314,13 +315,13 @@ public class DangerManager {
         }
         world.getWorldBorder().changeSize(config.getBorderSizeDuringRise(), config.getBorderResizeTime() * 20L);
 
-        TextUtils.sendMessage("!!ATTENTION!! La lave commence à monter !");
+        TextUtils.broadcastMessage(TextUtils.infoMessage("!!ATTENTION!! La lave commence à monter !"));
         if (config.isKeepInventoryDuringPreparation())
-            TextUtils.sendMessage("Les inventaires ne sont plus sauvegardés");
+            TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires ne sont plus sauvegardés"));
         if (config.isDisablePvpDuringPreparation())
-            TextUtils.sendMessage("Le PvP est activé");
-        TextUtils.sendMessage("Le respawn est désactivé");
-        TextUtils.sendMessage("La zone se rétrécit");
+            TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est activé"));
+        TextUtils.broadcastMessage(TextUtils.infoMessage("Le respawn est désactivé"));
+        TextUtils.broadcastMessage(TextUtils.infoMessage("La zone se rétrécit"));
 
         if (config.isPlaceLava()) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 1, 1);

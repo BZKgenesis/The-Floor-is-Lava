@@ -4,6 +4,7 @@ import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -169,10 +170,10 @@ public class TheFloorIslavaListener implements Listener {
         event.setCancelled(true);
 
         Player player = event.getPlayer();
-        String team = getTeamOf(player); // À TOI d’implémenter selon ton plugin d’équipes
+        String team = getTeamOf(player);
 
         if (team == null) {
-            player.sendMessage("§cT'as pas d'équipe, donc pas de coffre partagé.");
+            player.sendActionBar(TextUtils.errorMessage("Vous n'êtes pas dans une équipe, donc pas de coffre partagé.", false));
             return;
         }
 

@@ -46,24 +46,41 @@ public class TextUtils {
         }
     }
 
-    public static void sendMessage(String message){
-        Bukkit.getServer().sendMessage(Component.text("[").color(TextColor.color(255,255,255))
+    public static Component prefix(){
+        return Component.text("[").color(TextColor.color(255,255,255))
                 .append(Component.text("TFL").color(TextColor.color(255,0,0)))
-                .append(Component.text("]").color(TextColor.color(255,255,255)))
-                .append(Component.text(" " +message).color(TextColor.color(255,255,255))));
+                .append(Component.text("] ").color(TextColor.color(255,255,255)));
+    }
+    public static void broadcastMessage(Component message){
+        Bukkit.getServer().sendMessage(message);
     }
 
-    public static void sendActionBar(String message){
-
+    public static void sendActionBar(Component component){
         for (Player player : Bukkit.getServer().getOnlinePlayers()){
-            player.sendActionBar(Component.text("[").color(TextColor.color(255,255,255))
-                    .append(Component.text("TFL").color(TextColor.color(255,0,0)))
-                    .append(Component.text("]").color(TextColor.color(255,255,255)))
-                    .append(Component.text(" " +message).color(TextColor.color(255,255,255))));
+            player.sendActionBar(component);
         }
     }
 
     public static String plainText(Component component) {
         return PlainTextComponentSerializer.plainText().serialize(component);
+    }
+
+    @SuppressWarnings("unused")
+    public static Component warningMessage(String message){
+        return prefix().append(Component.text(message).color(TextColor.color(255,255,0)));
+    }
+
+    public static Component errorMessage(String message){
+        return errorMessage(message, true);
+    }
+    public static Component errorMessage(String message, boolean withPrefix){
+        if (!withPrefix) return Component.text(message).color(TextColor.color(255,0,0));
+        return prefix().append(Component.text(message).color(TextColor.color(255,0,0)));
+    }
+    public static Component infoMessage(String message){
+        return prefix().append(Component.text(message).color(TextColor.color(255,255,255)));
+    }
+    public static Component validationMessage(String message){
+        return prefix().append(Component.text(message).color(TextColor.color(0,255,0)));
     }
 }

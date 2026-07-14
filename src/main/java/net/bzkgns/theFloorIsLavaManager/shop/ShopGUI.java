@@ -3,6 +3,7 @@ package net.bzkgns.theFloorIsLavaManager.shop;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -269,7 +270,7 @@ public class ShopGUI implements Listener {
         ShopRecipe recipe = RECIPES.get(idx);
 
         if (!canPay(p, recipe)) {
-            p.sendMessage("§cIngrédients insuffisants.");
+            p.sendMessage(TextUtils.errorMessage("Ingrédients insuffisants."));
             p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
             return;
         }
