@@ -13,6 +13,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,17 +28,26 @@ import org.bukkit.util.BoundingBox;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import static net.bzkgns.theFloorIsLavaManager.ConfigCommands.registerConfigNode;
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaCommands.registerTflCommands;
 
 public final class TheFloorIsLavaManager extends JavaPlugin {
+
+    public static final String LOBBY_WORLD = "tfl_lobby";
+    public static final String GAME_WORLD = "tfl_game";
+    public static final String MAPS_FOLDER = "TheFloorIsLava-maps";
 
     public static String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
 
     private DangerManager dangerManager;
     private TeamManager teamManager;
+    private ResourcePackManager resourcePackManager;
+    private WorldManager worldManager;
+
 
     public static boolean pvp;
 
@@ -46,15 +56,37 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // saveDefaultConfig() et la création de dangerManager doivent précéder toute
+        // opération de WorldManager : resetRandomWorld()/loadMap() appellent
+        // dangerManager.stop() en interne, donc dangerManager ne doit jamais être null
+        // au moment où onEnable() les invoque (cas du tout premier démarrage, quand
+        // GAME_WORLD n'existe pas encore).
+        saveDefaultConfig();
+        initLobbyWorld();
+
+        dangerManager = new DangerManager(this);
+
+        if (Bukkit.getWorld(GAME_WORLD) == null) {
+            getLogger().info("Création du monde de jeu...");
+            worldManager = new WorldManager(this);
+            worldManager.resetRandomWorld();
+        } else {
+            worldManager = new WorldManager(this);
+        }
+        resourcePackManager = new ResourcePackManager(this);
+        try {
+            resourcePackManager.load();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         Bukkit.getPluginManager().registerEvents(new ShopGUI(), this);
         pvp = true;
-        saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
         getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
+        getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
 
-        dangerManager = new DangerManager(this);
         teamManager = new TeamManager(this);
 
         for(Team team : getServer().getScoreboardManager().getMainScoreboard().getTeams()){
@@ -72,37 +104,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                     return Command.SINGLE_SUCCESS;
                 } ).build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(ShopBuildCommand));
-        World world = Bukkit.getWorld("world");
-        StructureManager manager = Bukkit.getStructureManager();
-
-        // charge la structure depuis le fichier
-
-        Structure structure = null; // a() = load
-        try {
-            InputStream struct_file = this.getResource("tfl_spawn.nbt");
-            if (struct_file != null){
-                structure = manager.loadStructure(struct_file);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        if (world != null){
-            world.getNearbyEntities(new BoundingBox(-15,250,-15,15,310,15)).forEach(entity -> {
-                if (entity.getType() != EntityType.PLAYER){
-                    entity.remove();
-                }
-            });
-            if (structure != null) {
-                Location pos = new Location(world,-14,279,-14); // position où placer la structure
-                structure.place(pos, true, StructureRotation.NONE, Mirror.NONE,0,1.0f,new Random());
-            }
-
-            Location spawnPos = new Location(world,0,281,0);
-            world.setSpawnLocation(spawnPos);
-            world.setGameRule(GameRules.RESPAWN_RADIUS, 0);
-            world.setTime(0);
-            world.setGameRule(GameRules.ADVANCE_TIME,false);
-        }
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new EggBridgeTask(this), 1,1);
 
@@ -123,27 +124,38 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         if (dangerManager != null) {
             dangerManager.stop();
         }
-        if (!Objects.equals(worldToReset, "")){
-            World world = Bukkit.getWorld(worldToReset);
-            if (world != null){
-                world.setTime(0);
-                Bukkit.unloadWorld(world, false); // false = ne sauvegarde pas
-                File worldFolder = new File(Bukkit.getWorldContainer(), "world");
-                boolean error = !deleteRecursively(worldFolder);
-                if (error){
-                    this.getLogger().warning("Tous les fichiers du monde n'ont pas pu etre reset");
-                }
-            }
-        }
     }
-    public static boolean deleteRecursively(File file) {
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File f : files) deleteRecursively(f);
-            }
+
+    private void initLobbyWorld() {
+        World lobby = Bukkit.getWorld(LOBBY_WORLD);
+
+        if (lobby == null) {
+            WorldCreator creator = new WorldCreator(LOBBY_WORLD);
+            creator.environment(World.Environment.NORMAL);
+            creator.type(WorldType.NORMAL);
+            creator.generateStructures(false);
+
+            lobby = Bukkit.createWorld(creator);
         }
-        return file.delete();
+
+        if (lobby == null) {
+            getLogger().severe("Impossible de charger le monde \"" + LOBBY_WORLD + "\" !");
+            return;
+        }
+
+        // Configuration du lobby
+        lobby.setAutoSave(false);
+        lobby.setTime(6000);
+        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
+        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
+        lobby.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        lobby.setStorm(false);
+        lobby.setThundering(false);
+
+        Location spawn = new Location(lobby, 0.5, 100, 0.5);
+        lobby.setSpawnLocation(spawn);
+
+        getLogger().info("Monde lobby chargé !");
     }
 
     public static void sendMessage(String message){
@@ -164,15 +176,69 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     }
 
     public double getFallDamageReduction(){
-        return dangerManager.fallDamageReduction;
+        return dangerManager.getConfig().getFallDamageReduction();
     }
 
     public DangerManager getDangerManagerInstance(){
         return dangerManager;
     }
+
     public TeamManager getTeamManager(){
         return teamManager;
     }
 
+    public ResourcePackManager getResourcePackManager(){
+        return resourcePackManager;
+    }
 
+    public WorldManager getWorldManager(){
+        return worldManager;
+    }
 }
+
+/*
+/summon armor_stand ~ ~-1.5 ~
+    {
+        NoGravity:1b,
+        Silent:1b,
+        Invulnerable:1b,
+        Invisible:1b,
+        Tags:["tfl_spawn_mannequin"],
+        attributes:[
+            {
+                id:"minecraft:scale",
+                base:.5
+            }
+        ],
+        Passengers:[
+            {
+                id:"minecraft:mannequin",
+                NoGravity:1b,
+                Silent:1b,
+                Invulnerable:1b,
+                immovable:true,
+                hide_description:false,
+                Rotation:[180F,0F],
+                Tags:["tfl_spawn_mannequin"],
+                attributes:[
+                    {
+                        id:"minecraft:scale",
+                        base:.5
+                    }
+                ],
+                profile:{
+                    "name":"BZK_genesis",
+                    "id":[I;674201676,-138196797,-1254556747,-1700660538],
+                    "properties":[
+                        {
+                            "name":"textures",
+                            "value":"ewogICJ0aW1lc3RhbXAiIDogMTc4Mzk4MDA5MjMzOCwKICAicHJvZmlsZUlkIiA6ICIyODJmODA0Y2Y3YzM0OGMzYjUzOGZiYjU5YWExZmFjNiIsCiAgInByb2ZpbGVOYW1lIiA6ICJCWktfZ2VuZXNpcyIsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS81OTQ1MDI2MmNiODMzYmRhNWViY2VhN2U2N2ExOWJkNGQ0NmJiYzVmOTRhNDMyMDEzNmUwYmM4OTU5MWI0YzlkIgogICAgfQogIH0KfQ=="
+                        }
+                    ]
+                },
+                description:"Créateur"
+            }
+        ],
+        Rotation:[180F,0F]
+    }
+ */

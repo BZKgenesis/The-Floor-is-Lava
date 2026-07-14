@@ -66,18 +66,18 @@ public class ShopGUI implements Listener {
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
         for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
-            plugin.getLogger().info("recipe : "+recipe_key);
+            //plugin.getLogger().info("recipe : "+recipe_key);
             NamespacedKey key = new NamespacedKey(plugin, recipe_key);
             Recipe recipe = Bukkit.getRecipe(key);
             if (recipe !=null){
-                plugin.getLogger().info("recipe valide : "+recipe_key);
+                //plugin.getLogger().info("recipe valide : "+recipe_key);
                 IngredientEntries choices = new IngredientEntries();
                 ItemStack result = recipe.getResult();
                 if (recipe instanceof ShapedRecipe recipeShaped){
-                    plugin.getLogger().info("recipe shaped : "+recipe_key);
+                    //plugin.getLogger().info("recipe shaped : "+recipe_key);
                     for (Map.Entry<Character,RecipeChoice> recipeChoice : recipeShaped.getChoiceMap().entrySet()){
                         if (recipeChoice.getValue() !=null){
-                            plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
+                            //plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
                             if (choices.containsRecipeChoice(recipeChoice.getValue())){
                                 choices.addAmount(recipeChoice.getValue(),1);
                             }else{
@@ -88,9 +88,9 @@ public class ShopGUI implements Listener {
                     }
                 }
                 if (recipe instanceof ShapelessRecipe recipeShaped){
-                    plugin.getLogger().info("recipe shapeless : "+recipe_key);
+                    //plugin.getLogger().info("recipe shapeless : "+recipe_key);
                     for (RecipeChoice recipeChoice : recipeShaped.getChoiceList()){
-                        plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
+                        //plugin.getLogger().info("recipeChoice : "+recipe_key+"  "+recipeChoice.toString());
                         if (choices.containsRecipeChoice(recipeChoice)){
                             choices.addAmount(recipeChoice,1);
                         }else{

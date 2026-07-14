@@ -3,6 +3,7 @@ package net.bzkgns.theFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.Teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.Teams.TeamManagerItem;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Egg;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static net.bzkgns.theFloorIsLavaManager.BlockColorUtils.getWoolBlockByPlayer;
+import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.GAME_WORLD;
 
 
 public class TheFloorIslavaListener implements Listener {
@@ -52,7 +54,17 @@ public class TheFloorIslavaListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
-        World world = Bukkit.getWorld("world");
+        World world = Bukkit.getWorld(GAME_WORLD);
+
+        Player player = event.getPlayer();
+
+        player.setResourcePack(
+                plugin.getResourcePackManager().getUrl(),
+                plugin.getResourcePackManager().getSha1(),
+                true,
+                Component.text("Ce pack est obligatoire")
+        );
+        plugin.getLogger().info("Player " + player.getName() + " joined. Total world time: " + event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME));
         if (event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME) < 100 && world != null){
             Location spawnPos = new Location (world,0.5,281,0.5);
             event.getPlayer().teleport(spawnPos);
@@ -62,7 +74,8 @@ public class TheFloorIslavaListener implements Listener {
                 event.getPlayer().give(ShopGUI.giveShopItem());
             }
         }
-        if (plugin.getDangerManagerInstance().getHasStarted() && !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
+        if (plugin.getDangerManagerInstance().getHasStarted() &&
+                !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
             event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
         for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
@@ -221,7 +234,10 @@ public class TheFloorIslavaListener implements Listener {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (!EggBridge.isEggBridgeItem(item)) return;
-        event.getEntity().getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "eggBridgeEntity"), PersistentDataType.STRING, "eggBridgeEntity");
+        event.getEntity().getPersistentDataContainer().set(
+                new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class),"eggBridgeEntity"),
+                PersistentDataType.STRING,
+                "eggBridgeEntity");
     }
     @EventHandler
     public void onSnowballPlateLaunch(ProjectileLaunchEvent event){
@@ -230,13 +246,20 @@ public class TheFloorIslavaListener implements Listener {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (!SnowballPlate.isSnowballPlateItem(item)) return;
-        event.getEntity().getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "snowballPlateEntity"), PersistentDataType.STRING, "snowballPlateEntity");
+        event.getEntity().getPersistentDataContainer().set(
+                new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "snowballPlateEntity"),
+                PersistentDataType.STRING,
+                "snowballPlateEntity");
     }
 
     @EventHandler
     public void onSnowballHit(ProjectileHitEvent event){
         if (!(event.getEntity() instanceof Snowball snowball)) return;
-        if (!(Objects.equals(snowball.getPersistentDataContainer().get(new NamespacedKey(plugin, "snowballPlateEntity"), PersistentDataType.STRING), "snowballPlateEntity"))) return;
+        if (!(Objects.equals(snowball.getPersistentDataContainer().get(
+                new NamespacedKey(plugin, "snowballPlateEntity"),
+                PersistentDataType.STRING),
+                "snowballPlateEntity"))
+        ) return;
         if (!(snowball.getShooter() instanceof Player p)) return;
 
         Location loc = snowball.getLocation().getBlock().getLocation();
@@ -258,9 +281,7 @@ public class TheFloorIslavaListener implements Listener {
                 if (!b.getType().isSolid()) {
                     b.setType(material, false);
                 }
-
             }
-
         }
     }
 

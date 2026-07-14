@@ -3,6 +3,8 @@ package net.bzkgns.theFloorIsLavaManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -11,6 +13,8 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import static net.bzkgns.theFloorIsLavaManager.ConfigCommands.registerConfigNode;
 
 
 public class TheFloorIsLavaCommands {
@@ -36,8 +40,19 @@ public class TheFloorIsLavaCommands {
         return Command.SINGLE_SUCCESS;
     }
     private static int pause(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
-        dangerManager.pause();
+        if (!dangerManager.pause()){
+            ctx.getSource().getSender().sendMessage("§cImpossible de mettre en pause (état actuel : " + dangerManager.getState() + ").");
+            return Command.SINGLE_SUCCESS;
+        }
         ctx.getSource().getSender().sendMessage("Pause du système.");
+        return Command.SINGLE_SUCCESS;
+    }
+    private static int resume(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
+        if (!dangerManager.resume()){
+            ctx.getSource().getSender().sendMessage("§cAucune pause en cours à reprendre.");
+            return Command.SINGLE_SUCCESS;
+        }
+        ctx.getSource().getSender().sendMessage("Reprise du système.");
         return Command.SINGLE_SUCCESS;
     }
     private static int setIncreaseAmount(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
@@ -54,6 +69,7 @@ public class TheFloorIsLavaCommands {
 
     public static LiteralCommandNode<CommandSourceStack> registerTflCommands(DangerManager dangerManager, TheFloorIsLavaManager plugin){
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("tfl");
+        root.then(registerConfigNode(dangerManager));
         root.then(Commands.literal("getLevel")
             .requires(sender -> sender.getSender().isOp())
             .executes( ctx -> getLevel(ctx,dangerManager)));
@@ -88,11 +104,23 @@ public class TheFloorIsLavaCommands {
                 }));
         root.then(Commands.literal("resetWorld")
                 .requires(sender -> sender.getSender().isOp())
-                .executes( ctx -> {
-                    TheFloorIsLavaManager.worldToReset = "world";
-                    Bukkit.getServer().restart();
-                    return  Command.SINGLE_SUCCESS;
-                }));
+                    .then(Commands.literal("random")
+                        .executes(ctx -> resetWorldRandomCommande(ctx,0,plugin))
+            .then(Commands.argument("seed", LongArgumentType.longArg()).executes(
+                ctx -> resetWorldRandomCommande(ctx,LongArgumentType.getLong(ctx,"seed"),plugin)))
+                ).then(Commands.literal("map")
+                        .then(Commands.argument("map_name", StringArgumentType.greedyString()).suggests((commandContext, suggestionsBuilder) ->{
+                            plugin.getWorldManager().getMapsNames().forEach(name -> {
+                                    if (name.contains(" ")) {
+                                        suggestionsBuilder.suggest("\"" + name + "\"");
+                                    } else {
+                                        suggestionsBuilder.suggest(name);
+                                    }
+                                });
+                            return suggestionsBuilder.buildFuture();
+                                        }
+                                        )
+                                .executes(ctx -> resetWorldMapCommande(ctx,StringArgumentType.getString(ctx,"map_name").replace("\"",""),plugin)))));
         root.then(Commands.literal("team")
                 .executes( ctx -> {
                     if (plugin.getDangerManagerInstance().getHasStarted()){
@@ -105,6 +133,26 @@ public class TheFloorIsLavaCommands {
                     return Command.SINGLE_SUCCESS;
                 }));
         return root.build();
+    }
+
+    private static int resetWorldRandomCommande(CommandContext<CommandSourceStack> ctx, long seed, TheFloorIsLavaManager plugin){
+
+        plugin.getWorldManager().resetRandomWorld(seed);
+
+        ctx.getSource().getSender()
+                .sendMessage("Reset du monde lancé");
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int resetWorldMapCommande(CommandContext<CommandSourceStack> ctx, String map_name, TheFloorIsLavaManager plugin){
+
+        plugin.getWorldManager().loadMap(map_name);
+
+        ctx.getSource().getSender()
+                .sendMessage("Chargement du monde \""+ map_name +"\" lancé");
+
+        return Command.SINGLE_SUCCESS;
     }
 
 }
