@@ -2,11 +2,11 @@ package net.bzkgns.theFloorIsLavaManager;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerManager;
-import net.bzkgns.theFloorIsLavaManager.Items.EggBridgeTask;
-import net.bzkgns.theFloorIsLavaManager.Teams.TeamGUI;
-import net.bzkgns.theFloorIsLavaManager.Teams.TeamManager;
-import net.bzkgns.theFloorIsLavaManager.Shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
+import net.bzkgns.theFloorIsLavaManager.items.EggBridgeTask;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
+import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -24,7 +24,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     public static final String GAME_WORLD = "tfl_game";
     public static final String MAPS_FOLDER = "TheFloorIsLava-maps";
 
-    public static String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
+    public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
 
     private DangerManager dangerManager;
     private TeamManager teamManager;
@@ -33,6 +33,10 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
 
     public static boolean pvp;
+
+    public static TheFloorIsLavaManager getInstance() {
+        return JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
+    }
 
 
     @Override
@@ -55,11 +59,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             worldManager = new WorldManager(this);
         }
         resourcePackManager = new ResourcePackManager(this);
-        try {
-            resourcePackManager.load();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        resourcePackManager.load();
 
         Bukkit.getPluginManager().registerEvents(new ShopGUI(), this);
         pvp = true;
@@ -68,7 +68,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
         getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
 
-        teamManager = new TeamManager(this);
+        teamManager = new TeamManager();
 
         for(Team team : getServer().getScoreboardManager().getMainScoreboard().getTeams()){
             team.unregister();

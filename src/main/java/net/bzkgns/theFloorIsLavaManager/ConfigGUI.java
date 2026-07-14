@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager;
 
-import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerConfig;
-import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerConfigKey;
-import net.bzkgns.theFloorIsLavaManager.DangerZone.DangerManager;
+import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerConfig;
+import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerConfigKey;
+import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 
 /**
- * Point de départ pour une GUI d'édition de la configuration (à faire évoluer avec le
+ * Point de départ pour un GUI d'édition de la configuration (à faire évoluer avec le
  * même style que TeamGUI/ShopGUI). Un item par paramètre de DangerConfigKey :
  * - clic gauche  = +1 (Shift = +10)
  * - clic droit   = -1 (Shift = -10)

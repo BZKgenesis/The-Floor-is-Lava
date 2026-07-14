@@ -1,10 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager;
 
-import net.bzkgns.theFloorIsLavaManager.Items.*;
-import net.bzkgns.theFloorIsLavaManager.Teams.TeamGUI;
-import net.bzkgns.theFloorIsLavaManager.Items.TeamManagerItem;
-import net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils;
-import net.bzkgns.theFloorIsLavaManager.Shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.items.*;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
+import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
+import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -32,7 +31,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.List;
 import java.util.Objects;
 
-import static net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils.getWoolBlockByPlayer;
+import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.getWoolBlockByPlayer;
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.GAME_WORLD;
 
 
@@ -115,6 +114,7 @@ public class TheFloorIslavaListener implements Listener {
         }
     }
 
+    @SuppressWarnings({"DataFlowIssue", "ConstantValue"})
     @EventHandler
     public void onPlaced(BlockPlaceEvent event){
         Player p = event.getPlayer();
@@ -234,7 +234,7 @@ public class TheFloorIslavaListener implements Listener {
         if (plugin.getDangerManagerInstance().getNoRespawn()){
             plugin.getLogger().info("OnDeath no respawn");
             Player player = event.getEntity();
-            Location deathLocation = player.getLocation(); //TODO: Save death location for respawn
+            @SuppressWarnings("unused") Location deathLocation = player.getLocation(); //TODO: Save death location for respawn
             event.getEntity().getWorld().strikeLightningEffect(event.getEntity().getLocation());
 
             // Empêche le respawn auto si jamais tu l'as modifié ailleurs
@@ -293,7 +293,7 @@ public class TheFloorIslavaListener implements Listener {
         fillAround(loc, 4, BlockUtils.getWoolBlockByPlayer(p));
     }
 
-    private void fillAround(Location center, int radius, Material material) {
+    private void fillAround(Location center, @SuppressWarnings("SameParameterValue") int radius, Material material) {
         World world = center.getWorld();
         int cx = center.getBlockX();
         int cy = center.getBlockY();
@@ -319,10 +319,7 @@ public class TheFloorIslavaListener implements Listener {
         if (new PopupTowerItem().isItem(stack)){
             return true;
         }
-        if (materials.contains(stack.getType())){
-            return true;
-        }
-        return false;
+        return materials.contains(stack.getType());
     }
 
 

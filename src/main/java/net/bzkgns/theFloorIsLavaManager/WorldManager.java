@@ -24,7 +24,7 @@ import java.util.zip.ZipInputStream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import org.bukkit.Bukkit;
+import java.util.logging.Level;
 
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.*;
 
@@ -86,6 +86,7 @@ public class WorldManager {
         recreateWorld(creator, players, true);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void recreateWorld(WorldCreator creator, List<Player> players, boolean placeDefaultSpawnStructure) {
         World newWorld = Bukkit.createWorld(creator);
 
@@ -166,33 +167,37 @@ public class WorldManager {
     }
 
     private static void copyDirectory(Path source, Path destination) throws IOException {
-        System.out.println("Copying directory from: " + source + " to: " + destination);
-        Files.walk(source).forEach(path -> {
-            try {
-                Path relative = source.relativize(path);
-                String relativeStr = relative.toString().replace("\\", "/");
+        TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
+        try (Stream<Path> paths = Files.walk(source)){
+            paths.forEach(path -> {
+                try {
+                    Path relative = source.relativize(path);
+                    String relativeStr = relative.toString().replace("\\", "/");
 
-                // FILTRES CRUCIAUX POUR PAPER 26.1+
-                if (
-                         relativeStr.startsWith("DIM1") || relativeStr.startsWith("DIM-1") // Bloque les sous-dimensions problématiques
-                        || relativeStr.equals("uid.dat") || relativeStr.equals("session.lock")) {
-                    return;
-                }
-                System.out.println("Copying: " + source.resolve(relative) + " to: " + destination.resolve(relative));
-
-                Path target = destination.resolve(relative);
-                if (Files.isDirectory(path)) {
-                    if (!Files.exists(target)) {
-                        Files.createDirectories(target);
+                    // FILTRES CRUCIAUX POUR PAPER 26.1+
+                    if (
+                             relativeStr.startsWith("DIM1") || relativeStr.startsWith("DIM-1") // Bloque les sous-dimensions problématiques
+                            || relativeStr.equals("uid.dat") || relativeStr.equals("session.lock")) {
+                        return;
                     }
-                } else {
-                    Files.createDirectories(target.getParent());
-                    Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    System.out.println("Copying: " + source.resolve(relative) + " to: " + destination.resolve(relative));
+
+                    Path target = destination.resolve(relative);
+                    if (Files.isDirectory(path)) {
+                        if (!Files.exists(target)) {
+                            Files.createDirectories(target);
+                        }
+                    } else {
+                        Files.createDirectories(target.getParent());
+                        Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    }
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.WARNING, e.getMessage(), e);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+            });
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, e.getMessage(), e);
+        }
     }
 
     private void extractZip(File zipFile, File destination) throws IOException {
@@ -302,16 +307,6 @@ public class WorldManager {
         // On décharge le monde et on vide le VRAI dossier de dimension
         Bukkit.unloadWorld(oldWorld, false);
         deleteRecursively(destination);
-        /*mergeWorldGenSettings(
-                new File(
-                        Bukkit.getWorldContainer(),
-                        "TheFloorIsLava-maps/" + mapName + "/data/minecraft/world_gen_settings.dat"
-                ),
-                new File(
-                        Bukkit.getWorldContainer(),
-                        "/world/data/minecraft/world_gen_settings.dat"
-                )
-        );*/
 
         File mapsFolder = new File(
                 Bukkit.getWorldContainer(),
@@ -376,6 +371,7 @@ public class WorldManager {
         return file.delete();
     }
 
+    @SuppressWarnings("unused")
     public boolean isResettingWorld(){
         return resettingWorld;
     }
@@ -420,6 +416,7 @@ public class WorldManager {
     }
 
 
+    @SuppressWarnings("unused")
     public void mergeWorldGenSettings(File sourceFile, File targetFile) {
         plugin.getLogger().info("sourceFile: " + sourceFile.getAbsolutePath());
         plugin.getLogger().info("targetFile: " + targetFile.getAbsolutePath());
@@ -502,8 +499,7 @@ public class WorldManager {
             plugin.getLogger().info("La configuration de la dimension 'minecraft:tfl_game' a ete fusionnee avec succes !");
 
         } catch (IOException e) {
-            plugin.getLogger().severe("Erreur lors de la fusion du fichier world_gen_settings.dat : " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log( Level.SEVERE, e.getMessage(),e);
         }
     }
 }

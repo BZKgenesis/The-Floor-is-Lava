@@ -1,6 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager;
 
-import net.bzkgns.theFloorIsLavaManager.Items.*;
+import net.bzkgns.theFloorIsLavaManager.items.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -10,7 +10,7 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 
-import static net.bzkgns.theFloorIsLavaManager.Utils.BlockUtils.RESOURCE_MATERIALS;
+import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIALS;
 
 public class TheFloorIsLavaCrafts {
 

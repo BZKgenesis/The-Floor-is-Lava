@@ -19,7 +19,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "unused"})
 public class TheFloorIsLavaBootstrap implements PluginBootstrap {
 
     @Override
