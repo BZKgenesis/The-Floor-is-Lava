@@ -114,9 +114,8 @@ public class DangerManager {
         int lavaRisingDelay = config.getLavaRisingDelay();
         TextUtils.broadcastMessage(TextUtils.infoMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes"));
 
-
-
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:tfl_game run spreadplayers 0 0 50 " + config.getBorderSizePreRise() / 2 + " under 200 true @a[gamemode=!creative]");
+
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[gamemode=!creative] at @s run spawnpoint");
         for (Player p : Bukkit.getOnlinePlayers()) {
             AttributeInstance healthAttribute = p.getAttribute(Attribute.MAX_HEALTH);
@@ -131,6 +130,7 @@ public class DangerManager {
             p.getInventory().clear();
             p.getInventory().setArmorContents(new ItemStack[0]);
             p.give(new ShopItem().giveItem());
+            p.setGameMode(GameMode.SURVIVAL);
         }
         //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
         int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
@@ -146,6 +146,9 @@ public class DangerManager {
     }
 
     public void stop() {
+        World world = plugin.getWorldManager().getGameWorld();
+        if (world != null)
+            world.getWorldBorder().setSize(world.getWorldBorder().getSize());
         state = GameState.LOBBY;
         cancelIfRunning(placeLavaTask);
         placeLavaTask = -1;

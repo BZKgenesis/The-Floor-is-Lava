@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLavaManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
-import net.bzkgns.theFloorIsLavaManager.items.EggBridgeTask;
+import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
@@ -27,7 +27,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
 
     private DangerManager dangerManager;
-    private TeamManager teamManager;
     private ResourcePackManager resourcePackManager;
     private WorldManager worldManager;
 
@@ -48,6 +47,18 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         // GAME_WORLD n'existe pas encore).
         saveDefaultConfig();
         initLobbyWorld();
+        ItemManager.registerAll(
+                new BatteItem(),
+                new CiseauxItem(),
+                new EggBridge(),
+                new FireBallItem(),
+                new PopupTowerItem(),
+                new ShopItem(),
+                new SnowballPlateItem(),
+                new TeamInventoryItem(),
+                new TeamRespawnItem(),
+                new TeamManagerItem()
+        );
 
         dangerManager = new DangerManager(this);
 
@@ -68,7 +79,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
         getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
 
-        teamManager = new TeamManager();
+        TeamManager.getInstance().clearTeams();
 
         for(Team team : getServer().getScoreboardManager().getMainScoreboard().getTeams()){
             team.unregister();
@@ -145,10 +156,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     public DangerManager getDangerManagerInstance(){
         return dangerManager;
-    }
-
-    public TeamManager getTeamManager(){
-        return teamManager;
     }
 
     public ResourcePackManager getResourcePackManager(){

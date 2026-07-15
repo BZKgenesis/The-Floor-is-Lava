@@ -10,10 +10,15 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
+import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
+import net.minecraft.core.BlockPos;
 import org.bukkit.entity.Player;
+
+import java.util.Map;
 
 import static net.bzkgns.theFloorIsLavaManager.ConfigCommands.registerConfigNode;
 
@@ -39,6 +44,7 @@ public class TheFloorIsLavaCommands {
         return Command.SINGLE_SUCCESS;
     }
     private static int stop(CommandContext<CommandSourceStack> ctx){
+        TheFloorIsLavaManager.getInstance().getDangerManagerInstance().stop();
         ctx.getSource().getSender().sendMessage("Arrêt du système.");
         return Command.SINGLE_SUCCESS;
     }
@@ -103,15 +109,15 @@ public class TheFloorIsLavaCommands {
                 .requires(sender -> sender.getSender().isOp())
                 .then(Commands.argument("item_key", StringArgumentType.word()).suggests(
                         (_, suggestionsBuilder) -> {
-                            for (String itemKey : CustomItem.getAllItemKeys()) {
+                            for (String itemKey : ItemManager.getAllItemKeys()) {
                                 suggestionsBuilder.suggest(itemKey);
                             }
                             return suggestionsBuilder.buildFuture();
                         }
                 ).executes(ctx -> {
                     String itemKey = StringArgumentType.getString(ctx, "item_key");
-                    if (ctx.getSource().getExecutor() instanceof Player player && CustomItem.getAllItemKeys().contains(itemKey)) {
-                        player.give(CustomItem.getItemByKey(itemKey).giveItem());
+                    if (ctx.getSource().getExecutor() instanceof Player player && ItemManager.getAllItemKeys().contains(itemKey)) {
+                        player.give(ItemManager.getItemByKey(itemKey).giveItem());
                     } else {
                         ctx.getSource().getSender().sendMessage("§cItem inconnu : " + itemKey);
                     }
@@ -147,6 +153,32 @@ public class TheFloorIsLavaCommands {
                     }
                     return Command.SINGLE_SUCCESS;
                 }));
+        root.then(Commands.literal("debug")
+                .requires(sender -> sender.getSender().isOp())
+                .then(Commands.literal("respawnTeam")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                player.sendMessage("respawn locations:");
+                                for (Map.Entry<String, BlockPos> entry : TeamRespawnManager.getInstance().getRespawnPoints().entrySet()){
+                                    player.sendMessage("- respawn point for team " + entry.getKey() + " is at " + entry.getValue().toString());
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("team")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                player.sendMessage("teams");
+                                for (String teamName : TeamManager.getInstance().getTeams()){
+                                    player.sendMessage("- team " + teamName + " has members: " + TeamManager.getInstance().getTeam(teamName).getMembers().toString());
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+
+                );
+
+
         return root.build();
     }
 

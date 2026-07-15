@@ -22,6 +22,7 @@ public class TheFloorIsLavaCrafts {
         plugin.getServer().addRecipe(new CiseauxItem().getRecipe());
         plugin.getServer().addRecipe(new PopupTowerItem().getRecipe());
         plugin.getServer().addRecipe(new TeamInventoryItem().getRecipe());
+        plugin.getServer().addRecipe(new TeamRespawnItem().getRecipe());
         Plugin firebalPlugin = Bukkit.getPluginManager().getPlugin("ThrowableFireballs");
         if (firebalPlugin!=null){
             plugin.getServer().addRecipe(new FireBallItem().getRecipe());

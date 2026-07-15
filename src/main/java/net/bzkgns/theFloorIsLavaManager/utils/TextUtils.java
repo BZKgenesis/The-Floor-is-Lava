@@ -80,7 +80,11 @@ public class TextUtils {
     public static Component infoMessage(String message){
         return prefix().append(Component.text(message).color(TextColor.color(255,255,255)));
     }
+
     public static Component validationMessage(String message){
+        return validationMessage(message, true);
+    }
+    public static Component validationMessage(String message, boolean withPrefix){
         return prefix().append(Component.text(message).color(TextColor.color(0,255,0)));
     }
 }

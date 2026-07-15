@@ -13,6 +13,15 @@ public class TeamManager {
     private final Map<String, TeamData> teams = new HashMap<>();
     private final InviteManager inviteManager;
 
+    private static TeamManager instance;
+
+    public static TeamManager getInstance() {
+        if (instance == null) {
+            instance = new TeamManager();
+        }
+        return instance;
+    }
+
 
     public TeamManager() {
         this.inviteManager = new InviteManager();
@@ -32,7 +41,14 @@ public class TeamManager {
 
 
     public TeamData getPlayerTeam(UUID uuid) {
-        for (TeamData t : teams.values()) if (t.getMembers().contains(uuid)) return t;
+        System.out.println("Searching for team of player UUID: " + uuid);
+        for (TeamData t : teams.values()) {
+            System.out.println("Checking team: " + t.getName() + " for player UUID: " + uuid);
+            if (t.getMembers().contains(uuid)) {
+                System.out.println("Player UUID: " + uuid + " is in team: " + t.getName());
+                return t;
+            }
+        }
         return null;
     }
 
@@ -121,6 +137,14 @@ public class TeamManager {
             Player player = Bukkit.getServer().getPlayer(playerUUID);
             if (player != null)
                 player.sendMessage(message);
+        }
+    }
+
+    public void clearTeams() {
+        teams.clear();
+        Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
+        for (Team team : sb.getTeams()) {
+            team.unregister();
         }
     }
 }

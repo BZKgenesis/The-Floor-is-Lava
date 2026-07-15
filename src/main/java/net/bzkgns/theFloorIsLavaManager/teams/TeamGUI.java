@@ -40,7 +40,7 @@ public class TeamGUI implements Listener {
         TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 27, Component.text("Menu d'équipe"));
 
-        TeamManager tm = plugin.getTeamManager();
+        TeamManager tm = TeamManager.getInstance();
         TeamData team = tm.getPlayerTeam(p.getUniqueId());
 
 
@@ -65,7 +65,7 @@ public class TeamGUI implements Listener {
         p.openInventory(inv);
     }
     public static void openRequestsMenu(Player p) {
-        TeamManager teamManager = TheFloorIsLavaManager.getInstance().getTeamManager();
+        TeamManager teamManager = TeamManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 54, Component.text("Demandes en attente"));
         int i = 0;
         for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(teamManager.getPlayerTeam(p.getUniqueId()).getName())){
@@ -82,7 +82,7 @@ public class TeamGUI implements Listener {
         p.openInventory(inv);
     }
     public static void openManageMenu(Player p) {
-        TeamManager teamManager = TheFloorIsLavaManager.getInstance().getTeamManager();
+        TeamManager teamManager = TeamManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 54, Component.text("Kick des membres"));
         int i = 0;
         if (teamManager.getPlayerTeam(p.getUniqueId())!=null){
@@ -101,7 +101,7 @@ public class TeamGUI implements Listener {
         }
     }
     public static void openAskJoinMenu(Player p) {
-        TeamManager teamManager = TheFloorIsLavaManager.getInstance().getTeamManager();
+        TeamManager teamManager = TeamManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 54, Component.text("Demander à rejoindre une équipe"));
         int i = 0;
         for ( String teamName : teamManager.getTeams()){
@@ -183,7 +183,7 @@ public class TeamGUI implements Listener {
 
 
             if (name.contains("Créer")) {
-                plugin.getTeamManager().createTeamForPlayer(player);
+                TeamManager.getInstance().createTeamForPlayer(player);
                 plugin.getLogger().info( player.getName() + " a créé une équipe");
                 player.sendMessage(TextUtils.validationMessage("Équipe créée."));
                 openMainMenu(player);
@@ -216,7 +216,7 @@ public class TeamGUI implements Listener {
 
 
             if (name.contains("Oui")) {
-                plugin.getTeamManager().removePlayerFromTeam(player);
+                TeamManager.getInstance().removePlayerFromTeam(player);
                 player.sendMessage(TextUtils.errorMessage("Vous avez quitté votre équipe."));
                 openMainMenu(player);
             } else if (name.contains("Non")) {
@@ -242,10 +242,10 @@ public class TeamGUI implements Listener {
 
 
 
-            TeamData team = plugin.getTeamManager().getPlayerTeam(player.getUniqueId());
+            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
             if (team == null) return;
 
-            if (!plugin.getTeamManager().getInviteManager().hasInvite(target.getUniqueId(), team.getName())) {
+            if (!TeamManager.getInstance().getInviteManager().hasInvite(target.getUniqueId(), team.getName())) {
                 plugin.getLogger().info("no request found for " + targetName);
                 player.sendMessage(TextUtils.errorMessage("Demande expirée."));
                 openRequestsMenu(player);
@@ -253,7 +253,7 @@ public class TeamGUI implements Listener {
             }
 
             if (event.isRightClick()){
-                plugin.getTeamManager().getInviteManager().remove(target.getUniqueId());
+                TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
                 target.sendMessage(TextUtils.errorMessage("La demande pour l'équipe de " + team.getName() + " a été refusée !"));
                 player.sendMessage(TextUtils.errorMessage("Demande refusée."));
                 openRequestsMenu(player);
@@ -261,8 +261,8 @@ public class TeamGUI implements Listener {
             }
             TeamManager.broadcastTeamMessage(TextUtils.validationMessage(target.getName() + " ajouté à l'équipe."), team);
             team.acceptRequest(target.getUniqueId());
-            plugin.getTeamManager().addPlayerToVanillaTeam(target, team.getName());
-            plugin.getTeamManager().getInviteManager().remove(target.getUniqueId());
+            TeamManager.getInstance().addPlayerToVanillaTeam(target, team.getName());
+            TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
 
             target.sendMessage(TextUtils.validationMessage("Votre demande a été acceptée !"));
             openRequestsMenu(player);
@@ -284,15 +284,15 @@ public class TeamGUI implements Listener {
             String targetName = plainText(event.getCurrentItem().getItemMeta().displayName());
 
 
-            TeamData teamAsked = plugin.getTeamManager().getTeam(targetName);
+            TeamData teamAsked = TeamManager.getInstance().getTeam(targetName);
 
             if (teamAsked == null) {
                 plugin.getLogger().info("teamAsked is null pour " + targetName);
                 return;
             }
 
-            if (plugin.getTeamManager().getInviteManager().hasInvite(player.getUniqueId(), teamAsked.getName())) {
-                plugin.getTeamManager().getInviteManager().remove(player.getUniqueId());
+            if (TeamManager.getInstance().getInviteManager().hasInvite(player.getUniqueId(), teamAsked.getName())) {
+                TeamManager.getInstance().getInviteManager().remove(player.getUniqueId());
                 player.sendMessage(TextUtils.errorMessage("Demande annulée"));
                 openAskJoinMenu(player);
                 return;
@@ -300,7 +300,7 @@ public class TeamGUI implements Listener {
 
             plugin.getLogger().info(player.getName() + " à demandé de rejoindre " + teamAsked.getName());
 
-            plugin.getTeamManager().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getName());
+            TeamManager.getInstance().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getName());
 
 
             player.sendMessage(TextUtils.validationMessage("La demande a été envoyé"));
@@ -326,9 +326,9 @@ public class TeamGUI implements Listener {
             if (kickedPlayer == null) return;
             plugin.getLogger().info("kick" + kickedPlayer.getName());
 
-            TeamData team = plugin.getTeamManager().getTeam(player.getName());
+            TeamData team = TeamManager.getInstance().getTeam(player.getName());
             if (team == null) return;
-            plugin.getTeamManager().removePlayerFromTeam(kickedPlayer);
+            TeamManager.getInstance().removePlayerFromTeam(kickedPlayer);
             kickedPlayer.sendMessage(TextUtils.errorMessage("Vous avez été expulsé de l'équipe de " + team.getName()));
             TeamManager.broadcastTeamMessage(TextUtils.errorMessage( kickedPlayer.getName() + " a été expulsé de l'équipe"), team);
 
