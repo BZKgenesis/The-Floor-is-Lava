@@ -122,42 +122,31 @@ public class TheFloorIslavaListener implements Listener {
         }
     }
 
-    @SuppressWarnings({"DataFlowIssue", "ConstantValue"})
     @EventHandler
     public void onPlaced(BlockPlaceEvent event){
-        Player p = event.getPlayer();
+        Player player = event.getPlayer();
         Block block = event.getBlockPlaced();
         ItemStack blockPlaced = event.getItemInHand();
-        plugin.getLogger().info(event.getPlayer().getName()+ " a placé " + blockPlaced.toString());
+        plugin.getLogger().info(event.getPlayer().getName()+ " a placé " + blockPlaced);
         if (block.getType().toString().endsWith("WOOL")){
-            block.setType(getWoolBlockByPlayer(p));
+            block.setType(getWoolBlockByPlayer(player));
             return;
         }
 
         if (new PopupTowerItem().isItem(blockPlaced)){
-            Rotation rotation = Rotation.NONE;
-            float angle =p.getYaw()+180;
-            if (angle<=45 || angle>=315){
-                rotation = Rotation.NONE;
-            } else if (angle>=45 && angle<=135) {
-                rotation = Rotation.CLOCKWISE;
-            } else if (angle>=135 && angle<=225) {
-                rotation = Rotation.FLIPPED;
-            }else if (angle>=225 && angle<=315) {
-                rotation = Rotation.COUNTER_CLOCKWISE;
-            }
-            PopupTower.placePopupTower(p,block.getLocation(),rotation);
+            PopupTower.onPopupTowerPlaced(player,block);
             return;
         }
         if (new TeamRespawnItem().isItem(blockPlaced)) {
-            TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
+            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
             if (team == null) {
-                p.sendActionBar(TextUtils.errorMessage("Vous ne pouvez pas placer le portail d'inventaire d'équipe car vous n'êtes pas dans une équipe.", false));
+                player.sendActionBar(TextUtils.errorMessage("Vous ne pouvez pas placer le portail d'inventaire d'équipe car vous n'êtes pas dans une équipe.", false));
                 event.setCancelled(true);
                 return;
             }
             plugin.getLogger().info(event.getPlayer().getName()+ " a placé une ancre de réapparition en" + block.getLocation());
             TeamRespawnManager.getInstance().setRespawnPoint(team.getName(), new BlockPos(block.getX(),block.getY(),block.getZ()));
+            player.sendActionBar(TextUtils.validationMessage("Le portail d'inventaire d'équipe a été placé.", false));
         }
     }
 

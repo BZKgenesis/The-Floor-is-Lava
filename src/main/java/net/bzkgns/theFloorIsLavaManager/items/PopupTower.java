@@ -161,4 +161,21 @@ public class PopupTower {
             block.setBlockData(directional);
         }
     }
+
+    @SuppressWarnings({"DataFlowIssue", "ConstantValue"})
+    public static void onPopupTowerPlaced(Player p, Block block){
+
+        Rotation rotation = Rotation.NONE;
+        float angle =p.getYaw()+180;
+        if (angle<=45 || angle>=315){
+            rotation = Rotation.NONE;
+        } else if (angle>=45 && angle<=135) {
+            rotation = Rotation.CLOCKWISE;
+        } else if (angle>=135 && angle<=225) {
+            rotation = Rotation.FLIPPED;
+        }else if (angle>=225 && angle<=315) {
+            rotation = Rotation.COUNTER_CLOCKWISE;
+        }
+        PopupTower.placePopupTower(p,block.getLocation(),rotation);
+    }
 }
