@@ -139,8 +139,9 @@ public class WorldManager {
 
             List<Entity> displays = world.getEntities().stream()
                     .filter(e ->
-                            e.getType()==EntityType.TEXT_DISPLAY &&
-                                    e.getScoreboardTags().contains("tfl_spawn_texts"))
+                            e.getType()==EntityType.TEXT_DISPLAY && e.getScoreboardTags().contains("tfl_spawn_texts") ||
+                            e.getType()==EntityType.MANNEQUIN && e.getScoreboardTags().contains("tfl_spawn_mannequins") ||
+                            e.getType()==EntityType.ARMOR_STAND && e.getScoreboardTags().contains("tfl_spawn_armor_deco"))
                     .toList();
 
             displays.forEach(Entity::remove);
