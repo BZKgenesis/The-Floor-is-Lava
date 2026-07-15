@@ -103,10 +103,19 @@ public class DangerManager {
         if (config.isDisablePvpDuringPreparation()) {
             TheFloorIsLavaManager.pvp = false;
         }
-        playerInGame.addAll(plugin.getServer().getOnlinePlayers());
+        playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> plugin.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(p) != null).toList());
         noRespawn = false;
 
         TextUtils.broadcastMessage(TextUtils.infoMessage("Le jeu commence !"));
+        for(Player p : plugin.getServer().getOnlinePlayers()){
+            p.removeScoreboardTag("inGame");
+            if (!isPlayerInGame(p)){
+                p.setGameMode(GameMode.SPECTATOR);
+                p.sendMessage(TextUtils.infoMessage("Vous êtes en mode spectateur car vous n'êtes pas dans une équipe."));
+            }else{
+                p.addScoreboardTag("inGame");
+            }
+        }
         if (config.isKeepInventoryDuringPreparation())
             TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires sont sauvegardés (keepInventory)"));
         if (config.isDisablePvpDuringPreparation())
@@ -115,9 +124,11 @@ public class DangerManager {
         int lavaRisingDelay = config.getLavaRisingDelay();
         TextUtils.broadcastMessage(TextUtils.infoMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes"));
 
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:tfl_game run spreadplayers 0 0 50 " + config.getBorderSizePreRise() / 2 + " under 200 true @a[gamemode=!creative]");
 
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[gamemode=!creative] at @s run spawnpoint");
+
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:tfl_game run spreadplayers 0 0 50 " + config.getBorderSizePreRise() / 2 + " under 200 true @a[tag=inGame]");
+
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[tag=inGame] at @s run spawnpoint");
         for (Player p : Bukkit.getOnlinePlayers()) {
             AttributeInstance healthAttribute = p.getAttribute(Attribute.MAX_HEALTH);
             if (healthAttribute == null) {
