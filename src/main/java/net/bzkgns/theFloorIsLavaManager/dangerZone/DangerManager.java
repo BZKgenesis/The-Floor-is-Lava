@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.dangerZone;
 
 import net.bzkgns.theFloorIsLavaManager.GameState;
+import net.bzkgns.theFloorIsLavaManager.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
@@ -234,6 +235,7 @@ public class DangerManager {
             Bukkit.getScheduler().cancelTask(increaseTask);
             increaseTask = -1;
         }
+        TeamRespawnManager.getInstance().checkRespawnPointValidity();
     }
 
     private void tickDamage() {
