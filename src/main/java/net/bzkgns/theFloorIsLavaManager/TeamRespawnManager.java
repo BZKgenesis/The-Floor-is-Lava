@@ -5,8 +5,9 @@ import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.minecraft.core.BlockPos;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 
-import javax.xml.stream.Location;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,6 +39,15 @@ public class TeamRespawnManager {
     }
 
     public void removeRespawnPoint(String teamName) {
+        World game_world = plugin.getWorldManager().getGameWorld();
+        if(game_world == null){
+            plugin.getLogger().warning("Game world is null while trying to remove respawn point for team: " + teamName);
+            return;
+        }
+        Block respawnBlock = game_world.getBlockAt(respawnPoints.get(teamName).getX(), respawnPoints.get(teamName).getY(), respawnPoints.get(teamName).getZ());
+        if(respawnBlock.getType() == Material.RESPAWN_ANCHOR){
+            respawnBlock.setType(Material.AIR);
+        }
         respawnPoints.remove(teamName);
     }
 

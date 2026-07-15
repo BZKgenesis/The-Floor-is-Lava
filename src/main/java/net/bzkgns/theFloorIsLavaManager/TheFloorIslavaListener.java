@@ -145,8 +145,11 @@ public class TheFloorIslavaListener implements Listener {
                 return;
             }
             plugin.getLogger().info(event.getPlayer().getName()+ " a placé une ancre de réapparition en" + block.getLocation());
+            if (TeamRespawnManager.getInstance().hasRespawnPoint(team.getName())){
+                TeamRespawnManager.getInstance().removeRespawnPoint(team.getName());
+            }
             TeamRespawnManager.getInstance().setRespawnPoint(team.getName(), new BlockPos(block.getX(),block.getY(),block.getZ()));
-            player.sendActionBar(TextUtils.validationMessage("Le portail d'inventaire d'équipe a été placé.", false));
+            player.sendMessage(TextUtils.validationMessage("Le portail d'inventaire d'équipe a été placé.", false));
         }
     }
 
