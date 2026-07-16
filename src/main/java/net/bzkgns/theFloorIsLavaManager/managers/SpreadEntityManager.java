@@ -157,8 +157,8 @@ public class SpreadEntityManager {
             // Bloc sur lequel on peut marcher
             if (ground.getType().isSolid()
                     && !ground.isLiquid()
-                    && above.isPassable()
-                    && above2.isPassable()) {
+                    && above.isPassable() && !above.isLiquid()
+                    && above2.isPassable() && !above2.isLiquid()) {
 
                 return new Location(
                         world,
