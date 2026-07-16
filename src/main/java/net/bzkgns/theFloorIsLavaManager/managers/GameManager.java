@@ -63,6 +63,30 @@ public class GameManager {
         return state == GameState.LOBBY;
     }
 
+    public static void initGamePlayer(Player player) {
+        AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
+        if (healthAttribute == null) {
+            TheFloorIsLavaManager.getInstance().getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + player.getName());
+            return;
+        }
+        player.setHealth(healthAttribute.getValue());
+        player.setFoodLevel(20);
+        player.setSaturation(20);
+        player.setExhaustion(0);
+        player.getInventory().clear();
+        player.getInventory().setArmorContents(new ItemStack[0]);
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setAllowFlight(false);
+    }
+
+    public static void initLobbyPlayer(Player player) {
+        TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
+        player.setGameMode(GameMode.SURVIVAL);
+        player.teleport(plugin.getWorldManager().getLobbySpawnLocation());
+        player.setRespawnLocation(plugin.getWorldManager().getLobbySpawnLocation(), true);
+        player.getInventory().clear();
+        player.setAllowFlight(true);
+    }
 
     public boolean startGame() {
         TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
@@ -114,19 +138,8 @@ public class GameManager {
                 p.setGameMode(GameMode.SPECTATOR);
                 p.sendMessage(TextUtils.infoMessage("Vous êtes en mode spectateur car vous n'êtes pas dans une équipe."));
             }else{
-                AttributeInstance healthAttribute = p.getAttribute(Attribute.MAX_HEALTH);
-                if (healthAttribute == null) {
-                    plugin.getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + p.getName());
-                    continue;
-                }
-                p.setHealth(healthAttribute.getValue());
-                p.setFoodLevel(20);
-                p.setSaturation(20);
-                p.setExhaustion(0);
-                p.getInventory().clear();
-                p.getInventory().setArmorContents(new ItemStack[0]);
+                initGamePlayer(p);
                 p.give(new ShopItem().giveItem());
-                p.setGameMode(GameMode.SURVIVAL);
             }
         }
         if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))

@@ -165,8 +165,7 @@ public class TeamRespawnManager {
     public Location getPlayerTeamRespawnPosition(UUID playerUUID) {
         TeamData playerTeam = TeamManager.getInstance().getPlayerTeam(playerUUID);
         if (playerTeam != null) {
-            plugin.getLogger().info("Player " + playerUUID + " is in team: " + playerTeam.getName());
-            return getRespawnPoint(playerTeam.getName());
+            return getRespawnPoint(playerTeam.getName()).clone().add(.5, 1, .5); // Return the respawn point for the player's team, adjusted to be above the block
 
         }
         return null; // Return null if the player is not in a team or no respawn point is set

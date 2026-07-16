@@ -5,6 +5,7 @@ import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
@@ -81,13 +82,9 @@ public class TheFloorIslavaListener implements Listener {
 
         switch (plugin.getGameManager().getState()){
             case LOBBY -> {
-                event.getPlayer().setGameMode(GameMode.SURVIVAL);
-                event.getPlayer().teleport(plugin.getWorldManager().getLobbySpawnLocation());
-                event.getPlayer().setRespawnLocation(plugin.getWorldManager().getLobbySpawnLocation(), true);
-                event.getPlayer().getInventory().clear();
+                GameManager.initLobbyPlayer(event.getPlayer());
                 event.getPlayer().give(new TeamManagerItem().giveItem());
                 event.getPlayer().give(new GiveAllItem().giveItem());
-                event.getPlayer().setAllowFlight(true);
             }
             case RUNNING -> {
                 event.getPlayer().setAllowFlight(false);
@@ -103,10 +100,7 @@ public class TheFloorIslavaListener implements Listener {
                     event.getPlayer().setGameMode(GameMode.SPECTATOR);
                 }
             }
-            case ENDING -> {
-                event.getPlayer().setGameMode(GameMode.SPECTATOR);
-                event.getPlayer().setAllowFlight(false);
-            }
+            case ENDING -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
         if (plugin.getGameManager().getState()==GameState.RUNNING &&
                 !plugin.getGameManager().isPlayerInGame(event.getPlayer())){
@@ -262,26 +256,50 @@ public class TheFloorIslavaListener implements Listener {
         Player player = event.getPlayer();
 
         Location deathLocation = deathLocations.remove(player.getUniqueId());
-
-        if (deathLocation == null) {
-            return;
-        }
-        plugin.getLogger().info("OnRespawn with respawn");
         Location respawnPos = TeamRespawnManager.getInstance().getPlayerTeamRespawnPosition(player.getUniqueId());
-        if (respawnPos == null) {
-            plugin.getLogger().info("No respawn point for player " + player.getName() + ", teleporting to death location.");
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                player.teleport(deathLocation);
-                player.setGameMode(GameMode.SPECTATOR);
-            });
-            return;
+
+        switch (TheFloorIsLavaManager.getInstance().getGameManager().getState()){
+            case LOBBY -> {
+                if (respawnPos != null){
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        player.teleport(respawnPos);
+                        player.setGameMode(GameMode.SURVIVAL);
+                    });
+                    return;
+                }
+                if (deathLocation != null){
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        player.teleport(deathLocation);
+                        player.setGameMode(GameMode.SPECTATOR);
+                    });
+                    return;
+                }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getLobbySpawnLocation());
+                    player.setGameMode(GameMode.SPECTATOR);
+                });
+            }
+            case RUNNING  -> {
+                if (respawnPos != null){
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        player.teleport(respawnPos);
+                        player.setGameMode(GameMode.SURVIVAL);
+                    });
+                    return;
+                }
+                if (deathLocation != null){
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        player.teleport(deathLocation);
+                        player.setGameMode(GameMode.SPECTATOR);
+                    });
+                    return;
+                }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getPreGameSpawnLocation());
+                    player.setGameMode(GameMode.SPECTATOR);
+                });
+            }
         }
-        plugin.getLogger().info("Respawn point for player " + player.getName() + " found at " + respawnPos.getX() + ", " + respawnPos.getY() + ", " + respawnPos.getZ() + ", teleporting.");
-        deathLocation.set(respawnPos.getX()+.5, respawnPos.getY()+1, respawnPos.getZ()+.5);
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            player.teleport(deathLocation);
-            player.setGameMode(GameMode.SURVIVAL);
-        });
     }
 
 
