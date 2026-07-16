@@ -23,7 +23,6 @@ public class TextUtils {
 
         switch (format) {
             case SHORTEST:
-                System.out.println("minutes: " + minutes + ", seconds: " + seconds);
                 if (minutes > 0) {
                     if (minutes > 1) {
                         return String.format("%d minutes", minutes);

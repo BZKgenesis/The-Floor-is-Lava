@@ -117,7 +117,6 @@ public class TheFloorIsLavaCommands {
                 .requires(sender -> sender.getSender().isOp())
                 .then(Commands.argument("item_key", StringArgumentType.word()).suggests(
                         (_, suggestionsBuilder) -> {
-                            System.out.println(suggestionsBuilder.getRemaining());
                             for (String itemKey : ItemManager.getAllItemKeys()) {
                                 if (itemKey.startsWith(suggestionsBuilder.getRemaining()))
                                     suggestionsBuilder.suggest(itemKey);

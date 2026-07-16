@@ -66,7 +66,6 @@ public class TeamRespawnManager {
     }
 
     public BlockPos getPlayerTeamRespawnPosition(UUID playerUUID) {
-        System.out.println("Checking respawn point for player UUID: " + playerUUID);
         TeamData playerTeam = TeamManager.getInstance().getPlayerTeam(playerUUID);
         if (playerTeam != null) {
             plugin.getLogger().info("Player " + playerUUID + " is in team: " + playerTeam.getName());

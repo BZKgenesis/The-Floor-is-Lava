@@ -41,11 +41,8 @@ public class TeamManager {
 
 
     public TeamData getPlayerTeam(UUID uuid) {
-        System.out.println("Searching for team of player UUID: " + uuid);
         for (TeamData t : teams.values()) {
-            System.out.println("Checking team: " + t.getName() + " for player UUID: " + uuid);
             if (t.getMembers().contains(uuid)) {
-                System.out.println("Player UUID: " + uuid + " is in team: " + t.getName());
                 return t;
             }
         }
@@ -146,5 +143,16 @@ public class TeamManager {
         for (Team team : sb.getTeams()) {
             team.unregister();
         }
+    }
+
+    public List<TeamData> getTeamAlive() {
+        List<TeamData> aliveTeams = new ArrayList<>();
+        for (TeamData team : teams.values()) {
+            if (!team.isEliminated()) {
+                aliveTeams.add(team);
+                break;
+            }
+        }
+        return aliveTeams;
     }
 }

@@ -53,7 +53,6 @@ public abstract class CustomItem {
     public abstract ItemStack giveItem();
     public boolean isItem(ItemStack stack){
         String itemKey = stack.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(plugin, "key"), PersistentDataType.STRING);
-        System.out.println("Comparing item: " + itemKey + " with custom item: " + key.getKey());
         return key.getKey().equals(itemKey) && stack.getType() == itemStack.getType();
     }
     public abstract CraftingRecipe getRecipe();

@@ -8,7 +8,6 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
-import net.bzkgns.theFloorIsLavaManager.utils.LoggingCommandSender;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -192,6 +191,16 @@ public class GameManager {
         return true;
     }
 
+    public boolean isGameWinning() {
+        if (state != GameState.RUNNING) {
+            return false;
+        }
+        if (dangerManager.getState() == DangerManager.DangerState.PREPARATION) {
+            return false;
+        }
+        return TeamManager.getInstance().getTeamAlive().size() <= 1;
+    }
+
     private void startRisingPhase() {
         cancelBossBarTask();
 
@@ -305,6 +314,21 @@ public class GameManager {
         if (bossbar != null) {
             bossbar.addPlayer(player);
         }
+    }
+
+    public void endGame() {
+        if (state != GameState.RUNNING) {
+            return;
+        }
+        state = GameState.LOBBY;
+        cancelBossBarTask();
+        if (bossbar != null) {
+            bossbar.removeAll();
+            bossbar = null;
+        }
+        dangerManager.reset();
+        playerInGame.clear();
+        noRespawn = false;
     }
 
 }
