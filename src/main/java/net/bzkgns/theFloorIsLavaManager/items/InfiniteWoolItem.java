@@ -4,13 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
 
-public class ShopItem extends CustomItem{
-    public ShopItem() {
-        super("shop_item",
-                "Shop",
-                "Ouvre le menu du shop",
-                Rarity.COMMON,
-                Material.BOOK,
+public class InfiniteWoolItem extends CustomItem {
+    public InfiniteWoolItem() {
+        super("infinite_wool",
+                "Infinite Wool",
+                "Permet de placer des blocs de laine infiniment",
+                Rarity.EPIC,
+                Material.LIGHT_GRAY_WOOL,
                 true
         );
     }

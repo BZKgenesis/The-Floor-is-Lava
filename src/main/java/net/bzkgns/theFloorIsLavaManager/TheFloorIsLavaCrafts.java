@@ -1,13 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager;
 
 import net.bzkgns.theFloorIsLavaManager.items.*;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.plugin.Plugin;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIALS;
@@ -16,16 +12,8 @@ public class TheFloorIsLavaCrafts {
 
     public void setCrafts(Plugin plugin){
 
-        plugin.getServer().addRecipe(new BatteItem().getRecipe());
-        plugin.getServer().addRecipe(new EggBridge().getRecipe());
-        plugin.getServer().addRecipe(new SnowballPlateItem().getRecipe());
-        plugin.getServer().addRecipe(new CiseauxItem().getRecipe());
-        plugin.getServer().addRecipe(new PopupTowerItem().getRecipe());
-        plugin.getServer().addRecipe(new TeamInventoryItem().getRecipe());
-        plugin.getServer().addRecipe(new TeamRespawnItem().getRecipe());
-        Plugin firebalPlugin = Bukkit.getPluginManager().getPlugin("ThrowableFireballs");
-        if (firebalPlugin!=null){
-            plugin.getServer().addRecipe(new FireBallItem().getRecipe());
+        for (CraftingRecipe craft : ItemManager.getAllCraftingRecipes()){
+            plugin.getServer().addRecipe(craft);
         }
 
         NamespacedKey patateKey = new NamespacedKey(plugin, "patate");
@@ -53,11 +41,5 @@ public class TheFloorIsLavaCrafts {
             enderPearlRecipe.setIngredient('A', Material.IRON_INGOT);
             enderPearlRecipe.setIngredient('B', new RecipeChoice.MaterialChoice(RESOURCE_MATERIALS));
         plugin.getServer().addRecipe(enderPearlRecipe);
-
-
     }
-
-
-
-
 }

@@ -1,18 +1,15 @@
-package net.bzkgns.theFloorIsLavaManager.dangerZone;
+package net.bzkgns.theFloorIsLavaManager.managers;
 
-import net.bzkgns.theFloorIsLavaManager.GameState;
-import net.bzkgns.theFloorIsLavaManager.TeamRespawnManager;
-import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
+import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -20,23 +17,26 @@ import java.util.List;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.round;
-import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.formatTime;
 
 public class DangerManager {
 
-    private final TheFloorIsLavaManager plugin;
-    private final DangerConfig config;
+    public enum DangerState {
+        NONE,
+        PREPARATION,
+        RISING,
+        PAUSED
+    }
 
-    private GameState state = GameState.LOBBY;
-    private GameState stateBeforePause;
+    private DangerState stateBeforePause = DangerState.NONE;
+
+    private DangerState state = DangerState.NONE;
+
+    private final TheFloorIsLavaManager plugin;
+    private final ConfigManager<DangerConfig> dangerConfigManager;
 
     private double dangerLevel;
     private int oldDangerLevelPlaced;
     private double increaseAmount;
-
-    private boolean noRespawn = false;
-
-    private List<Player> playerInGame = new ArrayList<>();
 
     private int increaseTask = -1;
     private int damageTask = -1;
@@ -46,19 +46,17 @@ public class DangerManager {
 
     private static final int DISPLAY_PERIOD = 5;
 
-    public DangerManager(TheFloorIsLavaManager plugin) {
-        this.plugin = plugin;
-        this.config = DangerConfig.loadFrom(plugin.getConfig());
+    public DangerManager(ConfigManager<DangerConfig> dangerConfigManager) {
+        this.plugin = TheFloorIsLavaManager.getInstance();
+        this.dangerConfigManager = dangerConfigManager;
         resetRuntimeState();
     }
 
     /** Réinitialise l'état d'une partie (niveau de lave, joueurs en jeu...) sans toucher à la config. */
     private void resetRuntimeState() {
-        dangerLevel = config.getStartLevel();
-        oldDangerLevelPlaced = config.getStartLevel() - 1;
-        increaseAmount = config.initialIncreaseAmount();
-        playerInGame = new ArrayList<>();
-        noRespawn = false;
+        dangerLevel = dangerConfigManager.getInt("start-level");
+        oldDangerLevelPlaced = (int) (dangerLevel - 1);
+        increaseAmount = dangerConfigManager.getConfig().initialIncreaseAmount();
     }
 
     private void cancelIfRunning(int taskId) {
@@ -67,101 +65,34 @@ public class DangerManager {
 
     // --- Config ---
 
-    public DangerConfig getConfig() {
-        return config;
-    }
-
     /** La config ne se modifie qu'en dehors d'une partie, pour éviter tout état incohérent en plein jeu. */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canEditConfig() {
-        return state == GameState.LOBBY;
+        return state == DangerState.NONE;
     }
 
-    public GameState getState() {
+    public DangerState getState() {
         return state;
     }
 
     // --- Cycle de vie de la partie ---
 
-    public boolean start() {
-        if (state != GameState.LOBBY) {
+    public boolean startPreparation(){
+        World world = plugin.getWorldManager().getGameWorld();
+        if (world == null){
+            plugin.getLogger().warning("Impossible de récupérer le monde de jeu pour démarrer la préparation");
             return false;
         }
-        state = GameState.PREPARING;
-
-        World world = plugin.getWorldManager().getGameWorld();
-        world.getWorldBorder().setSize(config.getBorderSizePreRise());
-        world.getWorldBorder().setCenter(0, 0);
+        state = DangerState.PREPARATION;
         cancelIfRunning(damageTask);
         damageTask = -1;
-        if (config.isKeepInventoryDuringPreparation())
-            world.setGameRule(GameRules.KEEP_INVENTORY, true);
-        world.setGameRule(GameRules.ADVANCE_TIME, true);
-        world.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);
         cancelIfRunning(particleTask);
         particleTask = -1;
-        if (config.isDisablePvpDuringPreparation()) {
-            TheFloorIsLavaManager.pvp = false;
-        }
-        playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> plugin.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(p) != null).toList());
-        noRespawn = false;
-
-        TextUtils.broadcastMessage(TextUtils.infoMessage("Le jeu commence !"));
-        for(Player p : plugin.getServer().getOnlinePlayers()){
-            p.removeScoreboardTag("inGame");
-            if (!isPlayerInGame(p)){
-                p.setGameMode(GameMode.SPECTATOR);
-                p.sendMessage(TextUtils.infoMessage("Vous êtes en mode spectateur car vous n'êtes pas dans une équipe."));
-            }else{
-                p.addScoreboardTag("inGame");
-            }
-        }
-        if (config.isKeepInventoryDuringPreparation())
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires sont sauvegardés (keepInventory)"));
-        if (config.isDisablePvpDuringPreparation())
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est désactivé"));
-
-        int lavaRisingDelay = config.getLavaRisingDelay();
-        TextUtils.broadcastMessage(TextUtils.infoMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes"));
-
-
-
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:tfl_game run spreadplayers 0 0 50 " + config.getBorderSizePreRise() / 2 + " under 200 true @a[tag=inGame]");
-
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[tag=inGame] at @s run spawnpoint");
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            AttributeInstance healthAttribute = p.getAttribute(Attribute.MAX_HEALTH);
-            if (healthAttribute == null) {
-                plugin.getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + p.getName());
-                continue;
-            }
-            p.setHealth(healthAttribute.getValue());
-            p.setFoodLevel(20);
-            p.setSaturation(20);
-            p.setExhaustion(0);
-            p.getInventory().clear();
-            p.getInventory().setArmorContents(new ItemStack[0]);
-            p.give(new ShopItem().giveItem());
-            p.setGameMode(GameMode.SURVIVAL);
-        }
-        //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
-        int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
-        for (int d : delay) {
-            if (lavaRisingDelay > d) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
-                        () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va commencer à monter dans " + formatTime(d, TextUtils.TimeFormat.SHORTEST) + "...")), lavaRisingDelay - d);
-            }
-        }
-
-        phase2Task = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this::startPhase2, lavaRisingDelay);
         return true;
     }
 
-    public void stop() {
-        World world = plugin.getWorldManager().getGameWorld();
-        if (world != null)
-            world.getWorldBorder().setSize(world.getWorldBorder().getSize());
-        state = GameState.LOBBY;
+    public void reset() {
+        state = DangerState.NONE;
         cancelIfRunning(placeLavaTask);
         placeLavaTask = -1;
         cancelIfRunning(increaseTask);
@@ -177,11 +108,11 @@ public class DangerManager {
 
     /** Ne gère la pause que pendant la montée de la lave (RISING). Renvoie false sinon. */
     public boolean pause() {
-        if (state != GameState.RISING && state != GameState.PREPARING) {
+        if (state != DangerState.PREPARATION && state != DangerState.RISING) {
             return false;
         }
         stateBeforePause = state;
-        state = GameState.PAUSED;
+        state = DangerState.PAUSED;
         cancelIfRunning(increaseTask);
         increaseTask = -1;
         cancelIfRunning(damageTask);
@@ -195,16 +126,16 @@ public class DangerManager {
 
     /** Relance les tâches annulées par pause(). Renvoie false si la partie n'était pas en pause. */
     public boolean resume() {
-        if (state != GameState.PAUSED) {
+        if (state != DangerState.PAUSED) {
             return false;
         }
         state = stateBeforePause;
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickIncrease, 0, 1);
-        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 0, config.getDamageEvery());
-        if (config.isShowAlert()) {
+        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 0, dangerConfigManager.getInt("damage-every"));
+        if (dangerConfigManager.getBoolean("show-alert") ) {
             particleTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickParticles, 0, DISPLAY_PERIOD);
         }
-        if (config.isPlaceLava()) {
+        if (dangerConfigManager.getBoolean("place-lava")) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 0, 1);
         }
         return true;
@@ -239,8 +170,8 @@ public class DangerManager {
     // --- Tâches (extraites en méthodes nommées pour être réutilisables par resume()) ---
 
     private void tickIncrease() {
-        if (dangerLevel < config.getEndLevel()) {
-            increaseAmount = config.increaseAmountFor(dangerLevel);
+        if (dangerLevel < dangerConfigManager.getInt("end-level")) {
+            increaseAmount = (dangerConfigManager.getConfig()).increaseAmountFor(dangerLevel);
             dangerLevel += increaseAmount;
         } else if (increaseTask != -1) {
             Bukkit.getScheduler().cancelTask(increaseTask);
@@ -252,7 +183,7 @@ public class DangerManager {
     private void tickDamage() {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (p.getLocation().getY() < dangerLevel) {
-                p.damage(config.getDamage());
+                p.damage(dangerConfigManager.getDouble("damage"));
             }
         }
     }
@@ -275,7 +206,7 @@ public class DangerManager {
     }
 
     private void tickPlaceLava() {
-        int increaseSize = config.getIncreaseSize();
+        int increaseSize = dangerConfigManager.getInt("increase-size");
         if (oldDangerLevelPlaced + increaseSize >= round(dangerLevel)) {
             return;
         }
@@ -291,7 +222,7 @@ public class DangerManager {
         World world = plugin.getWorldManager().getGameWorld();
         Location wbCenter = world.getWorldBorder().getCenter();
         double wbSize = world.getWorldBorder().getSize();
-        int lavaMargin = config.getLavaMargin();
+        int lavaMargin = dangerConfigManager.getInt("lava-margin");
         Vector3i edgeMin = new Vector3i((int) (wbCenter.getX() - round(wbSize / 2)) - lavaMargin, oldDangerLevelPlaced + 1, (int) (wbCenter.getZ() - round(wbSize / 2)) - lavaMargin);
         Vector3i edgeMax = new Vector3i((int) (wbCenter.getX() + round(wbSize / 2)) + lavaMargin, (int) round(dangerLevel), (int) (wbCenter.getZ() + round(wbSize / 2)) + lavaMargin);
 
@@ -314,36 +245,22 @@ public class DangerManager {
         oldDangerLevelPlaced = (int) round(dangerLevel);
     }
 
-    private void startPhase2() {
-        state = GameState.RISING;
-        World world = plugin.getWorldManager().getGameWorld();
-        if (world != null)
-            world.setGameRule(GameRules.KEEP_INVENTORY, false);
+    public void startRising() {
+        state = DangerState.RISING;
 
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickIncrease, 0, 1);
-        TheFloorIsLavaManager.pvp = true;
-        noRespawn = true;
 
-        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, config.getDamageEvery());
-        if (world == null){
-            plugin.getLogger().warning("Impossible de récupérer le monde de jeu pour démarrer la phase 2");
-            return;
-        }
-        world.getWorldBorder().changeSize(config.getBorderSizeDuringRise(), config.getBorderResizeTime() * 20L);
+        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, dangerConfigManager.getInt("damage-every"));
 
         TextUtils.broadcastMessage(TextUtils.infoMessage("!!ATTENTION!! La lave commence à monter !"));
-        if (config.isKeepInventoryDuringPreparation())
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires ne sont plus sauvegardés"));
-        if (config.isDisablePvpDuringPreparation())
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est activé"));
         TextUtils.broadcastMessage(TextUtils.infoMessage("Le respawn est désactivé"));
         TextUtils.broadcastMessage(TextUtils.infoMessage("La zone se rétrécit"));
 
-        if (config.isPlaceLava()) {
+        if (dangerConfigManager.getBoolean("place-lava")) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 1, 1);
         }
 
-        if (config.isShowAlert()) {
+        if (dangerConfigManager.getBoolean("show-alert")) {
             particleTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickParticles, 0, DISPLAY_PERIOD);
         }
     }
@@ -362,21 +279,4 @@ public class DangerManager {
         }, 1, 1);
     }
 
-    // --- Joueurs / compatibilité ---
-
-    public boolean isPlayerInGame(Player player) {
-        return playerInGame.contains(player);
-    }
-
-    public boolean getNoRespawn() {
-        return noRespawn;
-    }
-
-    /**
-     * Conservé pour compatibilité avec le code existant (TheFloorIslavaListener, /tfl team) :
-     * remplace l'ancien booléen hasStarted. true dès la préparation jusqu'à l'arrêt.
-     */
-    public boolean getHasStarted() {
-        return state == GameState.PREPARING || state == GameState.RISING || state == GameState.PAUSED;
-    }
 }

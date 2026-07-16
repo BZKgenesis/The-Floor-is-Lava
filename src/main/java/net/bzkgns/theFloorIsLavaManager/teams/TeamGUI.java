@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.teams;
 
+import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -37,7 +38,6 @@ public class TeamGUI implements Listener {
 
 
     public static void openMainMenu(Player p) {
-        TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 27, Component.text("Menu d'équipe"));
 
         TeamManager tm = TeamManager.getInstance();
@@ -172,7 +172,7 @@ public class TeamGUI implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (plugin.getDangerManagerInstance().getHasStarted()) return;
+        if (plugin.getGameManager().getState() == GameState.RUNNING) return;
         Player player = (Player) event.getWhoClicked();
         if (plainText(event.getView().title()).equals("Menu d'équipe")) {
             event.setCancelled(true);

@@ -1,6 +1,11 @@
 package net.bzkgns.theFloorIsLavaManager;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.bzkgns.theFloorIsLavaManager.items.*;
+import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
+import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
+import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
@@ -32,14 +37,12 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Team;
 
 import java.util.*;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.getWoolBlockByPlayer;
-import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.GAME_WORLD;
 
-
+@SuppressWarnings("UnstableApiUsage")
 public class TheFloorIslavaListener implements Listener {
 
     private final TheFloorIsLavaManager plugin;
@@ -63,8 +66,6 @@ public class TheFloorIslavaListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
-        World world = Bukkit.getWorld(GAME_WORLD);
-
         Player player = event.getPlayer();
 
         player.setResourcePack(
@@ -74,40 +75,34 @@ public class TheFloorIslavaListener implements Listener {
                 Component.text("Ce pack est obligatoire")
         );
         plugin.getLogger().info("Player " + player.getName() + " joined. Total world time: " + event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME));
-        if (event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME) < 100 && world != null){
-            Location spawnPos = new Location (world,0.5,281,0.5);
-            event.getPlayer().teleport(spawnPos);
-            if (!plugin.getDangerManagerInstance().getHasStarted()){
+        plugin.getGameManager().addPlayerToBossBar(player);
+
+        switch (plugin.getGameManager().getState()){
+            case LOBBY -> {
+                event.getPlayer().setGameMode(GameMode.SURVIVAL);
+                event.getPlayer().teleport(plugin.getWorldManager().getLobbySpawnLocation());
+                event.getPlayer().setRespawnLocation(plugin.getWorldManager().getLobbySpawnLocation(), true);
                 event.getPlayer().getInventory().clear();
                 event.getPlayer().give(new TeamManagerItem().giveItem());
-                event.getPlayer().give(new ShopItem().giveItem());
+                event.getPlayer().give(new GiveAllItem().giveItem());
             }
-        }
-
-        switch (plugin.getDangerManagerInstance().getState()){
-            case LOBBY -> {
-                event.getPlayer().setGameMode(GameMode.ADVENTURE);
-                if (plugin.getWorldManager().isGameWorldLoaded()){
-                    event.getPlayer().teleport(plugin.getWorldManager().getPreGameSpawnLocation());
-                }else{
-                    event.getPlayer().teleport(plugin.getWorldManager().getLobbySpawnLocation());
-                }
-            }
-            case PREPARING, RISING -> {
-                if (plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
+            case RUNNING -> {
+                if (plugin.getGameManager().isPlayerInGame(event.getPlayer())){
                     event.getPlayer().setGameMode(GameMode.SURVIVAL);
                     if (!event.getPlayer().getWorld().equals(plugin.getWorldManager().getGameWorld())) {
                         event.getPlayer().teleport(plugin.getWorldManager().getDefaultSpawnLocation());
+                        event.getPlayer().setRespawnLocation(plugin.getWorldManager().getDefaultSpawnLocation(), true);
                     }
                 } else {
                     event.getPlayer().teleport(plugin.getWorldManager().getPreGameSpawnLocation());
+                    event.getPlayer().setRespawnLocation(plugin.getWorldManager().getPreGameSpawnLocation(), true);
                     event.getPlayer().setGameMode(GameMode.SPECTATOR);
                 }
             }
-            case PAUSED -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
+            case ENDING -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
-        if (plugin.getDangerManagerInstance().getHasStarted() &&
-                !plugin.getDangerManagerInstance().isPlayerInGame(event.getPlayer())){
+        if (plugin.getGameManager().getState()==GameState.RUNNING &&
+                !plugin.getGameManager().isPlayerInGame(event.getPlayer())){
             event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
         discoverRecipes(event.getPlayer());
@@ -126,38 +121,16 @@ public class TheFloorIslavaListener implements Listener {
     public void onPlaced(BlockPlaceEvent event){
         Player player = event.getPlayer();
         Block block = event.getBlockPlaced();
-        ItemStack blockPlaced = event.getItemInHand();
-        plugin.getLogger().info(event.getPlayer().getName()+ " a placé " + blockPlaced);
         if (block.getType().toString().endsWith("WOOL")){
             block.setType(getWoolBlockByPlayer(player));
-            return;
-        }
-
-        if (new PopupTowerItem().isItem(blockPlaced)){
-            PopupTower.onPopupTowerPlaced(player,block);
-            return;
-        }
-        if (new TeamRespawnItem().isItem(blockPlaced)) {
-            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
-            if (team == null) {
-                player.sendActionBar(TextUtils.errorMessage("Vous ne pouvez pas placer le portail d'inventaire d'équipe car vous n'êtes pas dans une équipe.", false));
-                event.setCancelled(true);
-                return;
-            }
-            plugin.getLogger().info(event.getPlayer().getName()+ " a placé une ancre de réapparition en" + block.getLocation());
-            if (TeamRespawnManager.getInstance().hasRespawnPoint(team.getName())){
-                TeamRespawnManager.getInstance().removeRespawnPoint(team.getName());
-            }
-            TeamRespawnManager.getInstance().setRespawnPoint(team.getName(), new BlockPos(block.getX(),block.getY(),block.getZ()));
-            player.sendMessage(TextUtils.validationMessage("Le portail d'inventaire d'équipe a été placé.", false));
         }
     }
 
     @EventHandler
-    public void noPickup(PlayerAttemptPickupItemEvent e){
+    public void onPickupWool(PlayerAttemptPickupItemEvent e){
         Item item = e.getItem();
         ItemStack stack = item.getItemStack();
-        if (stack.getType().toString().endsWith("WOOL")){
+        if (stack.getType().toString().endsWith("WOOL") && !(stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE) != null && stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE))){
             item.setItemStack(new ItemStack(Material.LIGHT_GRAY_WOOL, stack.getAmount()));
         }
     }
@@ -174,35 +147,18 @@ public class TheFloorIslavaListener implements Listener {
     }
 
     @EventHandler
-    public void onTeamInvInteract(PlayerInteractEvent event) {
-        if (!event.hasItem()) return;
-
-        ItemStack item = event.getItem();
-        if (item == null) return;
-        if (!new TeamInventoryItem().isItem(item)) return;
-
-        event.setCancelled(true);
-
-        Player player = event.getPlayer();
-        String team = getTeamOf(player);
-
-        if (team == null) {
-            player.sendActionBar(TextUtils.errorMessage("Vous n'êtes pas dans une équipe, donc pas de coffre partagé.", false));
-            return;
-        }
-
-        TeamInventory inv = TeamInventoryManager.getInstance().getTeamInventory(team);
-        player.openInventory(inv.getInventory());
-    }
-
-    @EventHandler
     public void onTeamManagerInteract(PlayerInteractEvent event) {
+        System.out.println("onTeamManagerInteract called for player: " + event.getPlayer().getName());
         if (!event.hasItem()) return;
+        System.out.println("Player has item: " + event.getItem().getType());
 
         ItemStack item = event.getItem();
         if (item == null) return;
+        System.out.println("Item is not null: " + item.getType());
         if (!new TeamManagerItem().isItem(item)) return;
-        if (plugin.getDangerManagerInstance().getHasStarted()) return;
+        System.out.println("Item is TeamManagerItem: " + item.getType());
+        if (plugin.getGameManager().getState()==GameState.RUNNING) return;
+        System.out.println("Game state is not RUNNING, opening Team GUI for player: " + event.getPlayer().getName());
 
         event.setCancelled(true);
         TeamGUI.openMainMenu(event.getPlayer());
@@ -221,16 +177,6 @@ public class TheFloorIslavaListener implements Listener {
         ShopGUI.open(event.getPlayer(),0);
     }
 
-    private String getTeamOf(Player p){
-        if (p!= null){
-            Team team = plugin.getServer().getScoreboardManager().getMainScoreboard().getEntryTeam(p.getName());
-            if (team != null){
-                return team.getName();
-            }
-        }
-        return null;
-    }
-
     @EventHandler
     public void onFallDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player player &&
@@ -246,7 +192,7 @@ public class TheFloorIslavaListener implements Listener {
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         plugin.getLogger().info("OnDeath with respawn");
-        if (plugin.getDangerManagerInstance().getNoRespawn()){
+        if (plugin.getGameManager().getNoRespawn()){
             plugin.getLogger().info("OnDeath no respawn");
             Player player = event.getEntity();
             deathLocations.put(
@@ -333,7 +279,7 @@ public class TheFloorIslavaListener implements Listener {
         if (!(egg.getShooter() instanceof Player p)) return;
 
         ItemStack item = p.getInventory().getItemInMainHand();
-        if (!new EggBridge().isItem(item)) return;
+        if (!new EggBridgeItem().isItem(item)) return;
         event.getEntity().getPersistentDataContainer().set(
                 new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class),"eggBridgeEntity"),
                 PersistentDataType.STRING,

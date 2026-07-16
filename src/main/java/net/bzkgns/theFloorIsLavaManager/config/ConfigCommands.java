@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.config;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -6,12 +6,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerConfig;
-import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerConfigKey;
-import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfigKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+
+import java.util.function.Supplier;
 
 /**
  * /tfl config list                -> affiche tous les paramètres et leur valeur
@@ -24,95 +25,114 @@ import org.bukkit.entity.Player;
 @SuppressWarnings("SameReturnValue")
 public class ConfigCommands {
 
-    public static LiteralArgumentBuilder<CommandSourceStack> registerConfigNode(DangerManager dangerManager) {
-        LiteralArgumentBuilder<CommandSourceStack> configNode = Commands.literal("config")
+    public static LiteralArgumentBuilder<CommandSourceStack> registerConfigNode(ConfigManager<?> configManager) {
+        LiteralArgumentBuilder<CommandSourceStack> configNode = Commands.literal(configManager.getConfig().getName())
                 .requires(sender -> sender.getSender().isOp());
 
         configNode.then(Commands.literal("list")
-                .executes(ctx -> listConfig(ctx, dangerManager)));
+                .executes(ctx -> listConfig(ctx, configManager)));
 
         configNode.then(Commands.literal("get")
                 .then(Commands.argument("cle", StringArgumentType.word())
                         .suggests((_, builder) -> {
-                            for (DangerConfigKey k : DangerConfigKey.values()) builder.suggest(k.getKey());
+                            for (ConfigKey k : configManager.getConfig().getKeys()) builder.suggest(k.getKey());
                             return builder.buildFuture();
                         })
-                        .executes(ctx -> getValue(ctx, dangerManager))));
+                        .executes(ctx -> getValue(ctx, configManager))));
 
         configNode.then(Commands.literal("set")
                 .then(Commands.argument("cle", StringArgumentType.word())
                         .suggests((_, builder) -> {
-                            for (DangerConfigKey k : DangerConfigKey.values()) builder.suggest(k.getKey());
+                            for (ConfigKey k : configManager.getConfig().getKeys()) builder.suggest(k.getKey());
                             return builder.buildFuture();
                         })
                         .then(Commands.argument("valeur", StringArgumentType.word())
-                                .executes(ctx -> setValue(ctx, dangerManager)))));
+                                .executes(ctx -> setValue(ctx, configManager, () -> TheFloorIsLavaManager.getInstance().getGameManager().canEditConfig())))));
 
         configNode.then(Commands.literal("gui")
-                .executes(ctx -> openGui(ctx, dangerManager)));
+                .executes(ctx -> openGui(ctx, configManager)));
 
         return configNode;
     }
 
-    private static int listConfig(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager) {
-        DangerConfig config = dangerManager.getConfig();
+    private static <T extends ConfigSection<T>> int listConfig(CommandContext<CommandSourceStack> ctx, ConfigManager<T> configManager) {
+        T config = configManager.getConfig();
         ctx.getSource().getSender().sendMessage(Component.text("§6--- Configuration TFL ---"));
-        for (DangerConfigKey k : DangerConfigKey.values()) {
+
+        for (ConfigKey<T, ?> k : config.getKeys()) {
             ctx.getSource().getSender().sendMessage(Component.text(
                     "§e" + k.getKey() + "§7 = §f" + k.get(config) + " §8(" + k.getDescription() + ")"));
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int getValue(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager) {
+    private static <T extends ConfigSection<T>> int getValue(
+            CommandContext<CommandSourceStack> ctx,
+            ConfigManager<T> configManager
+    ) {
         String rawKey = StringArgumentType.getString(ctx, "cle");
-        DangerConfigKey key = DangerConfigKey.fromKey(rawKey);
+
+        ConfigKey<T, ?> key = configManager.getKey(rawKey);
+
         if (key == null) {
-            ctx.getSource().getSender().sendMessage(Component.text("§cParamètre inconnu : " + rawKey));
+            ctx.getSource().getSender().sendMessage(
+                    Component.text("§cParamètre inconnu : " + rawKey));
             return Command.SINGLE_SUCCESS;
         }
+
         ctx.getSource().getSender().sendMessage(Component.text(
-                "§e" + key.getKey() + " §7= §f" + key.get(dangerManager.getConfig())));
+                "§e" + key.getKey() + " §7= §f" + key.get(configManager.getConfig())));
+
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int setValue(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager) {
-        if (!dangerManager.canEditConfig()) {
+    private static <T extends ConfigSection<T>> int setValue(
+            CommandContext<CommandSourceStack> ctx,
+            ConfigManager<T> configManager,
+            Supplier<Boolean> canEdit
+    ) {
+        if (!canEdit.get()) {
             ctx.getSource().getSender().sendMessage(Component.text(
-                    "Impossible de modifier la configuration pendant une partie en cours.", NamedTextColor.RED));
+                    "Impossible de modifier la configuration pendant une partie en cours.",
+                    NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }
 
         String rawKey = StringArgumentType.getString(ctx, "cle");
         String rawValue = StringArgumentType.getString(ctx, "valeur");
-        DangerConfigKey key = DangerConfigKey.fromKey(rawKey);
+
+        ConfigKey<T, ?> key = configManager.getKey(rawKey);
 
         if (key == null) {
-            ctx.getSource().getSender().sendMessage(Component.text("§cParamètre inconnu : " + rawKey));
+            ctx.getSource().getSender().sendMessage(
+                    Component.text("§cParamètre inconnu : " + rawKey));
             return Command.SINGLE_SUCCESS;
         }
 
         try {
-            key.set(dangerManager.getConfig(), rawValue);
+            configManager.set(rawKey, rawValue);
         } catch (NumberFormatException e) {
-            ctx.getSource().getSender().sendMessage(Component.text("§cValeur invalide pour " + rawKey + " : " + rawValue));
+            ctx.getSource().getSender().sendMessage(Component.text(
+                    "§cValeur invalide pour " + rawKey + " : " + rawValue));
             return Command.SINGLE_SUCCESS;
         }
 
-        ctx.getSource().getSender().sendMessage(Component.text("§a" + key.getKey() + " défini à " + rawValue));
+        ctx.getSource().getSender().sendMessage(Component.text(
+                "§a" + key.getKey() + " défini à " + key.get(configManager.getConfig())));
+
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int openGui(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager) {
+    private static <T extends ConfigSection<T>> int openGui(CommandContext<CommandSourceStack> ctx, ConfigManager<T> configManager) {
         if (!(ctx.getSource().getExecutor() instanceof Player player)) {
             ctx.getSource().getSender().sendMessage(Component.text("§cCommande réservée aux joueurs."));
             return Command.SINGLE_SUCCESS;
         }
-        if (!dangerManager.canEditConfig()) {
+        if (!TheFloorIsLavaManager.getInstance().getGameManager().canEditConfig()) {
             player.sendMessage(Component.text("Impossible d'éditer la configuration pendant une partie en cours.", NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }
-        ConfigGUI.open(player, dangerManager);
+        ConfigGUI.open(player, configManager.getConfig());
         return Command.SINGLE_SUCCESS;
     }
 }

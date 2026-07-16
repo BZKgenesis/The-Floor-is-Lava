@@ -8,9 +8,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
-import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
+import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
+import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
 import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
+import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -20,7 +22,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Map;
 
-import static net.bzkgns.theFloorIsLavaManager.ConfigCommands.registerConfigNode;
+import static net.bzkgns.theFloorIsLavaManager.config.ConfigCommands.registerConfigNode;
 
 @SuppressWarnings("SameReturnValue")
 public class TheFloorIsLavaCommands {
@@ -35,16 +37,16 @@ public class TheFloorIsLavaCommands {
         ctx.getSource().getSender().sendMessage("Niveau défini à " + level);
         return Command.SINGLE_SUCCESS;
     }
-    private static int start(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
-        if (dangerManager.start()){
+    private static int start(CommandContext<CommandSourceStack> ctx, GameManager gameManager){
+        if (gameManager.startGame()){
             ctx.getSource().getSender().sendMessage("Démarrage du système.");
         }else{
-            ctx.getSource().getSender().sendMessage("Erreur dans le démarrage du système (état actuel : " + dangerManager.getState() + ").");
+            ctx.getSource().getSender().sendMessage("Erreur dans le démarrage du système (état actuel : " + gameManager.getState() + ").");
         }
         return Command.SINGLE_SUCCESS;
     }
     private static int stop(CommandContext<CommandSourceStack> ctx){
-        TheFloorIsLavaManager.getInstance().getDangerManagerInstance().stop();
+        TheFloorIsLavaManager.getInstance().getGameManager().stopGame();
         ctx.getSource().getSender().sendMessage("Arrêt du système.");
         return Command.SINGLE_SUCCESS;
     }
@@ -76,41 +78,46 @@ public class TheFloorIsLavaCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    public static LiteralCommandNode<CommandSourceStack> registerTflCommands(DangerManager dangerManager, TheFloorIsLavaManager plugin){
+    public static LiteralCommandNode<CommandSourceStack> registerTflCommands(GameManager gameManager, TheFloorIsLavaManager plugin){
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("tfl");
-        root.then(registerConfigNode(dangerManager));
+        root.then(Commands.literal("config")
+            .requires(sender -> sender.getSender().isOp())
+                .then(registerConfigNode(plugin.getConfigManager("danger")))
+                .then(registerConfigNode(plugin.getConfigManager("game"))));
         root.then(Commands.literal("getLevel")
             .requires(sender -> sender.getSender().isOp())
-            .executes( ctx -> getLevel(ctx,dangerManager)));
+            .executes( ctx -> getLevel(ctx,gameManager.getDangerManager())));
         root.then(Commands.literal("setLevel")
             .requires(sender -> sender.getSender().isOp()).then(
                 Commands.argument("couche", IntegerArgumentType.integer(-64,319))
-                .executes(ctx ->setLevel(ctx,dangerManager))));
+                .executes(ctx ->setLevel(ctx,gameManager.getDangerManager()))));
         root.then(Commands.literal("start")
             .requires(sender -> sender.getSender().isOp())
-            .executes(ctx -> start(ctx,dangerManager)));
+            .executes(ctx -> start(ctx,gameManager)));
         root.then(Commands.literal("stop")
             .requires(sender -> sender.getSender().isOp())
             .executes(TheFloorIsLavaCommands::stop));
         root.then(Commands.literal("pause")
             .requires(sender -> sender.getSender().isOp())
-            .executes(ctx -> pause(ctx,dangerManager)));
+            .executes(ctx -> pause(ctx,gameManager.getDangerManager())));
         root.then(Commands.literal("resume")
                 .requires(sender -> sender.getSender().isOp())
-                .executes(ctx -> resume(ctx,dangerManager)));
+                .executes(ctx -> resume(ctx,gameManager.getDangerManager())));
         root.then(Commands.literal("setSpeed")
             .requires(sender -> sender.getSender().isOp()).then(
                 Commands.argument("nbTick", DoubleArgumentType.doubleArg(1,1000))
-                .executes(ctx ->setIncreaseAmount(ctx,dangerManager))));
+                .executes(ctx ->setIncreaseAmount(ctx,gameManager.getDangerManager()))));
         root.then(Commands.literal("getSpeed")
             .requires(sender -> sender.getSender().isOp())
-            .executes( ctx -> getSpeed(ctx,dangerManager)));
+            .executes( ctx -> getSpeed(ctx,gameManager.getDangerManager())));
         root.then(Commands.literal("give")
                 .requires(sender -> sender.getSender().isOp())
                 .then(Commands.argument("item_key", StringArgumentType.word()).suggests(
                         (_, suggestionsBuilder) -> {
+                            System.out.println(suggestionsBuilder.getRemaining());
                             for (String itemKey : ItemManager.getAllItemKeys()) {
-                                suggestionsBuilder.suggest(itemKey);
+                                if (itemKey.startsWith(suggestionsBuilder.getRemaining()))
+                                    suggestionsBuilder.suggest(itemKey);
                             }
                             return suggestionsBuilder.buildFuture();
                         }
@@ -144,7 +151,7 @@ public class TheFloorIsLavaCommands {
                                 .executes(ctx -> resetWorldMapCommande(ctx,StringArgumentType.getString(ctx,"map_name").replace("\"",""),plugin)))));
         root.then(Commands.literal("team")
                 .executes( ctx -> {
-                    if (plugin.getDangerManagerInstance().getHasStarted()){
+                    if (plugin.getGameManager().getState() == GameState.RUNNING){
                         ctx.getSource().getSender().sendMessage("§cVous ne pouvez pas gérer votre équipe pendant une partie !");
                         return Command.SINGLE_SUCCESS;
                     }

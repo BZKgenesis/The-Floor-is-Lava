@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.items;
+package net.bzkgns.theFloorIsLavaManager.items.popup_tower;
 
 import net.minecraft.core.BlockPos;
 import org.bukkit.*;

@@ -1,5 +1,6 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor;
 
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
@@ -79,7 +80,7 @@ public class TeamRespawnManager {
         for (Map.Entry<String, BlockPos> entry : respawnPoints.entrySet()) {
             String teamName = entry.getKey();
             BlockPos respawnPoint = entry.getValue();
-            if (respawnPoint.getY() < plugin.getDangerManagerInstance().getDangerLevel()){
+            if (respawnPoint.getY() < plugin.getGameManager().getDangerManager().getDangerLevel()){
                 removeRespawnPoint(teamName);
                 TeamManager.broadcastTeamMessage(TextUtils.errorMessage("Votre point de respawn a été supprimé car il est sous le niveau de danger actuel !"), TeamManager.getInstance().getTeam(teamName));
                 plugin.getLogger().info("Respawn point for team " + teamName + " has been removed due to being below the danger level.");

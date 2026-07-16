@@ -1,8 +1,9 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.managers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 
 import java.net.URI;
 import java.net.http.HttpClient;

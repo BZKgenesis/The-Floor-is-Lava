@@ -1,5 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
+
+import org.bukkit.inventory.CraftingRecipe;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,26 @@ public final class ItemManager {
 
     public static List<String> getAllItemKeys(){
         return new ArrayList<>(ITEMS.keySet());
+    }
+
+    public static List<String> getAllCraftableItemKeys(){
+        List<String> craftableItemKeys = new ArrayList<>();
+        for (CustomItem item : ITEMS.values()) {
+            if (item.getRecipe() != null) {
+                craftableItemKeys.add(item.getKey());
+            }
+        }
+        return craftableItemKeys;
+    }
+
+    public static List<CraftingRecipe> getAllCraftingRecipes(){
+        List<CraftingRecipe> recipes = new ArrayList<>();
+        for (CustomItem item : ITEMS.values()) {
+            if (item.getRecipe() != null) {
+                recipes.add(item.getRecipe());
+            }
+        }
+        return recipes;
     }
 
     public static CustomItem getItemByKey(String key){

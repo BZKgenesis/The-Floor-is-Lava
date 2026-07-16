@@ -1,5 +1,6 @@
-package net.bzkgns.theFloorIsLavaManager;
+package net.bzkgns.theFloorIsLavaManager.managers;
 
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -48,7 +49,7 @@ public class WorldManager {
 
     public void resetRandomWorld(long seed) {
         isGameWorldLoaded = false;
-        plugin.getDangerManagerInstance().stop();
+        plugin.getGameManager().stopGame();
 
         resettingWorld = true;
 
@@ -273,7 +274,7 @@ public class WorldManager {
 
     public void loadMap(String mapName) {
 
-        plugin.getDangerManagerInstance().stop();
+        plugin.getGameManager().stopGame();
 
         isGameWorldLoaded = false;
         resettingWorld = true;
@@ -375,10 +376,6 @@ public class WorldManager {
     @SuppressWarnings("unused")
     public boolean isResettingWorld(){
         return resettingWorld;
-    }
-
-    public boolean isGameWorldLoaded() {
-        return isGameWorldLoaded;
     }
 
     public World getLobbyWorld(){
@@ -502,5 +499,41 @@ public class WorldManager {
         } catch (IOException e) {
             plugin.getLogger().log( Level.SEVERE, e.getMessage(),e);
         }
+    }
+
+    public void initLobbyWorld() {
+        TheFloorIsLavaManager.getInstance().getLogger().info("Initialisation du monde lobby...");
+        plugin.getLogger().info("Le monde lobby existe deja, suppression de l'ancien monde...");
+        Path lobbyPath = Bukkit.getWorldContainer().toPath().resolve("world/dimensions/minecraft").resolve(LOBBY_WORLD);
+        plugin.getLogger().info(lobbyPath.toFile().getAbsolutePath());
+        Bukkit.unloadWorld(getLobbyWorld(), false);
+        deleteRecursively(lobbyPath.toFile());
+        WorldCreator creator = new WorldCreator(LOBBY_WORLD);
+        creator.environment(World.Environment.NORMAL);
+        creator.type(WorldType.FLAT);
+        creator.generateStructures(false);
+        creator.generatorSettings("{\"layers\":[{\"block\":\"minecraft:bedrock\",\"height\":1},{\"block\":\"minecraft:light_gray_wool\",\"height\":63}],\"biome\":\"minecraft:plains\"}");
+
+        World lobby = creator.createWorld();
+
+        if (lobby == null) {
+            plugin.getLogger().severe("Impossible de charger le monde \"" + LOBBY_WORLD + "\" !");
+            return;
+        }
+
+        // Configuration du lobby
+        lobby.setAutoSave(false);
+        lobby.setTime(6000);
+        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
+        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
+        lobby.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        lobby.setGameRule(GameRules.SPAWN_MOBS, false);
+        lobby.setStorm(false);
+        lobby.setThundering(false);
+
+        Location spawn = new Location(lobby, 0.5, 0, 0.5);
+        lobby.setSpawnLocation(spawn);
+
+        plugin.getLogger().info("Monde lobby charge !");
     }
 }

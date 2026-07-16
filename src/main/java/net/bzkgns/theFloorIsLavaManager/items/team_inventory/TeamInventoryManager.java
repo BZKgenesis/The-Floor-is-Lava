@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.items;
+package net.bzkgns.theFloorIsLavaManager.items.team_inventory;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import org.bukkit.plugin.Plugin;

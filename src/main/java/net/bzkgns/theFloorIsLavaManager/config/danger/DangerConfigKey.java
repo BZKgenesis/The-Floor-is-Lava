@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.dangerZone;
+package net.bzkgns.theFloorIsLavaManager.config.danger;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -40,28 +40,7 @@ public enum DangerConfigKey {
             (c, v) -> c.setLavaMargin(Integer.parseInt(v))),
     INCREASE_SIZE("increase-size", "Hauteur (blocs) posée par palier",
             c -> Integer.toString(c.getIncreaseSize()),
-            (c, v) -> c.setIncreaseSize(Integer.parseInt(v))),
-    LAVA_RISING_DELAY("lava-rising-delay", "Délai (ticks) avant le début de la montée",
-            c -> Integer.toString(c.getLavaRisingDelay()),
-            (c, v) -> c.setLavaRisingDelay(Integer.parseInt(v))),
-    BORDER_SIZE_PRERISE("border-size-prerise", "Taille de bordure pendant la préparation",
-            c -> Integer.toString(c.getBorderSizePreRise()),
-            (c, v) -> c.setBorderSizePreRise(Integer.parseInt(v))),
-    BORDER_SIZE_DURING_RISE("border-size-during-rise", "Taille de bordure finale",
-            c -> Integer.toString(c.getBorderSizeDuringRise()),
-            (c, v) -> c.setBorderSizeDuringRise(Integer.parseInt(v))),
-    BORDER_RESIZE_TIME("border-resize-time", "Durée (secondes) du rétrécissement",
-            c -> Integer.toString(c.getBorderResizeTime()),
-            (c, v) -> c.setBorderResizeTime(Integer.parseInt(v))),
-    DISABLE_PVP_DURING_PREP("disable-pvp-during-preparation", "Désactiver le PvP pendant la préparation",
-            c -> Boolean.toString(c.isDisablePvpDuringPreparation()),
-            (c, v) -> c.setDisablePvpDuringPreparation(Boolean.parseBoolean(v))),
-    KEEP_INVENTORY_DURING_PREP("keepinventory-during-preparation", "Garder l'inventaire pendant la préparation",
-            c -> Boolean.toString(c.isKeepInventoryDuringPreparation()),
-            (c, v) -> c.setKeepInventoryDuringPreparation(Boolean.parseBoolean(v))),
-    FALL_DAMAGE_REDUCTION("falldamage-reduction", "Multiplicateur de dégâts de chute (bottes en cuir)",
-            c -> Double.toString(c.getFallDamageReduction()),
-            (c, v) -> c.setFallDamageReduction(Double.parseDouble(v)));
+            (c, v) -> c.setIncreaseSize(Integer.parseInt(v)));
 
     private final String key;
     private final String description;
@@ -78,12 +57,14 @@ public enum DangerConfigKey {
     }
 
     public String getKey() { return key; }
+    @SuppressWarnings("unused")
     public String getDescription() { return description; }
     public String get(DangerConfig config) { return getter.apply(config); }
 
     /** @throws NumberFormatException si la valeur ne correspond pas au type attendu */
     public void set(DangerConfig config, String rawValue) { setter.accept(config, rawValue); }
 
+    @SuppressWarnings("unused")
     public static DangerConfigKey fromKey(String key) {
         for (DangerConfigKey k : values()) {
             if (k.key.equalsIgnoreCase(key)) return k;

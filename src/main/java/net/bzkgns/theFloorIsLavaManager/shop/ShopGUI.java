@@ -3,14 +3,12 @@ package net.bzkgns.theFloorIsLavaManager.shop;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
+import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -67,7 +65,7 @@ public class ShopGUI implements Listener {
         RECIPES.clear();
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
-        for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
+        for (String recipe_key : ItemManager.getAllCraftableItemKeys()){
             //plugin.getLogger().info("recipe : "+recipe_key);
             NamespacedKey key = new NamespacedKey(plugin, recipe_key);
             Recipe recipe = Bukkit.getRecipe(key);
@@ -121,7 +119,10 @@ public class ShopGUI implements Listener {
 
             ShopRecipe recipe = RECIPES.get(start + i);
             ItemStack display = recipe.result().clone();
-            display.lore(List.of(Component.text("Clique pour échanger").color(TextColor.fromHexString("#55FF55"))));
+            List<Component> display_lore = display.lore();
+            if (display_lore == null) display_lore = new ArrayList<>();
+            display_lore.add(Component.text("Clique pour échanger").color(TextColor.fromHexString("#55FF55")));
+            display.lore(display_lore);
             inv.setItem(RESULT_SLOTS[i], display);
 
             int slot = RESULT_SLOTS[i];
@@ -269,13 +270,16 @@ public class ShopGUI implements Listener {
 
         ShopRecipe recipe = RECIPES.get(idx);
 
-        if (!canPay(p, recipe)) {
-            p.sendMessage(TextUtils.errorMessage("Ingrédients insuffisants."));
-            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
-            return;
+        if (e.getWhoClicked() instanceof Player player && player.getGameMode() != GameMode.CREATIVE){
+            if (!canPay(p, recipe)) {
+                p.sendMessage(TextUtils.errorMessage("Ingrédients insuffisants."));
+                p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+                return;
+            }else{
+                pay(p, recipe);
+            }
         }
 
-        pay(p, recipe);
         p.getInventory().addItem(recipe.result().clone());
         p.sendMessage("§aÉchange réussi.");
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);

@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
 
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Egg;
@@ -17,8 +18,8 @@ public class EggBridgeTask implements Runnable {
 
     private final Plugin plugin;
 
-    public EggBridgeTask(Plugin plugin) {
-        this.plugin = plugin;
+    public EggBridgeTask() {
+        this.plugin = TheFloorIsLavaManager.getInstance();
     }
 
     @Override

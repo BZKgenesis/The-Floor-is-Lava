@@ -2,8 +2,20 @@ package net.bzkgns.theFloorIsLavaManager;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.bzkgns.theFloorIsLavaManager.dangerZone.DangerManager;
+import net.bzkgns.theFloorIsLavaManager.config.ConfigGUI;
+import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
+import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
+import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryListener;
+import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
+import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLavaManager.items.*;
+import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
+import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerListener;
+import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
+import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnItem;
+import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnListener;
+import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
+import net.bzkgns.theFloorIsLavaManager.managers.WorldManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
@@ -16,6 +28,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaCommands.registerTflCommands;
 
 public final class TheFloorIsLavaManager extends JavaPlugin {
@@ -26,10 +41,15 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
 
-    private DangerManager dangerManager;
+    private GameManager gameManager;
     private ResourcePackManager resourcePackManager;
     private WorldManager worldManager;
 
+    private final Map<String, ConfigManager<?>> configManagers = new HashMap<>();
+
+    public ConfigManager<?> getConfigManager(String configName) {
+        return configManagers.get(configName);
+    }
 
     public static boolean pvp;
 
@@ -46,33 +66,43 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         // au moment où onEnable() les invoque (cas du tout premier démarrage, quand
         // GAME_WORLD n'existe pas encore).
         saveDefaultConfig();
-        initLobbyWorld();
+        gameManager = new GameManager();
+
+        worldManager = new WorldManager(this);
+        worldManager.initLobbyWorld();
         ItemManager.registerAll(
                 new BatteItem(),
                 new CiseauxItem(),
-                new EggBridge(),
+                new EggBridgeItem(),
                 new FireBallItem(),
                 new PopupTowerItem(),
                 new ShopItem(),
                 new SnowballPlateItem(),
                 new TeamInventoryItem(),
                 new TeamRespawnItem(),
-                new TeamManagerItem()
+                new TeamManagerItem(),
+                new GiveAllItem(),
+                new InfiniteWoolItem(),
+                new FeatherFallingBoots()
         );
 
-        dangerManager = new DangerManager(this);
-
+        ConfigManager<DangerConfig> dangerConfigManager = new ConfigManager<>(new DangerConfig());
+        ConfigManager<GameConfig> gameConfigManager = new ConfigManager<>(new GameConfig());
+        configManagers.put(dangerConfigManager.getConfig().getName(), dangerConfigManager);
+        configManagers.put(gameConfigManager.getConfig().getName(), gameConfigManager);
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
-            worldManager = new WorldManager(this);
             worldManager.resetRandomWorld();
-        } else {
-            worldManager = new WorldManager(this);
         }
         resourcePackManager = new ResourcePackManager(this);
         resourcePackManager.load();
 
         Bukkit.getPluginManager().registerEvents(new ShopGUI(), this);
+        Bukkit.getPluginManager().registerEvents(new PopupTowerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TeamRespawnListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TeamInventoryListener(), this);
+        Bukkit.getPluginManager().registerEvents(new GivelAllGUI(), this);
+        Bukkit.getPluginManager().registerEvents(new InfiniteWool(), this);
         pvp = true;
 
         getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
@@ -85,7 +115,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             team.unregister();
         }
 
-        LiteralCommandNode<CommandSourceStack> buildCommand = registerTflCommands(dangerManager, this);
+        LiteralCommandNode<CommandSourceStack> buildCommand = registerTflCommands(gameManager, this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
 
         LiteralCommandNode<CommandSourceStack> ShopBuildCommand = Commands.literal("shop")
@@ -97,7 +127,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 } ).build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(ShopBuildCommand));
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new EggBridgeTask(this), 1,1);
+
 
         new TheFloorIsLavaCrafts().setCrafts(this);
 
@@ -113,49 +143,18 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (dangerManager != null) {
-            dangerManager.stop();
+        if (gameManager != null) {
+            gameManager.stopGame();
         }
     }
 
-    private void initLobbyWorld() {
-        World lobby = Bukkit.getWorld(LOBBY_WORLD);
-
-        if (lobby == null) {
-            WorldCreator creator = new WorldCreator(LOBBY_WORLD);
-            creator.environment(World.Environment.NORMAL);
-            creator.type(WorldType.NORMAL);
-            creator.generateStructures(false);
-
-            lobby = Bukkit.createWorld(creator);
-        }
-
-        if (lobby == null) {
-            getLogger().severe("Impossible de charger le monde \"" + LOBBY_WORLD + "\" !");
-            return;
-        }
-
-        // Configuration du lobby
-        lobby.setAutoSave(false);
-        lobby.setTime(6000);
-        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
-        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
-        lobby.setGameRule(GameRules.ADVANCE_WEATHER, false);
-        lobby.setStorm(false);
-        lobby.setThundering(false);
-
-        Location spawn = new Location(lobby, 0.5, 100, 0.5);
-        lobby.setSpawnLocation(spawn);
-
-        getLogger().info("Monde lobby charge !");
-    }
 
     public double getFallDamageReduction(){
-        return dangerManager.getConfig().getFallDamageReduction();
+        return getConfigManager("game").getDouble("fall-damage-reduction");
     }
 
-    public DangerManager getDangerManagerInstance(){
-        return dangerManager;
+    public GameManager getGameManager(){
+        return gameManager;
     }
 
     public ResourcePackManager getResourcePackManager(){

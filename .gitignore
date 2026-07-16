@@ -50,15 +50,6 @@ run/
 runClient/
 runServer/
 
-# Crash reports & debug dumps
-crash-reports/
-hs_err_pid*
-replay_recordings/
-
-# Minecraft instance data
-saves/
-screenshots/
-config/
 
 # ==========================
 # --- Gradle wrappers ---

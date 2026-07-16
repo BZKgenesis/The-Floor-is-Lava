@@ -22,6 +22,7 @@ public class TextUtils {
 
         switch (format) {
             case SHORTEST:
+                System.out.println("minutes: " + minutes + ", seconds: " + seconds);
                 if (minutes > 0) {
                     if (minutes > 1) {
                         return String.format("%d minutes", minutes);
@@ -55,6 +56,14 @@ public class TextUtils {
         Bukkit.getServer().sendMessage(message);
     }
 
+    public static void broadcastMessageOp(Component message){
+        for (Player player : Bukkit.getServer().getOnlinePlayers()){
+            if (player.isOp()){
+                player.sendMessage(message);
+            }
+        }
+    }
+
     public static void sendActionBar(Component component){
         for (Player player : Bukkit.getServer().getOnlinePlayers()){
             player.sendActionBar(component);
@@ -84,6 +93,7 @@ public class TextUtils {
     public static Component validationMessage(String message){
         return validationMessage(message, true);
     }
+    @SuppressWarnings("unused")
     public static Component validationMessage(String message, boolean withPrefix){
         return prefix().append(Component.text(message).color(TextColor.color(0,255,0)));
     }
