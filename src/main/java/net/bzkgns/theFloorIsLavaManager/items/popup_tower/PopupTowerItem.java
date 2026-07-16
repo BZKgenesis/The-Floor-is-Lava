@@ -12,7 +12,7 @@ import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.WOOLS_MATERIALS;
 public class PopupTowerItem extends CustomItem {
 
     public PopupTowerItem() {
-        super("popupTower",
+        super("popup_tower",
                 "Popup Tower",
                 "Permet de créer une tour qui se déploie automatiquement",
                 Rarity.EPIC,

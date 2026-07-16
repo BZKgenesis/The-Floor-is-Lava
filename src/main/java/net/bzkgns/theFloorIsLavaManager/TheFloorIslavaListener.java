@@ -14,7 +14,6 @@ import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
-import net.minecraft.core.BlockPos;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Egg;
@@ -25,7 +24,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -269,7 +267,7 @@ public class TheFloorIslavaListener implements Listener {
             return;
         }
         plugin.getLogger().info("OnRespawn with respawn");
-        BlockPos respawnPos = TeamRespawnManager.getInstance().getPlayerTeamRespawnPosition(player.getUniqueId());
+        Location respawnPos = TeamRespawnManager.getInstance().getPlayerTeamRespawnPosition(player.getUniqueId());
         if (respawnPos == null) {
             plugin.getLogger().info("No respawn point for player " + player.getName() + ", teleporting to death location.");
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -279,40 +277,13 @@ public class TheFloorIslavaListener implements Listener {
             return;
         }
         plugin.getLogger().info("Respawn point for player " + player.getName() + " found at " + respawnPos.getX() + ", " + respawnPos.getY() + ", " + respawnPos.getZ() + ", teleporting.");
-        deathLocation.set(respawnPos.getX(), respawnPos.getY()+1, respawnPos.getZ());
+        deathLocation.set(respawnPos.getX()+.5, respawnPos.getY()+1, respawnPos.getZ()+.5);
         Bukkit.getScheduler().runTask(plugin, () -> {
             player.teleport(deathLocation);
             player.setGameMode(GameMode.SURVIVAL);
         });
     }
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        Block block = event.getBlock();
-        BlockPos blockPos = new BlockPos(block.getX(), block.getY(), block.getZ());
-        ItemStack blockBroken = ItemStack.of(block.getType());
-        if (blockBroken.getType().equals(Material.RESPAWN_ANCHOR)){
-            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
-            BlockPos respawnPos = TeamRespawnManager.getInstance().getRespawnPoint(team.getName());
-            if (respawnPos != null && respawnPos.getX() == block.getX() && respawnPos.getY() == block.getY() && respawnPos.getZ() == block.getZ()) {
-                player.sendActionBar(TextUtils.errorMessage("Vous ne pouvez pas casser votre propre portail d'inventaire d'équipe.", false));
-                plugin.getLogger().info(player.getName() + " a essayé de casser son propre portail d'inventaire d'équipe.");
-                event.setCancelled(true);
-                return;
-            }
-            String teamName = TeamRespawnManager.getInstance().getTeamNameByRespawnPoint(blockPos);
-            if (teamName != null) {
-                TeamRespawnManager.getInstance().removeRespawnPoint(teamName);
-                plugin.getLogger().info(player.getName() + " a cassé le portail d'inventaire d'équipe de l'équipe " + teamName);
-                player.sendActionBar(TextUtils.validationMessage("Le portail d'inventaire d'équipe a été supprimé.", false));
-                TeamManager.broadcastTeamMessage(TextUtils.errorMessage("Le portail d'inventaire d'équipe a été supprimé."), TeamManager.getInstance().getTeam(teamName));
-                return;
-            }
-            plugin.getLogger().warning(player.getName() + " a cassé un portail d'inventaire d'équipe qui n'était pas lié à une équipe.");
-
-        }
-    }
 
     @EventHandler
     public void onEggBridgeLaunch(ProjectileLaunchEvent event){

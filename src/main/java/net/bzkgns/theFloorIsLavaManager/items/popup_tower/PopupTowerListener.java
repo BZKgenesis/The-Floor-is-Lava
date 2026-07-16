@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class PopupTowerListener implements Listener {
 
-
     @EventHandler
     public void onPlaced(BlockPlaceEvent event) {
         Player player = event.getPlayer();

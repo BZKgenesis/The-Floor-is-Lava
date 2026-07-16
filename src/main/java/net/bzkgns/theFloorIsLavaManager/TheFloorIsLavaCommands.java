@@ -19,7 +19,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
-import net.minecraft.core.BlockPos;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -168,7 +168,7 @@ public class TheFloorIsLavaCommands {
                         .executes(ctx -> {
                             if (ctx.getSource().getExecutor() instanceof Player player){
                                 player.sendMessage("respawn locations:");
-                                for (Map.Entry<String, BlockPos> entry : TeamRespawnManager.getInstance().getRespawnPoints().entrySet()){
+                                for (Map.Entry<String, Location> entry : TeamRespawnManager.getInstance().getRespawnPoints().entrySet()){
                                     player.sendMessage("- respawn point for team " + entry.getKey() + " is at " + entry.getValue().toString());
                                 }
                             }

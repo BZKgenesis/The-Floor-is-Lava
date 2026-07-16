@@ -25,9 +25,13 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
+
+import java.util.List;
 
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaCommands.registerTflCommands;
 
@@ -127,6 +131,29 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             Bukkit.removeBossBar(key);
         }
 
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(
+                this,
+                () -> {
+                    List<Entity> entities = worldManager.getGameWorld().getEntities();
+                    entities.addAll(worldManager.getLobbyWorld().getEntities());
+                    entities.stream()
+                            .filter(e -> e instanceof ArmorStand && e.getScoreboardTags().contains("tfl_respawn_team_effect_armorstand"))
+                            .map(e -> (ArmorStand) e)
+                            .forEach(a -> {
+                                a.setRotation(a.getYaw()+0.15f, 0);
+                                a.getWorld().spawnParticle(
+                                        Particle.OMINOUS_SPAWNING,
+                                        a.getLocation().add(Math.cos(a.getYaw())*.8,-.5,Math.sin(a.getYaw())*.8),
+                                        1, 0,
+                                        0,
+                                        0,
+                                        0.1
+                                );
+                            });
+                },
+                0L,
+                2L
+        );
 
 
         this.getLogger().info("RisingDamage active !");

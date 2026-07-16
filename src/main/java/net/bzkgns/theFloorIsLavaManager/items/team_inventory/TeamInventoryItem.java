@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 public class TeamInventoryItem extends CustomItem {
     public TeamInventoryItem() {
-        super("teamInv",
+        super("team_inv",
                 "Portail d'inventaire d'équipe",
                 "Permet de partager l'inventaire avec les membres de l'équipe",
                 Rarity.EPIC,

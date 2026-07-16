@@ -150,7 +150,6 @@ public class TeamManager {
         for (TeamData team : teams.values()) {
             if (!team.isEliminated()) {
                 aliveTeams.add(team);
-                break;
             }
         }
         return aliveTeams;

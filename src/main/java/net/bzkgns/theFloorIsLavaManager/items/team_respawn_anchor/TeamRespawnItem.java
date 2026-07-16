@@ -14,7 +14,7 @@ public class TeamRespawnItem extends CustomItem {
                 "Ancre de réapparition d'équipe",
                 List.of("Permet de réapparaître à l'endroit où l'ancre est posée", "au lieu du spawn du monde de jeu."),
                 Rarity.RARE,
-                Material.RESPAWN_ANCHOR,
+                TeamRespawnManager.respawnAnchorMaterial,
                 true
         );
     }

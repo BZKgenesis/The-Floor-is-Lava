@@ -52,6 +52,10 @@ public abstract class CustomItem {
     }
     public abstract ItemStack giveItem();
     public boolean isItem(ItemStack stack){
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null || !meta.getPersistentDataContainer().has(new NamespacedKey(plugin, "key"), PersistentDataType.STRING)) {
+            return false;
+        }
         String itemKey = stack.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(plugin, "key"), PersistentDataType.STRING);
         return key.getKey().equals(itemKey) && stack.getType() == itemStack.getType();
     }

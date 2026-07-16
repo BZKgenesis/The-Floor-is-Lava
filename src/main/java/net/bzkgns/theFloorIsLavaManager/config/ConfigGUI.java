@@ -57,12 +57,26 @@ public class ConfigGUI implements Listener {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(TextUtils.textE(key.getKey()));
-        meta.lore(List.of(
-                TextUtils.text7("Valeur : ").append(textF(key.get(config).toString())),
-                TextUtils.text8(key.getDescription()),
-                TextUtils.text8("Clic gauche +1 / Shift +10"),
-                TextUtils.text8("Clic droit -1 / Shift -10")
-        ));
+        if (key.get(config) instanceof Number number) {
+            meta.lore(List.of(
+                    TextUtils.text7("Valeur : ").append(textF(number.toString())),
+                    TextUtils.text8(key.getDescription()),
+                    TextUtils.text8("Clic gauche +1 / Shift +10"),
+                    TextUtils.text8("Clic droit -1 / Shift -10")
+            ));
+        } else if (key.get(config) instanceof Boolean bool) {
+            meta.lore(List.of(
+                    TextUtils.text7("Valeur : ").append(textF(bool.toString())),
+                    TextUtils.text8(key.getDescription()),
+                    TextUtils.text8("Clic gauche pour inverser la valeur")
+            ));
+        } else {
+            meta.lore(List.of(
+                    TextUtils.text7("Valeur : ").append(textF(key.get(config).toString())),
+                    TextUtils.text8(key.getDescription()),
+                    TextUtils.text8("Ce paramètre ne se modifie pas au clic.")
+            ));
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -182,10 +196,10 @@ public class ConfigGUI implements Listener {
         Object value = typedKey.get(typedConfig);
 
         switch (value) {
-            case Integer i -> typedKey.set(typedConfig, (int) Math.round(after));
-            case Double v -> typedKey.set(typedConfig, after);
-            case Float v -> typedKey.set(typedConfig, (float) after);
-            case Long l -> typedKey.set(typedConfig, Math.round(after));
+            case Integer _ -> typedKey.set(typedConfig, (int) Math.round(after));
+            case Double _ -> typedKey.set(typedConfig, after);
+            case Float _ -> typedKey.set(typedConfig, (float) after);
+            case Long _ -> typedKey.set(typedConfig, Math.round(after));
             case null, default -> throw new IllegalArgumentException("Ce paramètre n'est pas numérique.");
         }
     }
