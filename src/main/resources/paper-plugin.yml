@@ -1,5 +1,5 @@
 name: TheFloorIsLavaManager
-version: '1.0.0'
+version: '1.1.0'
 main: net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager
 bootstrapper: net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaBootstrap
-api-version: '1.21'
+api-version: '26.1.2'
