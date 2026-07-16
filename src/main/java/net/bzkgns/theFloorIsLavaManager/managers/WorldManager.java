@@ -73,9 +73,7 @@ public class WorldManager {
         World oldWorld = getGameWorld();
         List<Player> players;
 
-        if(oldWorld == null){
-            players = new ArrayList<>(Bukkit.getOnlinePlayers());
-        }else{
+        if (oldWorld != null) {
             players = new ArrayList<>(oldWorld.getPlayers());
             World lobby = getLobbyWorld();
 
@@ -125,6 +123,7 @@ public class WorldManager {
 
     private void initializeLoadedMapWorld(World world) {
         world.setGameRule(GameRules.RESPAWN_RADIUS, 0);
+        world.setGameRule(GameRules.LOCATOR_BAR,false);
         world.setTime(0);
         world.setGameRule(GameRules.ADVANCE_TIME, false);
     }
