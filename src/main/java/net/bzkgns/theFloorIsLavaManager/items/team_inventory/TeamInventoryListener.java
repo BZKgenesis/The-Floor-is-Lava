@@ -5,7 +5,9 @@ import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
 
@@ -14,6 +16,16 @@ public class TeamInventoryListener implements Listener {
     @EventHandler
     public void onTeamInvInteract(PlayerInteractEvent event) {
         if (!event.hasItem()) return;
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return; // Ignore la main secondaire
+        }
+
+        Action action = event.getAction();
+
+        if (action != Action.RIGHT_CLICK_AIR &&
+                action != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
 
         ItemStack item = event.getItem();
         if (item == null) return;

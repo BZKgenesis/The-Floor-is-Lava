@@ -13,6 +13,7 @@ import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.minecraft.core.BlockPos;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -34,6 +36,7 @@ import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -67,6 +70,7 @@ public class TheFloorIslavaListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
+        player.setFlyingFallDamage(TriState.TRUE);
 
         player.setResourcePack(
                 plugin.getResourcePackManager().getUrl(),
@@ -85,8 +89,10 @@ public class TheFloorIslavaListener implements Listener {
                 event.getPlayer().getInventory().clear();
                 event.getPlayer().give(new TeamManagerItem().giveItem());
                 event.getPlayer().give(new GiveAllItem().giveItem());
+                event.getPlayer().setAllowFlight(true);
             }
             case RUNNING -> {
+                event.getPlayer().setAllowFlight(false);
                 if (plugin.getGameManager().isPlayerInGame(event.getPlayer())){
                     event.getPlayer().setGameMode(GameMode.SURVIVAL);
                     if (!event.getPlayer().getWorld().equals(plugin.getWorldManager().getGameWorld())) {
@@ -99,7 +105,10 @@ public class TheFloorIslavaListener implements Listener {
                     event.getPlayer().setGameMode(GameMode.SPECTATOR);
                 }
             }
-            case ENDING -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
+            case ENDING -> {
+                event.getPlayer().setGameMode(GameMode.SPECTATOR);
+                event.getPlayer().setAllowFlight(false);
+            }
         }
         if (plugin.getGameManager().getState()==GameState.RUNNING &&
                 !plugin.getGameManager().isPlayerInGame(event.getPlayer())){
@@ -107,7 +116,7 @@ public class TheFloorIslavaListener implements Listener {
         }
         discoverRecipes(event.getPlayer());
         if(event.getPlayer().getWorld().equals(plugin.getServer().getWorld("minecraft:overworld"))){
-            event.getPlayer().sendMessage(Component.text("§cTu n'es pas sensé être ici."));
+            event.getPlayer().sendMessage(TextUtils.errorMessage("Tu n'es pas sensé être ici."));
         }
     }
 
@@ -130,7 +139,7 @@ public class TheFloorIslavaListener implements Listener {
     public void onPickupWool(PlayerAttemptPickupItemEvent e){
         Item item = e.getItem();
         ItemStack stack = item.getItemStack();
-        if (stack.getType().toString().endsWith("WOOL") && !(stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE) != null && stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE))){
+        if (stack.getType().toString().endsWith("WOOL") && !(stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE) != null && Boolean.TRUE.equals(stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE)))){
             item.setItemStack(new ItemStack(Material.LIGHT_GRAY_WOOL, stack.getAmount()));
         }
     }
@@ -148,17 +157,22 @@ public class TheFloorIslavaListener implements Listener {
 
     @EventHandler
     public void onTeamManagerInteract(PlayerInteractEvent event) {
-        System.out.println("onTeamManagerInteract called for player: " + event.getPlayer().getName());
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return; // Ignore la main secondaire
+        }
+
+        Action action = event.getAction();
+
+        if (action != Action.RIGHT_CLICK_AIR &&
+                action != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
         if (!event.hasItem()) return;
-        System.out.println("Player has item: " + event.getItem().getType());
 
         ItemStack item = event.getItem();
         if (item == null) return;
-        System.out.println("Item is not null: " + item.getType());
         if (!new TeamManagerItem().isItem(item)) return;
-        System.out.println("Item is TeamManagerItem: " + item.getType());
         if (plugin.getGameManager().getState()==GameState.RUNNING) return;
-        System.out.println("Game state is not RUNNING, opening Team GUI for player: " + event.getPlayer().getName());
 
         event.setCancelled(true);
         TeamGUI.openMainMenu(event.getPlayer());
@@ -166,6 +180,16 @@ public class TheFloorIslavaListener implements Listener {
 
     @EventHandler
     public void onShopInteract(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return; // Ignore la main secondaire
+        }
+
+        Action action = event.getAction();
+
+        if (action != Action.RIGHT_CLICK_AIR &&
+                action != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
         if (!event.hasItem()) return;
 
         ItemStack item = event.getItem();

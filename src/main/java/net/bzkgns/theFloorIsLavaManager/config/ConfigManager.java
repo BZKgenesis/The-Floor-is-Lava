@@ -1,7 +1,10 @@
 package net.bzkgns.theFloorIsLavaManager.config;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,11 +13,13 @@ public class ConfigManager<T extends ConfigSection<T>> {
 
     private final T config;
 
+    private final File configFile;
+
     private final Map<String, ConfigKey<T, ?>> keys;
 
-
-    public ConfigManager(T config) {
+    public ConfigManager(T config, File configFile) {
         this.config = config;
+        this.configFile = configFile;
 
         this.keys = config.getKeys()
                 .stream()
@@ -43,12 +48,20 @@ public class ConfigManager<T extends ConfigSection<T>> {
         return configKey.get(config);
     }
 
+    public Integer getInt(ConfigKey<T,Integer> key) {
+        return getInt(key.getKey());
+    }
+
     public Integer getInt(String key) {
         try {
             return (Integer) this.get(key);
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("Key " + key + " is not an Integer");
         }
+    }
+
+    public Double getDouble(ConfigKey<T,Double> key) {
+        return getDouble(key.getKey());
     }
 
     public Double getDouble(String key) {
@@ -59,6 +72,9 @@ public class ConfigManager<T extends ConfigSection<T>> {
         }
     }
 
+    public Boolean getBoolean(ConfigKey<T,Boolean> key) {
+        return getBoolean(key.getKey());
+    }
     public Boolean getBoolean(String key) {
         try {
             return (Boolean) this.get(key);
@@ -128,5 +144,34 @@ public class ConfigManager<T extends ConfigSection<T>> {
 
     public T getConfig() {
         return config;
+    }
+
+    private void saveToFile(File file) {
+        FileConfiguration yaml = new YamlConfiguration();
+
+        save(yaml);
+
+        try {
+            yaml.save(file);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Impossible de sauvegarder la configuration " + file.getName(),
+                    e
+            );
+        }
+    }
+
+    private void loadFromFile(File file) {
+        FileConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+
+        load(yaml);
+    }
+
+    public void saveConfig() {
+        saveToFile(configFile);
+    }
+
+    public void loadConfig() {
+        loadFromFile(configFile);
     }
 }

@@ -9,6 +9,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
 import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
@@ -17,6 +18,7 @@ import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.minecraft.core.BlockPos;
 import org.bukkit.entity.Player;
 
@@ -52,7 +54,7 @@ public class TheFloorIsLavaCommands {
     }
     private static int pause(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
         if (!dangerManager.pause()){
-            ctx.getSource().getSender().sendMessage("§cImpossible de mettre en pause (état actuel : " + dangerManager.getState() + ").");
+            ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Impossible de mettre en pause (état actuel : " + dangerManager.getState() + ")."));
             return Command.SINGLE_SUCCESS;
         }
         ctx.getSource().getSender().sendMessage("Pause du système.");
@@ -60,7 +62,7 @@ public class TheFloorIsLavaCommands {
     }
     private static int resume(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
         if (!dangerManager.resume()){
-            ctx.getSource().getSender().sendMessage("§cAucune pause en cours à reprendre.");
+            ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Aucune pause en cours à reprendre."));
             return Command.SINGLE_SUCCESS;
         }
         ctx.getSource().getSender().sendMessage("Reprise du système.");
@@ -82,8 +84,9 @@ public class TheFloorIsLavaCommands {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("tfl");
         root.then(Commands.literal("config")
             .requires(sender -> sender.getSender().isOp())
-                .then(registerConfigNode(plugin.getConfigManager("danger")))
-                .then(registerConfigNode(plugin.getConfigManager("game"))));
+                .then(registerConfigNode(ConfigRegistry.getConfigManager("danger")))
+                .then(registerConfigNode(ConfigRegistry.getConfigManager("game")))
+                .then(registerConfigNode(ConfigRegistry.getConfigManager("map"))));
         root.then(Commands.literal("getLevel")
             .requires(sender -> sender.getSender().isOp())
             .executes( ctx -> getLevel(ctx,gameManager.getDangerManager())));
@@ -126,7 +129,7 @@ public class TheFloorIsLavaCommands {
                     if (ctx.getSource().getExecutor() instanceof Player player && ItemManager.getAllItemKeys().contains(itemKey)) {
                         player.give(ItemManager.getItemByKey(itemKey).giveItem());
                     } else {
-                        ctx.getSource().getSender().sendMessage("§cItem inconnu : " + itemKey);
+                        ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Item inconnu : " + itemKey));
                     }
                     return Command.SINGLE_SUCCESS;
                 })));
@@ -152,7 +155,7 @@ public class TheFloorIsLavaCommands {
         root.then(Commands.literal("team")
                 .executes( ctx -> {
                     if (plugin.getGameManager().getState() == GameState.RUNNING){
-                        ctx.getSource().getSender().sendMessage("§cVous ne pouvez pas gérer votre équipe pendant une partie !");
+                        ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Vous ne pouvez pas gérer votre équipe pendant une partie."));
                         return Command.SINGLE_SUCCESS;
                     }
                     if (ctx.getSource().getExecutor() instanceof Player player){

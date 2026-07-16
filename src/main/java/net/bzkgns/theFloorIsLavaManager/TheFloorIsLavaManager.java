@@ -5,9 +5,10 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigGUI;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
+import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryListener;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
-import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
 import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerListener;
@@ -28,9 +29,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaCommands.registerTflCommands;
 
 public final class TheFloorIsLavaManager extends JavaPlugin {
@@ -45,11 +43,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     private ResourcePackManager resourcePackManager;
     private WorldManager worldManager;
 
-    private final Map<String, ConfigManager<?>> configManagers = new HashMap<>();
-
-    public ConfigManager<?> getConfigManager(String configName) {
-        return configManagers.get(configName);
-    }
 
     public static boolean pvp;
 
@@ -60,15 +53,10 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // saveDefaultConfig() et la création de dangerManager doivent précéder toute
-        // opération de WorldManager : resetRandomWorld()/loadMap() appellent
-        // dangerManager.stop() en interne, donc dangerManager ne doit jamais être null
-        // au moment où onEnable() les invoque (cas du tout premier démarrage, quand
-        // GAME_WORLD n'existe pas encore).
-        saveDefaultConfig();
+
         gameManager = new GameManager();
 
-        worldManager = new WorldManager(this);
+        worldManager = new WorldManager();
         worldManager.initLobbyWorld();
         ItemManager.registerAll(
                 new BatteItem(),
@@ -85,11 +73,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new InfiniteWoolItem(),
                 new FeatherFallingBoots()
         );
-
-        ConfigManager<DangerConfig> dangerConfigManager = new ConfigManager<>(new DangerConfig());
-        ConfigManager<GameConfig> gameConfigManager = new ConfigManager<>(new GameConfig());
-        configManagers.put(dangerConfigManager.getConfig().getName(), dangerConfigManager);
-        configManagers.put(gameConfigManager.getConfig().getName(), gameConfigManager);
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
             worldManager.resetRandomWorld();
@@ -138,6 +121,14 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         healthObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
         ShopGUI.loadRecipes();
 
+        NamespacedKey key = new NamespacedKey(this, "game_bar");
+
+        if (Bukkit.getBossBar(key) != null) {
+            Bukkit.removeBossBar(key);
+        }
+
+
+
         this.getLogger().info("RisingDamage active !");
     }
 
@@ -150,7 +141,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
 
     public double getFallDamageReduction(){
-        return getConfigManager("game").getDouble("fall-damage-reduction");
+        ConfigManager<GameConfig> gameConfig =
+                ConfigRegistry.getConfigManager("game");
+        return gameConfig.getDouble(GameConfigKeys.FALL_DAMAGE_REDUCTION);
     }
 
     public GameManager getGameManager(){

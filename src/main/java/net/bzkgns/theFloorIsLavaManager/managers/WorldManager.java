@@ -1,6 +1,10 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.ConfigLoader;
+import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
+import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
+import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -33,9 +37,17 @@ public class WorldManager {
 
     private final TheFloorIsLavaManager plugin;
 
-    public WorldManager(TheFloorIsLavaManager plugin){
-        this.plugin = plugin;
+    public WorldManager(){
+        this.plugin = TheFloorIsLavaManager.getInstance();
+        currentMapConfigManager = ConfigLoader.load(
+                new MapConfig(),
+                ConfigLoader.pluginConfigFile("defaultMapConfig"),
+                true
+        );
+        ConfigRegistry.addConfig(currentMapConfigManager);
     }
+
+    private ConfigManager<MapConfig> currentMapConfigManager;
 
     private boolean resettingWorld = false;
 
@@ -47,7 +59,12 @@ public class WorldManager {
         resetRandomWorld(0);
     }
 
+    public ConfigManager<MapConfig> getCurrentMapConfigManager() {
+        return currentMapConfigManager;
+    }
+
     public void resetRandomWorld(long seed) {
+        loadDefaultMapConfig();
         isGameWorldLoaded = false;
         plugin.getGameManager().stopGame();
 
@@ -79,16 +96,16 @@ public class WorldManager {
         WorldCreator creator = new WorldCreator(GAME_WORLD);
         creator.seed(seed==0?new Random().nextLong():seed);
 
-        recreateWorld(creator,players);
+        recreateWorld(creator);
         isGameWorldLoaded = true;
     }
 
-    private void recreateWorld(WorldCreator creator, List<Player> players) {
-        recreateWorld(creator, players, true);
+    private void recreateWorld(WorldCreator creator) {
+        recreateWorld(creator, getCurrentMapConfigManager().getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE));
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void recreateWorld(WorldCreator creator, List<Player> players, boolean placeDefaultSpawnStructure) {
+    private void recreateWorld(WorldCreator creator, boolean placeDefaultSpawnStructure) {
         World newWorld = Bukkit.createWorld(creator);
 
         if (newWorld == null) {
@@ -103,10 +120,6 @@ public class WorldManager {
             initializeLoadedMapWorld(newWorld);
         }
 
-        for (Player player : players) {
-            player.teleport(newWorld.getSpawnLocation());
-        }
-
         resettingWorld = false;
     }
 
@@ -114,6 +127,34 @@ public class WorldManager {
         world.setGameRule(GameRules.RESPAWN_RADIUS, 0);
         world.setTime(0);
         world.setGameRule(GameRules.ADVANCE_TIME, false);
+    }
+
+    private void loadMapConfig(File mapFolder) {
+
+        File mapConfig = new File(mapFolder, "mapConfig.yml");
+
+        if (mapConfig.exists()) {
+            plugin.getLogger().info("Chargement de " + mapConfig);
+            currentMapConfigManager =
+                    ConfigLoader.load(new MapConfig(), mapConfig, false);
+        } else {
+            plugin.getLogger().info("Utilisation de defaultMapConfig.yml");
+            currentMapConfigManager =
+                    ConfigLoader.load(
+                            new MapConfig(),
+                            ConfigLoader.pluginConfigFile("defaultMapConfig"),
+                            true
+                    );
+        }
+    }
+
+    private void loadDefaultMapConfig() {
+        currentMapConfigManager =
+                ConfigLoader.load(
+                        new MapConfig(),
+                        ConfigLoader.pluginConfigFile("defaultMapConfig"),
+                        true
+                );
     }
 
     private void initializeGameWorld(World world) {
@@ -166,6 +207,7 @@ public class WorldManager {
         world.setGameRule(GameRules.RESPAWN_RADIUS,0);
         world.setTime(0);
         world.setGameRule(GameRules.ADVANCE_TIME,false);
+        world.getWorldBorder().setSize(100000);
     }
 
     private static void copyDirectory(Path source, Path destination) throws IOException {
@@ -182,7 +224,6 @@ public class WorldManager {
                             || relativeStr.equals("uid.dat") || relativeStr.equals("session.lock")) {
                         return;
                     }
-                    System.out.println("Copying: " + source.resolve(relative) + " to: " + destination.resolve(relative));
 
                     Path target = destination.resolve(relative);
                     if (Files.isDirectory(path)) {
@@ -323,6 +364,7 @@ public class WorldManager {
             resettingWorld = false;
             return;
         }
+        loadMapConfig(mapFolder);
 
         Path tempExtractDir = null;
 
@@ -358,7 +400,6 @@ public class WorldManager {
         isGameWorldLoaded = true;
         recreateWorld(
                 new WorldCreator(GAME_WORLD),
-                players,
                 true
         );
     }
@@ -524,12 +565,13 @@ public class WorldManager {
         // Configuration du lobby
         lobby.setAutoSave(false);
         lobby.setTime(6000);
-        lobby.setGameRule(GameRules.ADVANCE_TIME, false);
+        lobby.setClearWeatherDuration(1000000);
         lobby.setGameRule(GameRules.ADVANCE_TIME, false);
         lobby.setGameRule(GameRules.ADVANCE_WEATHER, false);
         lobby.setGameRule(GameRules.SPAWN_MOBS, false);
         lobby.setStorm(false);
         lobby.setThundering(false);
+        lobby.getWorldBorder().setSize(100000);
 
         Location spawn = new Location(lobby, 0.5, 0, 0.5);
         lobby.setSpawnLocation(spawn);

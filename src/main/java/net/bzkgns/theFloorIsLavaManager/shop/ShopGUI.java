@@ -34,6 +34,8 @@ public class ShopGUI implements Listener {
             0, 9, 18, 27, 36
     };
 
+    private static final String TITLE = "Shop";
+
     private static final List<ShopRecipe> RECIPES = new ArrayList<>();
     //private static final Map<Inventory, BukkitRunnable> RUNNABLES = new HashMap<>();
 
@@ -108,7 +110,7 @@ public class ShopGUI implements Listener {
         plugin.getLogger().info("recipe loaded "+RECIPES.size());
     }
     public static void open(Player p, int page) {
-        Inventory inv = Bukkit.createInventory(null, SIZE, Component.text("Shop").color(TextColor.fromHexString("#FFAA00")).append(Component.text("(Page " + (page + 1) + ")").color(TextColor.fromHexString("#AAAAAA"))));
+        Inventory inv = Bukkit.createInventory(null, SIZE, Component.text(TITLE).color(TextColor.fromHexString("#FFAA00")).append(Component.text("(Page " + (page + 1) + ")").color(TextColor.fromHexString("#AAAAAA"))));
         Map<Integer, IngredientDisplay> animated = new HashMap<>();
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
@@ -257,7 +259,7 @@ public class ShopGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getClickedInventory() instanceof PlayerInventory) return;
-        if (!plainText(e.getView().title()).startsWith("Shop")) return;
+        if (!plainText(e.getView().title()).startsWith(TITLE)) return;
         e.setCancelled(true);
 
         Player p = (Player) e.getWhoClicked();
@@ -281,7 +283,7 @@ public class ShopGUI implements Listener {
         }
 
         p.getInventory().addItem(recipe.result().clone());
-        p.sendMessage("§aÉchange réussi.");
+        p.sendMessage(TextUtils.validationMessage("Échange réussi."));
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
     }
     private static boolean canPay(Player p, ShopRecipe r) {

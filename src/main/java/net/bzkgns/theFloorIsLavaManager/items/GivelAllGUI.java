@@ -12,6 +12,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
@@ -51,6 +52,16 @@ public class GivelAllGUI implements Listener {
 
     @EventHandler
     public void onGiveAllInteract(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return; // Ignore la main secondaire
+        }
+
+        Action action = event.getAction();
+
+        if (action != Action.RIGHT_CLICK_AIR &&
+                action != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
         if (!event.hasItem()) return;
         ItemStack item = event.getItem();
         if (item == null) return;

@@ -115,3 +115,7 @@ Ressources notables (`src/main/resources/`) :
 ```
 
 Le jar compilé se trouve ensuite dans `build/libs/`.
+
+# Utils:
+seeds:
+- `1087643283499148055` : que de l'eau (test erreur de spread)

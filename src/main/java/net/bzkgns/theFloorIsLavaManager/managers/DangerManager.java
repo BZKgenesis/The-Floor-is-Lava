@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
+import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
@@ -54,7 +55,7 @@ public class DangerManager {
 
     /** Réinitialise l'état d'une partie (niveau de lave, joueurs en jeu...) sans toucher à la config. */
     private void resetRuntimeState() {
-        dangerLevel = dangerConfigManager.getInt("start-level");
+        dangerLevel = dangerConfigManager.getInt(DangerConfigKeys.START_LEVEL);
         oldDangerLevelPlaced = (int) (dangerLevel - 1);
         increaseAmount = dangerConfigManager.getConfig().initialIncreaseAmount();
     }
@@ -131,11 +132,11 @@ public class DangerManager {
         }
         state = stateBeforePause;
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickIncrease, 0, 1);
-        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 0, dangerConfigManager.getInt("damage-every"));
-        if (dangerConfigManager.getBoolean("show-alert") ) {
+        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 0, dangerConfigManager.getInt(DangerConfigKeys.DAMAGE_EVERY));
+        if (dangerConfigManager.getBoolean(DangerConfigKeys.SHOW_ALERT) ) {
             particleTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickParticles, 0, DISPLAY_PERIOD);
         }
-        if (dangerConfigManager.getBoolean("place-lava")) {
+        if (dangerConfigManager.getBoolean(DangerConfigKeys.PLACE_LAVA)) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 0, 1);
         }
         return true;
@@ -183,7 +184,7 @@ public class DangerManager {
     private void tickDamage() {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (p.getLocation().getY() < dangerLevel) {
-                p.damage(dangerConfigManager.getDouble("damage"));
+                p.damage(dangerConfigManager.getDouble(DangerConfigKeys.DAMAGE));
             }
         }
     }
@@ -206,7 +207,7 @@ public class DangerManager {
     }
 
     private void tickPlaceLava() {
-        int increaseSize = dangerConfigManager.getInt("increase-size");
+        int increaseSize = dangerConfigManager.getInt(DangerConfigKeys.INCREASE_SIZE);
         if (oldDangerLevelPlaced + increaseSize >= round(dangerLevel)) {
             return;
         }
@@ -222,7 +223,7 @@ public class DangerManager {
         World world = plugin.getWorldManager().getGameWorld();
         Location wbCenter = world.getWorldBorder().getCenter();
         double wbSize = world.getWorldBorder().getSize();
-        int lavaMargin = dangerConfigManager.getInt("lava-margin");
+        int lavaMargin = dangerConfigManager.getInt(DangerConfigKeys.LAVA_MARGIN);
         Vector3i edgeMin = new Vector3i((int) (wbCenter.getX() - round(wbSize / 2)) - lavaMargin, oldDangerLevelPlaced + 1, (int) (wbCenter.getZ() - round(wbSize / 2)) - lavaMargin);
         Vector3i edgeMax = new Vector3i((int) (wbCenter.getX() + round(wbSize / 2)) + lavaMargin, (int) round(dangerLevel), (int) (wbCenter.getZ() + round(wbSize / 2)) + lavaMargin);
 
@@ -250,17 +251,17 @@ public class DangerManager {
 
         increaseTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickIncrease, 0, 1);
 
-        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, dangerConfigManager.getInt("damage-every"));
+        damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, dangerConfigManager.getInt(DangerConfigKeys.DAMAGE_EVERY));
 
         TextUtils.broadcastMessage(TextUtils.infoMessage("!!ATTENTION!! La lave commence à monter !"));
         TextUtils.broadcastMessage(TextUtils.infoMessage("Le respawn est désactivé"));
         TextUtils.broadcastMessage(TextUtils.infoMessage("La zone se rétrécit"));
 
-        if (dangerConfigManager.getBoolean("place-lava")) {
+        if (dangerConfigManager.getBoolean(DangerConfigKeys.PLACE_LAVA)) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 1, 1);
         }
 
-        if (dangerConfigManager.getBoolean("show-alert")) {
+        if (dangerConfigManager.getBoolean(DangerConfigKeys.SHOW_ALERT)) {
             particleTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickParticles, 0, DISPLAY_PERIOD);
         }
     }

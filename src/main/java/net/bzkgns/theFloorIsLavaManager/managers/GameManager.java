@@ -1,9 +1,11 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.ConfigLoader;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
+import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.LoggingCommandSender;
@@ -14,6 +16,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -31,17 +34,29 @@ public class GameManager {
 
     private BossBar bossbar;
 
-    private final ConfigManager<GameConfig> gameConfigManager = new ConfigManager<>(new GameConfig());
-    private final ConfigManager<DangerConfig> dangerConfigManager = new ConfigManager<>(new DangerConfig());
+    private final ConfigManager<GameConfig> gameConfigManager;
 
     private int phaseRisingTask = -1;
     private int bossBarTask = -1;
 
     private boolean noRespawn = false;
 
-    private List<Player> playerInGame;
+    private final List<Entity> playerInGame;
 
     public GameManager() {
+
+
+
+        gameConfigManager = ConfigLoader.load(
+                new GameConfig()
+        );
+
+        ConfigManager<DangerConfig> dangerConfigManager = ConfigLoader.load(
+                new DangerConfig()
+        );
+
+        ConfigRegistry.addConfig(gameConfigManager);
+        ConfigRegistry.addConfig(dangerConfigManager);
         this.dangerManager = new DangerManager(dangerConfigManager);
         playerInGame = new ArrayList<>();
     }
@@ -53,10 +68,14 @@ public class GameManager {
     public boolean startGame() {
         TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
-        plugin.getServer().removeBossBar(new NamespacedKey(plugin, "game_bar"));
+        NamespacedKey key = new NamespacedKey(plugin, "game_bar");
 
-        if (gameConfigManager.getInt("min-nb-teams") > TeamManager.getInstance().getTeams().size()) {
-            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Impossible de démarrer le jeu, il faut au moins " + gameConfigManager.getInt("min-nb-teams") + " équipe(s)."));
+        if (Bukkit.getBossBar(key) != null) {
+            Bukkit.removeBossBar(key);
+        }
+
+        if (gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM) > TeamManager.getInstance().getTeams().size()) {
+            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Impossible de démarrer le jeu, il faut au moins " + gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM) + " équipe(s)."));
             return false;
         }
 
@@ -71,27 +90,31 @@ public class GameManager {
         }
         state = GameState.RUNNING;
         World world = plugin.getWorldManager().getGameWorld();
-        world.getWorldBorder().setSize(gameConfigManager.getInt("border-size-prerise"));
+        world.getWorldBorder().setSize(gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_PRE_RISE));
         world.getWorldBorder().setCenter(0, 0);
-        if (gameConfigManager.getBoolean("keep-inventory-during-preparation"))
+        if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
             world.setGameRule(GameRules.KEEP_INVENTORY, true);
         world.setGameRule(GameRules.ADVANCE_TIME, true);
         world.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);
 
-        if (gameConfigManager.getBoolean("disable-pvp-during-preparation")) {
+        if (gameConfigManager.getBoolean(GameConfigKeys.DISABLE_PVP_DURING_PREPARATION)) {
             TheFloorIsLavaManager.pvp = false;
         }
-        playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> plugin.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(p) != null).toList());
+        plugin.getServer().getOnlinePlayers().forEach(p -> p.getScoreboardTags().remove("inGame"));
+                plugin.getServer().getOnlinePlayers().stream()
+                        .filter(p -> plugin.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(p) != null)
+                        .forEach(p -> p.addScoreboardTag("inGame")
+                        );
+        playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> p.getScoreboardTags().contains("inGame")).toList());
+        playerInGame.addAll(plugin.getWorldManager().getGameWorld().getEntities().stream().filter(e -> e.getScoreboardTags().contains("inGame")).toList());
         noRespawn = false;
 
         TextUtils.broadcastMessage(TextUtils.infoMessage("Le jeu commence !"));
         for(Player p : plugin.getServer().getOnlinePlayers()){
-            p.removeScoreboardTag("inGame");
             if (!isPlayerInGame(p)){
                 p.setGameMode(GameMode.SPECTATOR);
                 p.sendMessage(TextUtils.infoMessage("Vous êtes en mode spectateur car vous n'êtes pas dans une équipe."));
             }else{
-                p.addScoreboardTag("inGame");
                 AttributeInstance healthAttribute = p.getAttribute(Attribute.MAX_HEALTH);
                 if (healthAttribute == null) {
                     plugin.getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + p.getName());
@@ -107,26 +130,40 @@ public class GameManager {
                 p.setGameMode(GameMode.SURVIVAL);
             }
         }
-        if (gameConfigManager.getBoolean("keep-inventory-during-preparation"))
+        if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
             TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires sont sauvegardés (keepInventory)"));
-        if (gameConfigManager.getBoolean("disable-pvp-during-preparation"))
+        if (gameConfigManager.getBoolean(GameConfigKeys.DISABLE_PVP_DURING_PREPARATION))
             TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est désactivé"));
 
 
-        LoggingCommandSender commandSender = new LoggingCommandSender(Bukkit.getConsoleSender());
-        Bukkit.dispatchCommand(commandSender, "execute in minecraft:tfl_game run spreadplayers 0 0 50 " + gameConfigManager.getInt("border-size-prerise") / 2 + " under 200 true @a[tag=inGame]");
+        SpreadEntityManager spreadentityManager = new SpreadEntityManager();
+        boolean success = spreadentityManager.spread(
+                playerInGame,
+                new Location(world, 0, 200, 0),
+                gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_PRE_RISE) / 2.
+                , 50, true, 200
+        );
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-            if (!commandSender.getMessages().isEmpty())
-                System.out.println("Command output: " + commandSender.getMessages().getLast());
-            else
-                System.out.println("Command output: No output from command");
+        if (!success) {
+            plugin.getLogger().warning("Impossible de répartir les joueurs, vérifiez la configuration !");
+            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Impossible de répartir les joueurs, vérifiez la configuration !"));
+            Bukkit.removeBossBar(new NamespacedKey(plugin, "game_bar"));
+            state = GameState.LOBBY;
+            cancelBossBarTask();
+            return false;
+        }
+        playerInGame.forEach(e -> {
+            if (e instanceof Player p){
+                p.setAllowFlight(false);
+            }
         });
 
+        playerInGame.stream()
+                .filter(e -> e instanceof Player)
+                .map(e -> (Player) e )
+                .forEach(p -> p.setRespawnLocation(p.getLocation(), true));
 
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute as @a[tag=inGame] at @s run spawnpoint");
-
-        int lavaRisingDelay = gameConfigManager.getInt("lava-rising-delay");
+        int lavaRisingDelay = gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY);
         TextUtils.broadcastMessage(TextUtils.infoMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes"));
         //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
         int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
@@ -150,7 +187,7 @@ public class GameManager {
         phaseRisingTask = Bukkit.getScheduler().scheduleSyncDelayedTask(
                 TheFloorIsLavaManager.getInstance(),
                 this::startRisingPhase,
-                gameConfigManager.getInt("lava-rising-delay")
+                gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY)
         );
         return true;
     }
@@ -172,10 +209,10 @@ public class GameManager {
             plugin.getLogger().warning("Impossible de récupérer le monde de jeu pour démarrer la phase 2");
             return;
         }
-        world.getWorldBorder().changeSize(gameConfigManager.getInt("border-size-during-rise"), gameConfigManager.getInt("border-resize-time") * 20L);
-        if (gameConfigManager.getBoolean("keep-inventory-during-preparation"))
+        world.getWorldBorder().changeSize(gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_DURING_RISE), gameConfigManager.getInt(GameConfigKeys.BORDER_RESIZE_TIME) * 20L);
+        if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
             TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires ne sont plus sauvegardés"));
-        if (gameConfigManager.getBoolean("disable-pvp-during-preparation"))
+        if (gameConfigManager.getBoolean(GameConfigKeys.DISABLE_PVP_DURING_PREPARATION))
             TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est activé"));
         dangerManager.startRising();
     }
@@ -220,7 +257,7 @@ public class GameManager {
     }
 
     private void startPreparationBossBar() {
-        int preparationTime = gameConfigManager.getInt("lava-rising-delay");
+        int preparationTime = gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY);
 
         bossBarTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(
                 TheFloorIsLavaManager.getInstance(),
@@ -249,7 +286,7 @@ public class GameManager {
                                     ))
                             );
 
-                            remaining--;
+                            remaining = remaining - 20;
                         }
                     }
                 },

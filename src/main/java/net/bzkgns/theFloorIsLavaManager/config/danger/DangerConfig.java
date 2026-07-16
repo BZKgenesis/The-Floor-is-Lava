@@ -28,95 +28,17 @@ public class DangerConfig implements ConfigSection<DangerConfig> {
     private int increaseSize = 2;
 
     private static final List<ConfigKey<DangerConfig, ?>> KEYS = List.of(
-
-            new ConfigKey<>(
-                    "start-level",
-                    "Niveau Y de départ de la lave",
-                    DangerConfig::getStartLevel,
-                    DangerConfig::setStartLevel,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "end-level",
-                    "Niveau Y final de la lave",
-                    DangerConfig::getEndLevel,
-                    DangerConfig::setEndLevel,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "surface-level",
-                    "Niveau Y de la surface (change la vitesse de montée)",
-                    DangerConfig::getSurfaceLevel,
-                    DangerConfig::setSurfaceLevel,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "total-time-below-surface",
-                    "Durée (ticks) pour monter jusqu'à la surface",
-                    DangerConfig::getTotalTimeBelowSurface,
-                    DangerConfig::setTotalTimeBelowSurface,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "total-time-above-surface",
-                    "Durée (ticks) pour monter de la surface au sommet",
-                    DangerConfig::getTotalTimeAboveSurface,
-                    DangerConfig::setTotalTimeAboveSurface,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "damage",
-                    "Dégâts de la zone",
-                    DangerConfig::getDamage,
-                    DangerConfig::setDamage,
-                    Double::parseDouble
-            ),
-
-            new ConfigKey<>(
-                    "damage-every",
-                    "Fréquence (ticks) des dégâts",
-                    DangerConfig::getDamageEvery,
-                    DangerConfig::setDamageEvery,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "place-lava",
-                    "Poser réellement de la lave (sinon dégâts seuls)",
-                    DangerConfig::isPlaceLava,
-                    DangerConfig::setPlaceLava,
-                    Boolean::parseBoolean
-            ),
-
-            new ConfigKey<>(
-                    "show-alert",
-                    "Afficher les alertes de proximité de la zone",
-                    DangerConfig::isShowAlert,
-                    DangerConfig::setShowAlert,
-                    Boolean::parseBoolean
-            ),
-
-            new ConfigKey<>(
-                    "lava-margin",
-                    "Marge (blocs) de lave hors bordure",
-                    DangerConfig::getLavaMargin,
-                    DangerConfig::setLavaMargin,
-                    Integer::parseInt
-            ),
-
-            new ConfigKey<>(
-                    "increase-size",
-                    "Hauteur (blocs) posée par palier",
-                    DangerConfig::getIncreaseSize,
-                    DangerConfig::setIncreaseSize,
-                    Integer::parseInt
-            )
-
+            DangerConfigKeys.START_LEVEL,
+            DangerConfigKeys.END_LEVEL,
+            DangerConfigKeys.SURFACE_LEVEL,
+            DangerConfigKeys.TOTAL_TIME_BELOW_SURFACE,
+            DangerConfigKeys.TOTAL_TIME_ABOVE_SURFACE,
+            DangerConfigKeys.DAMAGE,
+            DangerConfigKeys.DAMAGE_EVERY,
+            DangerConfigKeys.PLACE_LAVA,
+            DangerConfigKeys.SHOW_ALERT,
+            DangerConfigKeys.LAVA_MARGIN,
+            DangerConfigKeys.INCREASE_SIZE
     );
 
     // Valeurs dérivées : jamais réglées directement, toujours recalculées.

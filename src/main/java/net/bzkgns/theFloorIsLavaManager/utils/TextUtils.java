@@ -6,6 +6,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+@SuppressWarnings("unused")
 public class TextUtils {
     public enum TimeFormat {
         SHORTEST,
@@ -96,5 +97,149 @@ public class TextUtils {
     @SuppressWarnings("unused")
     public static Component validationMessage(String message, boolean withPrefix){
         return prefix().append(Component.text(message).color(TextColor.color(0,255,0)));
+    }
+
+    /**
+     * black
+     * @param message message formatted in black color
+     * @return text component with black color
+     */
+    public static Component text0(String message){
+        return Component.text(message).color(TextColor.color(0,0,0));
+    }
+
+    /**
+     * dark_blue
+     * @param message message formatted in dark blue color
+     * @return text component with dark blue color
+     */
+    public static Component text1(String message){
+        return Component.text(message).color(TextColor.fromHexString("#0000AA"));
+    }
+
+    /**
+     * dark_green
+     * @param message message formatted in dark green color
+     * @return text component with dark green color
+     */
+    public static Component text2(String message){
+        return Component.text(message).color(TextColor.fromHexString("#00AA00"));
+    }
+
+    /**
+     * dark_aqua
+     * @param message message formatted in dark aqua color
+     * @return text component with dark aqua color
+     */
+    public static Component text3(String message){
+        return Component.text(message).color(TextColor.fromHexString("#00AAAA"));
+    }
+
+    /**
+     * dark_red
+     * @param message message formatted in dark red color
+     * @return text component with dark red color
+     */
+    public static Component text4(String message){
+        return Component.text(message).color(TextColor.fromHexString("#AA0000"));
+    }
+
+    /**
+     * dark_purple
+     * @param message message formatted in dark purple color
+     * @return text component with dark purple color
+     */
+    public static Component text5(String message){
+        return Component.text(message).color(TextColor.fromHexString("#AA00AA"));
+    }
+
+    /**
+     * gold
+     * @param message message formatted in gold color
+     * @return text component with gold color
+     */
+    public static Component text6(String message){
+        return Component.text(message).color(TextColor.fromHexString("#FFAA00"));
+    }
+
+    /**
+     * gray
+     * @param message message formatted in gray color
+     * @return text component with gray color
+     */
+    public static Component text7(String message){
+        return Component.text(message).color(TextColor.fromHexString("#AAAAAA"));
+    }
+
+    /**
+     * dark_gray
+     * @param message message formatted in dark gray color
+     * @return text component with dark gray color
+     */
+    public static Component text8(String message){
+        return Component.text(message).color(TextColor.fromHexString("#555555"));
+    }
+
+    /**
+     * blue
+     * @param message message formatted in blue color
+     * @return text component with blue color
+     */
+    public static Component text9(String message){
+        return Component.text(message).color(TextColor.fromHexString("#5555FF"));
+    }
+
+    /**
+     * green
+     * @param message message formatted in green color
+     * @return text component with green color
+     */
+    public static Component textA(String message){
+        return Component.text(message).color(TextColor.fromHexString("#55FF55"));
+    }
+
+    /**
+     * aqua
+     * @param message message formatted in aqua color
+     * @return text component with aqua color
+     */
+    public static Component textB(String message){
+        return Component.text(message).color(TextColor.fromHexString("#55FFFF"));
+    }
+
+    /**
+     * red
+     * @param message message formatted in red color
+     * @return text component with red color
+     */
+    public static Component textC(String message){
+        return Component.text(message).color(TextColor.fromHexString("#FF5555"));
+    }
+
+    /**
+     * light_purple
+     * @param message message formatted in light purple color
+     * @return text component with light purple color
+     */
+    public static Component textD(String message){
+        return Component.text(message).color(TextColor.fromHexString("#FF55FF"));
+    }
+
+    /**
+     * yellow
+     * @param message message formatted in yellow color
+     * @return text component with yellow color
+     */
+    public static Component textE(String message){
+        return Component.text(message).color(TextColor.fromHexString("#FFFF55"));
+    }
+
+    /**
+     * white
+     * @param message message formatted in white color
+     * @return text component with white color
+     */
+    public static Component textF(String message){
+        return Component.text(message).color(TextColor.fromHexString("#FFFFFF"));
     }
 }

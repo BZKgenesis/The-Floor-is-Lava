@@ -1,7 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.config;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -13,9 +15,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
+
+import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
+import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.textF;
 
 /**
  * Point de départ pour un GUI d'édition de la configuration (à faire évoluer avec le
@@ -50,12 +56,12 @@ public class ConfigGUI implements Listener {
     private static <T extends ConfigSection<?>> ItemStack buildItem(ConfigKey<T,?> key, T config) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text("§e" + key.getKey()));
+        meta.displayName(TextUtils.textE(key.getKey()));
         meta.lore(List.of(
-                Component.text("§7Valeur : §f" + key.get(config)),
-                Component.text("§8" + key.getDescription()),
-                Component.text("§8Clic gauche +1 / Shift +10"),
-                Component.text("§8Clic droit -1 / Shift -10")
+                TextUtils.text7("Valeur : ").append(textF(key.get(config).toString())),
+                TextUtils.text8(key.getDescription()),
+                TextUtils.text8("Clic gauche +1 / Shift +10"),
+                TextUtils.text8("Clic droit -1 / Shift -10")
         ));
         item.setItemMeta(meta);
         return item;
@@ -63,6 +69,8 @@ public class ConfigGUI implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() instanceof PlayerInventory) return;
+        if (!plainText(event.getView().title()).startsWith(plainText(TITLE))) return;
         Component title = event.getView().title();
 
         if (!(title instanceof TextComponent)) {
@@ -84,14 +92,14 @@ public class ConfigGUI implements Listener {
         DangerManager dangerManager = plugin.getGameManager().getDangerManager();
 
         if (!dangerManager.canEditConfig()) {
-            player.sendMessage("§cLa configuration ne peut être modifiée qu'en dehors d'une partie.");
+            player.sendMessage(TextUtils.errorMessage("La configuration ne peut être modifiée qu'en dehors d'une partie."));
             player.closeInventory();
             return;
         }
 
         String configName = rawTitle.substring("Configuration TFL - ".length());
 
-        ConfigSection<?> config = plugin.getConfigManager(configName).getConfig();
+        ConfigSection<?> config = ConfigRegistry.getConfigManager(configName).getConfig();
 
         if (config == null) {
             player.closeInventory();
@@ -130,24 +138,34 @@ public class ConfigGUI implements Listener {
             Player player,
             InventoryClickEvent event
     ) {
-        if (!(key.get(config) instanceof Number number)) {
-            player.sendMessage("§cCe paramètre ne se modifie pas au clic.");
-            return;
+        if (key.get(config) instanceof Number number) {
+            double current = number.doubleValue();
+
+            int step = event.isShiftClick() ? 10 : 1;
+            int direction = event.isRightClick() ? -1 : 1;
+
+            double updated = current + step * direction;
+
+            setNumericValue(key, config, current, updated);
+
+            event.getInventory().setItem(
+                    event.getSlot(),
+                    buildItem(key, config)
+            );
+        } else if (key.get(config) instanceof Boolean bool) {
+
+            Boolean updated = !bool;
+
+            setBooleanValue(key, config, bool, updated);
+
+            event.getInventory().setItem(
+                    event.getSlot(),
+                    buildItem(key, config)
+            );
+
+        } else {
+            player.sendMessage(TextUtils.errorMessage("Ce paramètre ne se modifie pas au clic."));
         }
-
-        double current = number.doubleValue();
-
-        int step = event.isShiftClick() ? 10 : 1;
-        int direction = event.isRightClick() ? -1 : 1;
-
-        double updated = current + step * direction;
-
-        setNumericValue(key, config, current, updated);
-
-        event.getInventory().setItem(
-                event.getSlot(),
-                buildItem(key, config)
-        );
 
     }
 
@@ -163,14 +181,28 @@ public class ConfigGUI implements Listener {
 
         Object value = typedKey.get(typedConfig);
 
-        if (value instanceof Integer) {
-            typedKey.set(typedConfig, (int) Math.round(after));
-        } else if (value instanceof Double) {
+        switch (value) {
+            case Integer i -> typedKey.set(typedConfig, (int) Math.round(after));
+            case Double v -> typedKey.set(typedConfig, after);
+            case Float v -> typedKey.set(typedConfig, (float) after);
+            case Long l -> typedKey.set(typedConfig, Math.round(after));
+            case null, default -> throw new IllegalArgumentException("Ce paramètre n'est pas numérique.");
+        }
+    }
+
+    private static <T extends ConfigSection<T>> void setBooleanValue(
+            ConfigKey<?, ?> key,
+            ConfigSection<?> config,
+            Boolean before,
+            Boolean after
+    ) {
+        ConfigKey<T, Object> typedKey = (ConfigKey<T, Object>) key;
+        T typedConfig = (T) config;
+
+        Object value = typedKey.get(typedConfig);
+
+        if (value instanceof Boolean) {
             typedKey.set(typedConfig, after);
-        } else if (value instanceof Float) {
-            typedKey.set(typedConfig, (float) after);
-        } else if (value instanceof Long) {
-            typedKey.set(typedConfig, Math.round(after));
         } else {
             throw new IllegalArgumentException("Ce paramètre n'est pas numérique.");
         }
@@ -182,8 +214,8 @@ public class ConfigGUI implements Listener {
             ConfigSection<?> config
     ) {
         return buildItem(
-                (ConfigKey<ConfigSection, ?>) key,
-                (ConfigSection) config
+                (ConfigKey<ConfigSection<?>, ?>) key,
+                config
         );
     }
 
