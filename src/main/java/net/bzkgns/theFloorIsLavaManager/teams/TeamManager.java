@@ -81,33 +81,35 @@ public class TeamManager {
         NamedTextColor color = randomColor();
 
 
-        TeamData data = new TeamData(name, color);
+
+
+        Team team = createVanillaTeam(name, color);
+
+        TeamData data = new TeamData(name, color, team);
         data.addMember(p.getUniqueId());
-        teams.put(name, data);
-
-
-        createVanillaTeam(name, color);
         addPlayerToVanillaTeam(p, name);
+        teams.put(name, data);
     }
 
 
-    public void createVanillaTeam(String teamName, NamedTextColor color) {
+    public Team createVanillaTeam(String teamName, NamedTextColor color) {
         Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team = sb.getTeam(teamName);
         if (team == null) team = sb.registerNewTeam(teamName);
         team.color(color);
         team.setAllowFriendlyFire(false);
         team.setCanSeeFriendlyInvisibles(true);
+        return team;
     }
 
     public void removePlayerFromTeam(Player p){
         TeamData team = getPlayerTeam(p.getUniqueId());
         team.removeMember(p.getUniqueId());
-        removePlayerFromVanillaTeam(p, team.getName());
-        if (p.getName().equals(team.getName())){
-            teams.remove(team.getName());
-            deleteVanillaTeam(team.getName());
-            inviteManager.deleteAllInviteForTeam(team.getName());
+        removePlayerFromVanillaTeam(p, team.getId());
+        if (p.getName().equals(team.getId())){
+            teams.remove(team.getId());
+            deleteVanillaTeam(team.getId());
+            inviteManager.deleteAllInviteForTeam(team.getId());
         }
     }
 
@@ -153,5 +155,30 @@ public class TeamManager {
             }
         }
         return aliveTeams;
+    }
+
+    public List<NamedTextColor> getAvailableColors() {
+        List<NamedTextColor> colorsAvailable = List.of(
+                NamedTextColor.BLACK,
+                NamedTextColor.DARK_BLUE,
+                NamedTextColor.DARK_GREEN,
+                NamedTextColor.DARK_AQUA,
+                NamedTextColor.DARK_RED,
+                NamedTextColor.DARK_PURPLE,
+                NamedTextColor.GOLD,
+                NamedTextColor.BLUE,
+                NamedTextColor.GREEN,
+                NamedTextColor.AQUA,
+                NamedTextColor.RED,
+                NamedTextColor.LIGHT_PURPLE,
+                NamedTextColor.YELLOW);
+        List<NamedTextColor> usableColors = new ArrayList<>(colorsAvailable);
+        for (TeamData team : teams.values()){
+            usableColors.remove(team.getColor());
+        }
+        if (usableColors.isEmpty()){
+            usableColors = new ArrayList<>(colorsAvailable);
+        }
+        return usableColors;
     }
 }

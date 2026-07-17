@@ -30,10 +30,10 @@ public class TeamRespawnListener implements Listener {
                 return;
             }
             TheFloorIsLavaManager.getInstance().getLogger().info(event.getPlayer().getName()+ " a placé une ancre de réapparition en" + block.getLocation());
-            if (TeamRespawnManager.getInstance().hasRespawnPoint(team.getName())){
-                TeamRespawnManager.getInstance().removeRespawnPoint(team.getName());
+            if (TeamRespawnManager.getInstance().hasRespawnPoint(team.getId())){
+                TeamRespawnManager.getInstance().removeRespawnPoint(team.getId());
             }
-            TeamRespawnManager.getInstance().setRespawnPoint(team.getName(),location);
+            TeamRespawnManager.getInstance().setRespawnPoint(team.getId(),location);
             player.sendMessage(TextUtils.validationMessage("Le portail d'inventaire d'équipe a été placé.", false));
         }
     }
@@ -48,7 +48,7 @@ public class TeamRespawnListener implements Listener {
         if (blockBroken.getType().equals(TeamRespawnManager.respawnAnchorMaterial)){
             TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
             if (team != null){
-                Location respawnPos = TeamRespawnManager.getInstance().getRespawnPoint(team.getName());
+                Location respawnPos = TeamRespawnManager.getInstance().getRespawnPoint(team.getId());
                 if (respawnPos != null && respawnPos.getX() == block.getX() && respawnPos.getY() == block.getY() && respawnPos.getZ() == block.getZ()) {
                     player.sendActionBar(TextUtils.errorMessage("Vous ne pouvez pas casser votre propre portail d'inventaire d'équipe.", false));
                     plugin.getLogger().info(player.getName() + " a essayé de casser son propre portail d'inventaire d'équipe.");

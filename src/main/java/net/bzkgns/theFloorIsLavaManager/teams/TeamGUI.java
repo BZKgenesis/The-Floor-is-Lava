@@ -1,5 +1,14 @@
 package net.bzkgns.theFloorIsLavaManager.teams;
 
+import io.papermc.paper.connection.PlayerGameConnection;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.dialog.DialogResponseView;
+import io.papermc.paper.event.player.PlayerCustomClickEvent;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
@@ -7,7 +16,9 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,6 +33,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.*;
@@ -48,10 +61,29 @@ public class TeamGUI implements Listener {
             inv.setItem(11, createItem(Material.GREEN_WOOL, "Créer une équipe", "create_team"));
             inv.setItem(15, createItem(Material.LIGHT_BLUE_WOOL, "Rejoindre une équipe", "join_team"));
         } else {
-            if (p.getName().equals(team.getName())){
+            if (p.getName().equals(team.getId())){
                 inv.setItem(13, createItem(Material.BLUE_WOOL, "Gérer mon équipe", "manage_team"));
                 inv.setItem(15, createItem(Material.PAPER, "Demandes reçues", "request_menu"));
+                ItemStack renameItem = createItem(Material.NAME_TAG, "Renommer l'équipe", "rename_menu");
+                renameItem.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Nom actuel: ").append(team.getName())).build());
+                inv.setItem(3, renameItem);
+                inv.setItem(5, createItem(Material.ACACIA_BOAT, "Changer la couleur de l'équipe", "recolor_menu"));
             }
+            ItemStack memberItem = createItem(Material.BLUE_WOOL, "Information de l'équipe", "info_team");
+            ItemLore.Builder lore = ItemLore.lore();
+            lore.addLine(Component.text("Nom de l'équipe: ").append(team.getName()));
+            for (UUID memberUuid : team.getMembers()){
+                Player member = Bukkit.getPlayer(memberUuid);
+                if (member != null){
+                    if (member.getName().equals(team.getId())){
+                        lore.addLine(Component.text("- \uD83D\uDC51"+member.getName()).color(TextColor.fromHexString("#55FF55")));
+                    } else {
+                    lore.addLine(Component.text("- "+member.getName()));
+                    }
+                }
+            }
+            memberItem.setData(DataComponentTypes.LORE, lore.build());
+            inv.setItem(22, memberItem);
             inv.setItem(11, createItem(Material.BARRIER, "Quitter l'équipe", "leave_team"));
         }
         p.openInventory(inv);
@@ -68,7 +100,7 @@ public class TeamGUI implements Listener {
         TeamManager teamManager = TeamManager.getInstance();
         Inventory inv = Bukkit.createInventory(null, 54, Component.text("Demandes en attente"));
         int i = 0;
-        for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(teamManager.getPlayerTeam(p.getUniqueId()).getName())){
+        for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(teamManager.getPlayerTeam(p.getUniqueId()).getId())){
             Player target = Bukkit.getServer().getPlayer(playerUuid);
             if (target!=null){
                 ItemStack item = createItem(Material.GREEN_WOOL, target.getName(), "accept_request");
@@ -107,9 +139,9 @@ public class TeamGUI implements Listener {
         for ( String teamName : teamManager.getTeams()){
             TeamData team = teamManager.getTeam(teamName);
             if (team !=null){
-                ItemStack item = createItem(BlockUtils.getWoolBlockByNamedTextColor(team.getColor()),team.getName());
+                ItemStack item = createItem(BlockUtils.getWoolBlockByNamedTextColor(team.getColor()),team.getNameText());
                 ItemLore.Builder lore = ItemLore.lore();
-                if (teamManager.getInviteManager().hasInvite(p.getUniqueId(), team.getName())){
+                if (teamManager.getInviteManager().hasInvite(p.getUniqueId(), team.getId())){
                     lore.addLine(Component.text("Cliquer pour annuler la demande").color(TextColor.fromHexString("#FF5555")));
                 }
                 for (UUID memberUuid : team.getMembers()){
@@ -126,6 +158,61 @@ public class TeamGUI implements Listener {
         }
         inv.setItem(45, createBackItem());
         p.openInventory(inv);
+    }
+
+    public static void openRenameMenu(Player p){
+        TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
+        if (team != null){
+            Dialog dialog = Dialog.create(builder -> builder.empty()
+                    .base(DialogBase.builder(Component.text("Configure your new experience value"))
+                            .inputs(List.of(
+                                    DialogInput.text("team_name", Component.text("Nom d'équipe", team.getColor()))
+                                            .initial(team.getNameText())
+                                            .build()
+                            ))
+                            .build()
+                    )
+                    .type(DialogType.confirmation(
+                            ActionButton.create(
+                                    Component.text("Confirm", TextColor.color(0xAEFFC1)),
+                                    Component.text("Click to confirm your input."),
+                                    100,
+                                    DialogAction.customClick(Key.key("papermc:user_input/confirm"), null)
+                            ),
+                            ActionButton.create(
+                                    Component.text("Discard", TextColor.color(0xFFA0B1)),
+                                    Component.text("Click to discard your input."),
+                                    100,
+                                    null // If we set the action to null, it doesn't do anything and closes the dialog
+                            )
+                    ))
+            );
+            p.showDialog(dialog);
+        }
+    }
+
+    public static void openRecolorMenu(Player p){
+        TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
+        if (team != null){
+            List<ActionButton> actions = new ArrayList<>();
+
+            for (NamedTextColor color : TeamManager.getInstance().getAvailableColors()){
+                String key = "papermc:user_input/recolor/"+ color;
+                actions.add(ActionButton.create(
+                        Component.text(color.toString(), color),
+                        Component.text("Click to change your team color."),
+                        100,
+                        DialogAction.customClick(Key.key(key), null )
+                ));
+            }
+
+            Dialog dialog = Dialog.create(builder -> builder.empty()
+                    .base(DialogBase.builder(Component.text("Changer la couleur de l'équipe")).build())
+                    .type(DialogType.multiAction(actions).build()
+                    )
+            );
+            p.showDialog(dialog);
+        }
     }
 
     private static ItemStack createItem(Material mat, String name) {
@@ -169,6 +256,71 @@ public class TeamGUI implements Listener {
         return false;
     }
 
+    @EventHandler
+    void handleRenameDialog(PlayerCustomClickEvent event) {
+        if (!event.getIdentifier().equals(Key.key("papermc:user_input/confirm"))) {
+            return;
+        }
+
+        DialogResponseView view = event.getDialogResponseView();
+        if (view == null) {
+            return;
+        }
+
+        String teamName = view.getText("team_name");
+        if (teamName == null || teamName.isBlank()) {
+            if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
+                Player player = conn.getPlayer();
+                player.sendMessage(TextUtils.errorMessage("Le nom de l'équipe ne peut pas être vide."));
+                openRenameMenu(player);
+            }
+            return;
+        }
+
+        if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
+            Player player = conn.getPlayer();
+            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+            if (team != null) {
+                team.rename(teamName);
+                player.sendMessage(TextUtils.validationMessage("L'équipe a été renommée en ").append(Component.text(teamName, team.getColor()) ));
+                openMainMenu(player);
+            }
+        }
+    }
+
+    @EventHandler
+    void handleRecolorDialog(PlayerCustomClickEvent event) {
+        if (!event.getIdentifier().asString().startsWith("papermc:user_input/recolor/")) {
+            return;
+        }
+
+        DialogResponseView view = event.getDialogResponseView();
+        if (view == null) {
+            return;
+        }
+
+        String colorString = event.getIdentifier().asString().substring("papermc:user_input/recolor/".length());
+        NamedTextColor newColor = NamedTextColor.NAMES.value(colorString);
+        if (newColor == null) {
+            if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
+                Player player = conn.getPlayer();
+                player.sendMessage(TextUtils.errorMessage("Couleur invalide."));
+                openRecolorMenu(player);
+            }
+            return;
+        }
+
+        if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
+            Player player = conn.getPlayer();
+            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+            if (team != null) {
+                team.changeColor(newColor);
+                player.sendMessage(TextUtils.validationMessage("La couleur de l'équipe à été changée en ").append(Component.text(newColor.toString(), team.getColor()) ));
+                openMainMenu(player);
+            }
+        }
+    }
+
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
@@ -203,6 +355,14 @@ public class TeamGUI implements Listener {
 
             if (name.contains("Quitter")) {
                 openConfirmLeaveMenu(player);
+            }
+
+            if (name.contains("Renommer")) {
+                openRenameMenu(player);
+            }
+
+            if (name.contains("Changer la couleur")) {
+                openRecolorMenu(player);
             }
         }
 
@@ -245,7 +405,7 @@ public class TeamGUI implements Listener {
             TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
             if (team == null) return;
 
-            if (!TeamManager.getInstance().getInviteManager().hasInvite(target.getUniqueId(), team.getName())) {
+            if (!TeamManager.getInstance().getInviteManager().hasInvite(target.getUniqueId(), team.getId())) {
                 plugin.getLogger().info("no request found for " + targetName);
                 player.sendMessage(TextUtils.errorMessage("Demande expirée."));
                 openRequestsMenu(player);
@@ -254,14 +414,14 @@ public class TeamGUI implements Listener {
 
             if (event.isRightClick()){
                 TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
-                target.sendMessage(TextUtils.errorMessage("La demande pour l'équipe de " + team.getName() + " a été refusée !"));
+                target.sendMessage(TextUtils.errorMessage("La demande pour l'équipe de ").append(team.getName()).append(TextUtils.errorMessage(" a été refusée !",false)));
                 player.sendMessage(TextUtils.errorMessage("Demande refusée."));
                 openRequestsMenu(player);
                 return;
             }
             TeamManager.broadcastTeamMessage(TextUtils.validationMessage(target.getName() + " ajouté à l'équipe."), team);
             team.acceptRequest(target.getUniqueId());
-            TeamManager.getInstance().addPlayerToVanillaTeam(target, team.getName());
+            TeamManager.getInstance().addPlayerToVanillaTeam(target, team.getId());
             TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
 
             target.sendMessage(TextUtils.validationMessage("Votre demande a été acceptée !"));
@@ -291,16 +451,16 @@ public class TeamGUI implements Listener {
                 return;
             }
 
-            if (TeamManager.getInstance().getInviteManager().hasInvite(player.getUniqueId(), teamAsked.getName())) {
+            if (TeamManager.getInstance().getInviteManager().hasInvite(player.getUniqueId(), teamAsked.getId())) {
                 TeamManager.getInstance().getInviteManager().remove(player.getUniqueId());
                 player.sendMessage(TextUtils.errorMessage("Demande annulée"));
                 openAskJoinMenu(player);
                 return;
             }
 
-            plugin.getLogger().info(player.getName() + " à demandé de rejoindre " + teamAsked.getName());
+            plugin.getLogger().info(player.getName() + " à demandé de rejoindre " + teamAsked.getId());
 
-            TeamManager.getInstance().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getName());
+            TeamManager.getInstance().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getId());
 
 
             player.sendMessage(TextUtils.validationMessage("La demande a été envoyé"));
@@ -329,7 +489,7 @@ public class TeamGUI implements Listener {
             TeamData team = TeamManager.getInstance().getTeam(player.getName());
             if (team == null) return;
             TeamManager.getInstance().removePlayerFromTeam(kickedPlayer);
-            kickedPlayer.sendMessage(TextUtils.errorMessage("Vous avez été expulsé de l'équipe de " + team.getName()));
+            kickedPlayer.sendMessage(TextUtils.errorMessage("Vous avez été expulsé de l'équipe de ").append(team.getName()));
             TeamManager.broadcastTeamMessage(TextUtils.errorMessage( kickedPlayer.getName() + " a été expulsé de l'équipe"), team);
 
             player.closeInventory();

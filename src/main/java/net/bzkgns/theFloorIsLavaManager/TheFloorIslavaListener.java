@@ -237,13 +237,13 @@ public class TheFloorIslavaListener implements Listener {
             TeamData team = TeamManager.getInstance().getPlayerTeam(event.getEntity().getUniqueId());
             if (team != null && team.isEliminated()) {
                 plugin.getLogger().info("Team " + team.getName() + " eliminated.");
-                TeamManager.broadcastTeamMessage(TextUtils.errorMessage("L'équipe ").append(Component.text(team.getName(),team.getColor()).append(TextUtils.errorMessage(" a été éliminée.",false))), team);
+                TeamManager.broadcastTeamMessage(TextUtils.errorMessage("L'équipe ").append(team.getName().append(TextUtils.errorMessage(" a été éliminée.",false))), team);
             }
         }
         if (plugin.getGameManager().isGameWinning()){
             TeamData winningTeam = TeamManager.getInstance().getTeamAlive().getFirst();
             if (winningTeam != null) {
-                TextUtils.broadcastMessage( TextUtils.warningMessage("FIN DE PARTIE - l'équipe de " + winningTeam.getName() + " a gagné !"));
+                TextUtils.broadcastMessage( TextUtils.warningMessage("FIN DE PARTIE - l'équipe ").append(winningTeam.getName()).append(TextUtils.warningMessage(" a gagné !", false)));
             }else{
                 TextUtils.broadcastMessage( TextUtils.warningMessage("FIN DE PARTIE - Aucune équipe n'a gagné !"));
             }

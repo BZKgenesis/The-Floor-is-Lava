@@ -75,8 +75,13 @@ public class TextUtils {
     }
 
     @SuppressWarnings("unused")
-    public static Component warningMessage(String message){
+    public static Component warningMessage(String message, boolean withPrefix){
+        if (!withPrefix) return Component.text(message).color(TextColor.color(255,255,0));
         return prefix().append(Component.text(message).color(TextColor.color(255,255,0)));
+    }
+    @SuppressWarnings("unused")
+    public static Component warningMessage(String message){
+        return warningMessage(message, true);
     }
 
     public static Component errorMessage(String message){
