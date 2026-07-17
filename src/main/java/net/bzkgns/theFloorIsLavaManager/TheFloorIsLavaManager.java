@@ -8,6 +8,9 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryListener;
+import net.bzkgns.theFloorIsLavaManager.kits.KitChoiceGUI;
+import net.bzkgns.theFloorIsLavaManager.kits.KitCommands;
+import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.items.*;
@@ -63,6 +66,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
         worldManager = new WorldManager();
         worldManager.initLobbyWorld();
+        KitManager.getInstance().loadKits();
         ItemManager.registerAll(
                 new BatteItem(),
                 new CiseauxItem(),
@@ -103,6 +107,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
         getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
         getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
+        getServer().getPluginManager().registerEvents(new KitChoiceGUI(), this);
 
         TeamManager.getInstance().clearTeams();
 
@@ -112,6 +117,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
         LiteralCommandNode<CommandSourceStack> buildCommand = registerTflCommands(gameManager, this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(KitCommands.registerCommands()));
 
         LiteralCommandNode<CommandSourceStack> ShopBuildCommand = Commands.literal("shop")
                 .executes(ctx ->{
@@ -174,6 +180,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         if (gameManager != null) {
             gameManager.stopGame();
         }
+        KitManager.getInstance().clearAllPlayerKits();
     }
 
 

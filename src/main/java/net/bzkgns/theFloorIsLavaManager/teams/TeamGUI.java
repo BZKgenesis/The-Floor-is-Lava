@@ -35,6 +35,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.*;
@@ -63,11 +64,19 @@ public class TeamGUI implements Listener {
         } else {
             if (p.getName().equals(team.getId())){
                 inv.setItem(13, createItem(Material.BLUE_WOOL, "Gérer mon équipe", "manage_team"));
-                inv.setItem(15, createItem(Material.PAPER, "Demandes reçues", "request_menu"));
+                inv.setItem(22, createItem(Material.PAPER, "Demandes reçues", "request_menu"));
                 ItemStack renameItem = createItem(Material.NAME_TAG, "Renommer l'équipe", "rename_menu");
                 renameItem.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Nom actuel: ").append(team.getName())).build());
                 inv.setItem(3, renameItem);
-                inv.setItem(5, createItem(Material.ACACIA_BOAT, "Changer la couleur de l'équipe", "recolor_menu"));
+                inv.setItem(5, createItem(Material.BRUSH, "Changer la couleur de l'équipe", "recolor_menu"));
+                ItemStack leaveItem = createItem(Material.BARRIER, "Quitter l'équipe", "leave_team");
+                ItemLore.Builder lore = ItemLore.lore();
+                lore.addLine(Component.text("ATTENTION si vous quittez,"));
+                lore.addLine(Component.text("votre équipe sera dissoute"));
+                leaveItem.setData(DataComponentTypes.LORE, lore.build());
+                inv.setItem(11, leaveItem);
+            }else{
+                inv.setItem(11, createItem(Material.BARRIER, "Quitter l'équipe", "leave_team"));
             }
             ItemStack memberItem = createItem(Material.BLUE_WOOL, "Information de l'équipe", "info_team");
             ItemLore.Builder lore = ItemLore.lore();
@@ -83,8 +92,7 @@ public class TeamGUI implements Listener {
                 }
             }
             memberItem.setData(DataComponentTypes.LORE, lore.build());
-            inv.setItem(22, memberItem);
-            inv.setItem(11, createItem(Material.BARRIER, "Quitter l'équipe", "leave_team"));
+            inv.setItem(15, memberItem);
         }
         p.openInventory(inv);
     }
@@ -92,7 +100,16 @@ public class TeamGUI implements Listener {
 
     public static void openConfirmLeaveMenu(Player p) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text("Quitter l'équipe ?"));
-        inv.setItem(11, createItem(Material.GREEN_WOOL, "Oui", "confirm_leaving"));
+        if (Objects.equals(TeamManager.getInstance().getPlayerTeam(p.getUniqueId()).getId(), p.getName())){
+            ItemStack leaveItem = createItem(Material.GREEN_WOOL, "Oui", "confirm_leaving");
+            ItemLore.Builder lore = ItemLore.lore();
+            lore.addLine(Component.text("ATTENTION si vous quittez,"));
+            lore.addLine(Component.text("votre équipe sera dissoute"));
+            leaveItem.setData(DataComponentTypes.LORE, lore.build());
+            inv.setItem(11, leaveItem);
+        }else{
+            inv.setItem(11, createItem(Material.GREEN_WOOL, "Oui", "confirm_leaving"));
+        }
         inv.setItem(15, createItem(Material.RED_WOOL, "Non", "deny_leaving"));
         p.openInventory(inv);
     }
@@ -164,7 +181,7 @@ public class TeamGUI implements Listener {
         TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
         if (team != null){
             Dialog dialog = Dialog.create(builder -> builder.empty()
-                    .base(DialogBase.builder(Component.text("Configure your new experience value"))
+                    .base(DialogBase.builder(Component.text("Renommer l'équipe"))
                             .inputs(List.of(
                                     DialogInput.text("team_name", Component.text("Nom d'équipe", team.getColor()))
                                             .initial(team.getNameText())
@@ -174,14 +191,14 @@ public class TeamGUI implements Listener {
                     )
                     .type(DialogType.confirmation(
                             ActionButton.create(
-                                    Component.text("Confirm", TextColor.color(0xAEFFC1)),
-                                    Component.text("Click to confirm your input."),
+                                    Component.text("Renommer", TextColor.color(0xAEFFC1)),
+                                    Component.text("Cliquer pour renommer votre équipe."),
                                     100,
-                                    DialogAction.customClick(Key.key("papermc:user_input/confirm"), null)
+                                    DialogAction.customClick(Key.key("tfl:user_input/confirm"), null)
                             ),
                             ActionButton.create(
-                                    Component.text("Discard", TextColor.color(0xFFA0B1)),
-                                    Component.text("Click to discard your input."),
+                                    Component.text("Annuler", TextColor.color(0xFFA0B1)),
+                                    Component.text("Cliquer pour annuler le renommage de votre équipe."),
                                     100,
                                     null // If we set the action to null, it doesn't do anything and closes the dialog
                             )
@@ -197,7 +214,7 @@ public class TeamGUI implements Listener {
             List<ActionButton> actions = new ArrayList<>();
 
             for (NamedTextColor color : TeamManager.getInstance().getAvailableColors()){
-                String key = "papermc:user_input/recolor/"+ color;
+                String key = "tfl:user_input/recolor/"+ color;
                 actions.add(ActionButton.create(
                         Component.text(color.toString(), color),
                         Component.text("Click to change your team color."),
@@ -208,7 +225,13 @@ public class TeamGUI implements Listener {
 
             Dialog dialog = Dialog.create(builder -> builder.empty()
                     .base(DialogBase.builder(Component.text("Changer la couleur de l'équipe")).build())
-                    .type(DialogType.multiAction(actions).build()
+                    .type(DialogType.multiAction(actions)
+                            .exitAction(ActionButton.create(
+                                    Component.text("Annuler", TextColor.color(0xFFA0B1)),
+                                    Component.text("Cliquer pour annuler le changement de couleur de votre équipe."),
+                                    100,
+                                    null // If we set the action to null, it doesn't do anything and closes the dialog
+                            )).build()
                     )
             );
             p.showDialog(dialog);
@@ -258,7 +281,7 @@ public class TeamGUI implements Listener {
 
     @EventHandler
     void handleRenameDialog(PlayerCustomClickEvent event) {
-        if (!event.getIdentifier().equals(Key.key("papermc:user_input/confirm"))) {
+        if (!event.getIdentifier().equals(Key.key("tfl:user_input/confirm"))) {
             return;
         }
 
@@ -290,7 +313,7 @@ public class TeamGUI implements Listener {
 
     @EventHandler
     void handleRecolorDialog(PlayerCustomClickEvent event) {
-        if (!event.getIdentifier().asString().startsWith("papermc:user_input/recolor/")) {
+        if (!event.getIdentifier().asString().startsWith("tfl:user_input/recolor/")) {
             return;
         }
 
@@ -299,7 +322,7 @@ public class TeamGUI implements Listener {
             return;
         }
 
-        String colorString = event.getIdentifier().asString().substring("papermc:user_input/recolor/".length());
+        String colorString = event.getIdentifier().asString().substring("tfl:user_input/recolor/".length());
         NamedTextColor newColor = NamedTextColor.NAMES.value(colorString);
         if (newColor == null) {
             if (event.getCommonConnection() instanceof PlayerGameConnection conn) {

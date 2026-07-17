@@ -10,6 +10,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.kits.KitData;
+import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
@@ -20,10 +22,12 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import static net.bzkgns.theFloorIsLavaManager.config.ConfigCommands.registerConfigNode;
@@ -176,19 +180,78 @@ public class TheFloorIsLavaCommands {
                             }
                             return Command.SINGLE_SUCCESS;
                         }))
+                .then(Commands.literal("gameState")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                player.sendMessage("game state: " + plugin.getGameManager().getState().toString());
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
                 .then(Commands.literal("team")
                         .executes(ctx -> {
                             if (ctx.getSource().getExecutor() instanceof Player player){
                                 player.sendMessage("teams");
                                 for (String teamName : TeamManager.getInstance().getTeams()){
-                                    player.sendMessage("- team " + teamName + " has members: " + TeamManager.getInstance().getTeam(teamName).getMembers().toString());
+                                    player.sendMessage(Component.text("- team ")
+                                            .append(Component.text(teamName, TeamManager.getInstance().getTeam(teamName).getColor()))
+                                            .append(Component.text(" has members: " + TeamManager.getInstance().getTeam(teamName).getMembers().toString())));
                                 }
                             }
                             return Command.SINGLE_SUCCESS;
                         }))
+                .then(Commands.literal("dangerState")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                player.sendMessage("danger state: " + plugin.getGameManager().getDangerManager().getState().toString());
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("kit")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                player.sendMessage("kits");
+                                for (String kitName : KitManager.getInstance().getAllKits().keySet()){
+                                    player.sendMessage("- kit " + kitName);
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .then(Commands.argument("kit_name", StringArgumentType.word()).suggests(
+                                (_, suggestionsBuilder) -> {
+                                    for (String kitName : KitManager.getInstance().getAllKits().keySet()) {
+                                        if (kitName.startsWith(suggestionsBuilder.getRemaining()))
+                                            suggestionsBuilder.suggest(kitName);
+                                    }
+                                    return suggestionsBuilder.buildFuture();
+                                }
+                        ).executes(ctx -> {
+                            String kitName = StringArgumentType.getString(ctx, "kit_name");
+                            KitData kit = KitManager.getInstance().getAllKits().get(kitName);
+                            if (ctx.getSource().getExecutor() instanceof Player player && kit != null) {
+
+                                player.sendMessage(kit.toString());
+                            } else {
+                                ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Kit inconnu : " + kitName));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })))
+                        .then(Commands.literal("playerKits")
+                                .executes(ctx -> {
+                                    if (ctx.getSource().getExecutor() instanceof Player player){
+                                        player.sendMessage("player kits");
+                                        for (Map.Entry<UUID, KitData> entry : KitManager.getInstance().getPlayerKits().entrySet()){
+                                            Player currentPlayer = plugin.getServer().getPlayer(entry.getKey());
+                                            if (currentPlayer != null){
+                                                player.sendMessage("- player " + currentPlayer.getName() + " has kit: " + entry.getValue().getName());
+                                            }else{
+                                                player.sendMessage("- player " + entry.getKey() + " has kit: " + entry.getValue().getName());
+                                            }
+                                        }
+                                    }
+                                    return Command.SINGLE_SUCCESS;
+                                }))
 
                 );
-
 
         return root.build();
     }

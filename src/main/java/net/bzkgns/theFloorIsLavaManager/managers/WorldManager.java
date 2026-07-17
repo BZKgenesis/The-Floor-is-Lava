@@ -568,6 +568,7 @@ public class WorldManager {
         lobby.setGameRule(GameRules.ADVANCE_TIME, false);
         lobby.setGameRule(GameRules.ADVANCE_WEATHER, false);
         lobby.setGameRule(GameRules.SPAWN_MOBS, false);
+        lobby.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);
         lobby.setStorm(false);
         lobby.setThundering(false);
         lobby.getWorldBorder().setSize(100000);

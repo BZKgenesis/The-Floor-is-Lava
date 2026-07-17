@@ -5,6 +5,7 @@ import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
@@ -70,6 +71,14 @@ public class TheFloorIslavaListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
         player.setFlyingFallDamage(TriState.TRUE);
+        KitManager.getInstance().assignKitToPlayer(player.getUniqueId(), "default");
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Player p = event.getPlayer();
+            World w = p.getWorld();
+
+            p.resetPlayerTime(); // ou setPlayerTime(w.getTime(), false)
+            p.setPlayerWeather(w.hasStorm() ? WeatherType.DOWNFALL : WeatherType.CLEAR);
+        }, 2L);
 
         player.setResourcePack(
                 plugin.getResourcePackManager().getUrl(),
@@ -90,6 +99,7 @@ public class TheFloorIslavaListener implements Listener {
                 event.getPlayer().setAllowFlight(false);
                 if (plugin.getGameManager().isPlayerInGame(event.getPlayer())){
                     event.getPlayer().setGameMode(GameMode.SURVIVAL);
+                    KitManager.getInstance().applyKitToPlayerAttributeOnly(player);
                     if (!event.getPlayer().getWorld().equals(plugin.getWorldManager().getGameWorld())) {
                         event.getPlayer().teleport(plugin.getWorldManager().getDefaultSpawnLocation());
                         event.getPlayer().setRespawnLocation(plugin.getWorldManager().getDefaultSpawnLocation(), true);
@@ -101,10 +111,6 @@ public class TheFloorIslavaListener implements Listener {
                 }
             }
             case ENDING -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
-        }
-        if (plugin.getGameManager().getState()==GameState.RUNNING &&
-                !plugin.getGameManager().isPlayerInGame(event.getPlayer())){
-            event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
         discoverRecipes(event.getPlayer());
         if(event.getPlayer().getWorld().equals(plugin.getServer().getWorld("minecraft:overworld"))){
@@ -270,13 +276,13 @@ public class TheFloorIslavaListener implements Listener {
                 if (deathLocation != null){
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         player.teleport(deathLocation);
-                        player.setGameMode(GameMode.SPECTATOR);
+                        player.setGameMode(GameMode.SURVIVAL);
                     });
                     return;
                 }
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getLobbySpawnLocation());
-                    player.setGameMode(GameMode.SPECTATOR);
+                    player.setGameMode(GameMode.SURVIVAL);
                 });
             }
             case RUNNING  -> {
@@ -284,6 +290,7 @@ public class TheFloorIslavaListener implements Listener {
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         player.teleport(respawnPos);
                         player.setGameMode(GameMode.SURVIVAL);
+                        KitManager.getInstance().applyKitToPlayerAttributeOnly(player);
                     });
                     return;
                 }

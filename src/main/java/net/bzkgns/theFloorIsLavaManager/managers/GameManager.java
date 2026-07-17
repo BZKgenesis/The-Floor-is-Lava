@@ -9,6 +9,7 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
+import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import org.bukkit.*;
@@ -17,12 +18,12 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.formatTime;
 
@@ -42,7 +43,7 @@ public class GameManager {
 
     private boolean noRespawn = false;
 
-    private final List<Entity> playerInGame;
+    private final List<Player> playerInGame;
 
     public GameManager() {
 
@@ -134,7 +135,6 @@ public class GameManager {
                         .forEach(p -> p.addScoreboardTag("inGame")
                         );
         playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> p.getScoreboardTags().contains("inGame")).toList());
-        playerInGame.addAll(plugin.getWorldManager().getGameWorld().getEntities().stream().filter(e -> e.getScoreboardTags().contains("inGame")).toList());
         noRespawn = false;
 
         TextUtils.broadcastMessage(TextUtils.infoMessage("Le jeu commence !"));
@@ -180,8 +180,7 @@ public class GameManager {
         });
 
         playerInGame.stream()
-                .filter(e -> e instanceof Player)
-                .map(e -> (Player) e )
+                .filter(Objects::nonNull)
                 .forEach(p -> p.setRespawnLocation(p.getLocation(), true));
 
         int lavaRisingDelay = gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY);
@@ -204,6 +203,8 @@ public class GameManager {
                     }
             );
         }
+        playerInGame.forEach(p->
+                KitManager.getInstance().applyKitToPlayer(p));
 
         phaseRisingTask = Bukkit.getScheduler().scheduleSyncDelayedTask(
                 TheFloorIsLavaManager.getInstance(),

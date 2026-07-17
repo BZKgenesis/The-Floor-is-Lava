@@ -15,15 +15,15 @@ public class SpreadEntityManager {
 
     private final Random random = new Random();
 
-    public boolean spread(
-            Collection<Entity> entities,
+    public <T extends Entity> boolean spread(
+            Collection<T> entities,
             Location center,
             double maxRadius,
             double minDistance,
             boolean respectTeams,
             int maxY
     ) {
-        List<List<Entity>> groups = createGroups(entities, respectTeams);
+        List<List<T>> groups = createGroups(entities, respectTeams);
 
         List<Location> positions = generatePositions(
                 groups.size(),
@@ -47,8 +47,8 @@ public class SpreadEntityManager {
 
         return true;
     }
-    private List<List<Entity>> createGroups(
-            Collection<Entity> entities,
+    private <T extends Entity> List<List<T>> createGroups(
+            Collection<T> entities,
             boolean teams
     ) {
 
@@ -58,9 +58,9 @@ public class SpreadEntityManager {
                     .collect(Collectors.toList());
         }
 
-        Map<Team, List<Entity>> map = new HashMap<>();
+        Map<Team, List<T>> map = new HashMap<>();
 
-        for (Entity e : entities) {
+        for (T e : entities) {
 
             Team team = Bukkit.getScoreboardManager()
                     .getMainScoreboard()
