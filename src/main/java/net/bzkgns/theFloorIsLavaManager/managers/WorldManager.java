@@ -5,6 +5,8 @@ import net.bzkgns.theFloorIsLavaManager.config.ConfigLoader;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
+import net.bzkgns.theFloorIsLavaManager.exception.*;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -55,7 +57,7 @@ public class WorldManager {
 
     private Location oldSpawn;
 
-    public void resetRandomWorld(){
+    public void resetRandomWorld() throws WorldGenerationException {
         resetRandomWorld(0);
     }
 
@@ -63,7 +65,7 @@ public class WorldManager {
         return currentMapConfigManager;
     }
 
-    public void resetRandomWorld(long seed) {
+    public void resetRandomWorld(long seed) throws WorldGenerationException {
         loadDefaultMapConfig();
         isGameWorldLoaded = false;
         plugin.getGameManager().stopGame();
@@ -79,10 +81,12 @@ public class WorldManager {
 
             if(lobby == null){
                 resettingWorld = false;
-                return;
+                throw new NoLobbyFoundException("Impossible de réinitialiser le monde, le monde lobby est introuvable.");
             }
 
-            players.forEach(p -> p.teleport(lobby.getSpawnLocation()));
+            players.stream()
+                    .filter(p -> p.getWorld().equals(oldWorld))
+                    .forEach(p -> p.teleport(lobby.getSpawnLocation()));
 
             // On capture le dossier avant de décharger le monde pour être sûr du chemin
             File worldFolder = oldWorld.getWorldFolder();
@@ -92,24 +96,23 @@ public class WorldManager {
         }
 
         WorldCreator creator = new WorldCreator(GAME_WORLD);
-        creator.seed(seed==0?new Random().nextLong():seed);
+        creator.seed(seed);
 
         recreateWorld(creator);
         isGameWorldLoaded = true;
     }
 
-    private void recreateWorld(WorldCreator creator) {
+    private void recreateWorld(WorldCreator creator) throws WorldGenerationException {
         recreateWorld(creator, getCurrentMapConfigManager().getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE));
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void recreateWorld(WorldCreator creator, boolean placeDefaultSpawnStructure) {
+    private void recreateWorld(WorldCreator creator, boolean placeDefaultSpawnStructure) throws WorldGenerationException {
         World newWorld = Bukkit.createWorld(creator);
 
         if (newWorld == null) {
-            plugin.getLogger().severe("Impossible de creer le monde.");
             resettingWorld = false;
-            return;
+            throw new NoWorldCreatedException("Le monde n'a pas pu être créé. Vérifiez les logs pour plus d'informations.");
         }
 
         if (placeDefaultSpawnStructure) {
@@ -137,17 +140,16 @@ public class WorldManager {
             currentMapConfigManager.loadFromFile(mapConfig);
         } else {
             plugin.getLogger().info("Utilisation de defaultMapConfig.yml");
+            TextUtils.broadcastMessageOp(TextUtils.warningMessage("Aucune configuration de map trouvée, utilisation de la configuration par défaut."));
             currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
         }
-        System.out.println("Map config Spawn structure: " + currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE));
     }
 
     private void loadDefaultMapConfig() {
         currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
-        System.out.println("Default Map config Spawn structure: " + currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE));
     }
 
-    private void initializeGameWorld(World world) {
+    private void initializeGameWorld(World world) throws WorldGenerationException {
         StructureManager manager = Bukkit.getStructureManager();
         Structure structure = null;
 
@@ -156,10 +158,11 @@ public class WorldManager {
                 structure = manager.loadStructure(structFile);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ErrorIOWorldAssetsException("Impossible de charger la structure de spawn par défaut.", e);
         }
-
-        world.getNearbyEntities(new BoundingBox(-15,250,-15,15,310,15))
+        int center_X = currentMapConfigManager.getInt(MapConfigKeys.CENTER_X);
+        int center_Z = currentMapConfigManager.getInt(MapConfigKeys.CENTER_Z);
+        world.getNearbyEntities(new BoundingBox(center_X-15,250,center_Z-15,center_X+15,310,center_Z+15))
                 .forEach(entity -> {
                     if(entity.getType() != EntityType.PLAYER){
                         entity.remove();
@@ -167,7 +170,7 @@ public class WorldManager {
                 });
 
         if(structure != null){
-            Location pos = new Location(world,-14,279,-14);
+            Location pos = new Location(world,center_X-14,279,center_Z-14);
 
             List<Entity> displays = world.getEntities().stream()
                     .filter(e ->
@@ -178,20 +181,27 @@ public class WorldManager {
 
             displays.forEach(Entity::remove);
 
-            structure.place(
-                    pos,
-                    true,
-                    StructureRotation.NONE,
-                    Mirror.NONE,
-                    0,
-                    1f,
-                    new Random()
-            );
+            if (currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE)){
+                structure.place(
+                        pos,
+                        true,
+                        StructureRotation.NONE,
+                        Mirror.NONE,
+                        0,
+                        1f,
+                        new Random()
+                );
+            }
         }
 
-        Location spawn = new Location(world,0.5,281,0.5);
-
         oldSpawn = world.getSpawnLocation();
+        Location spawn;
+        if (currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE)){
+            spawn  = new Location(world,center_X+0.5,281,center_Z+0.5);
+        }else{
+            spawn = oldSpawn.clone();
+        }
+
 
         world.setSpawnLocation(spawn);
         world.setGameRule(GameRules.RESPAWN_RADIUS,0);
@@ -303,7 +313,7 @@ public class WorldManager {
         return mapRoot;
     }
 
-    public void loadMap(String mapName) {
+    public void loadMap(String mapName) throws WorldGenerationException {
 
         plugin.getGameManager().stopGame();
 
@@ -317,9 +327,8 @@ public class WorldManager {
         if (oldWorld == null) {
             oldWorld = Bukkit.createWorld(new WorldCreator(GAME_WORLD));
             if (oldWorld == null) {
-                plugin.getLogger().severe("Impossible de resoudre le dossier de dimension !");
                 resettingWorld = false;
-                return;
+                throw new NoWorldCreatedException("Aucun monde de jeu n'existe et le plugin n'a pas pu en créer un temporaire pour récupérer le chemin du dossier de dimension.");
             }
         }
 
@@ -330,12 +339,13 @@ public class WorldManager {
 
         if(lobby == null){
             resettingWorld = false;
-            return;
+            throw new NoLobbyFoundException("Impossible de réinitialiser le monde, le monde lobby est introuvable.");
         }
 
-        for(Player player : players){
-            player.teleport(lobby.getSpawnLocation());
-        }
+        World finalOldWorld = oldWorld;
+        players.stream()
+                .filter(p -> p.getWorld().equals(finalOldWorld))
+                .forEach(p -> p.teleport(lobby.getSpawnLocation()));
 
         // On décharge le monde et on vide le VRAI dossier de dimension
         Bukkit.unloadWorld(oldWorld, false);
@@ -350,9 +360,8 @@ public class WorldManager {
         plugin.getLogger().info(mapFolder.getAbsolutePath());
 
         if(!mapFolder.exists()){
-            plugin.getLogger().warning("Map introuvable : " + mapName);
             resettingWorld = false;
-            return;
+            throw new NoMapFoundException("La map \"" + mapName + "\" est introuvable dans le dossier \"" + mapsFolder.getAbsolutePath() + "\".");
         }
         loadMapConfig(mapFolder);
 
@@ -373,12 +382,12 @@ public class WorldManager {
                 copyDirectory(sourceDimension.getParent().getParent().getParent().resolve("data"), destination.toPath().resolve("data"));
 
             } else {
-                throw new IOException("Le fichier n'est ni un dossier ni un zip.");
+                throw new ErrorIOWorldAssetsException("Le fichier de map \"" + mapFolder.getAbsolutePath() + "\" n'est ni un dossier ni un fichier zip valide.");
             }
 
         } catch(IOException e) {
             resettingWorld = false;
-            throw new RuntimeException(e);
+            throw new ErrorIOWorldAssetsException("Erreur lors de la copie des fichiers de la map \"" + mapFolder.getAbsolutePath() + "\" vers le dossier de dimension \"" + destination.getAbsolutePath() + "\".", e);
         } finally {
             if (tempExtractDir != null) {
                 if (!deleteRecursively(tempExtractDir.toFile())){

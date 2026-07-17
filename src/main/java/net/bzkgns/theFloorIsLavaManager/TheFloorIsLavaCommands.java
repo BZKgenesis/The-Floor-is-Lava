@@ -8,6 +8,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
@@ -23,6 +24,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.logging.Level;
 
 import static net.bzkgns.theFloorIsLavaManager.config.ConfigCommands.registerConfigNode;
 
@@ -193,20 +195,40 @@ public class TheFloorIsLavaCommands {
 
     private static int resetWorldRandomCommande(CommandContext<CommandSourceStack> ctx, long seed, TheFloorIsLavaManager plugin){
 
-        plugin.getWorldManager().resetRandomWorld(seed);
+        if (seed == 0){
+            seed = System.currentTimeMillis();
+        }
+        TextUtils.broadcastMessageOp(TextUtils.infoMessage("Réinitialisation du monde aléatoire avec la seed : " + seed));
 
-        ctx.getSource().getSender()
-                .sendMessage("Reset du monde lancé");
+        TextUtils.broadcastMessage(TextUtils.infoMessage("Génération du monde de jeu en cours... "));
+        TextUtils.broadcastMessage(TextUtils.infoMessage("Des chutes de performance peuvent survenir pendant la génération du monde. Veuillez patienter..."));
+        try{
+            plugin.getWorldManager().resetRandomWorld(seed);
+            TextUtils.broadcastMessageOp(TextUtils.validationMessage("Réinitialisation du monde terminé avec succès."));
+        } catch (WorldGenerationException e){
+            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Erreur lors de la réinitialisation du monde."));
+            TheFloorIsLavaManager.getInstance().getLogger().log(Level.SEVERE, "Erreur lors de la réinitialisation du monde.", e);
+        }
+
 
         return Command.SINGLE_SUCCESS;
     }
 
     private static int resetWorldMapCommande(CommandContext<CommandSourceStack> ctx, String map_name, TheFloorIsLavaManager plugin){
 
-        plugin.getWorldManager().loadMap(map_name);
+        TextUtils.broadcastMessageOp(TextUtils.infoMessage("Réinitialisation du monde avec la map : " + map_name));
 
-        ctx.getSource().getSender()
-                .sendMessage("Chargement du monde \""+ map_name +"\" lancé");
+        TextUtils.broadcastMessage(TextUtils.infoMessage("Génération du monde de jeu en cours... "));
+        TextUtils.broadcastMessage(TextUtils.infoMessage("Des chutes de performance peuvent survenir pendant la génération du monde. Veuillez patienter..."));
+
+        try {
+            plugin.getWorldManager().loadMap(map_name);
+            TextUtils.broadcastMessageOp(TextUtils.validationMessage("Réinitialisation du monde avec la map " + map_name + " terminé avec succès."));
+        }catch (WorldGenerationException e){
+            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Erreur lors de la réinitialisation du monde avec la map " + map_name + "."));
+            TheFloorIsLavaManager.getInstance().getLogger().log(Level.SEVERE, "Erreur lors de la réinitialisation du monde avec la map " + map_name + ".", e);
+        }
+
 
         return Command.SINGLE_SUCCESS;
     }

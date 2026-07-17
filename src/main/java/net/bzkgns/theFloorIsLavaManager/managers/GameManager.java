@@ -6,6 +6,8 @@ import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
+import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
+import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
@@ -114,7 +116,10 @@ public class GameManager {
         state = GameState.RUNNING;
         World world = plugin.getWorldManager().getGameWorld();
         world.getWorldBorder().setSize(gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_PRE_RISE));
-        world.getWorldBorder().setCenter(0, 0);
+        ConfigManager<MapConfig> mapConfigManager = ConfigRegistry.getConfigManager("map");
+        world.getWorldBorder().setCenter(
+                mapConfigManager.getInt(MapConfigKeys.CENTER_X),
+                mapConfigManager.getInt(MapConfigKeys.CENTER_Z));
         if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
             world.setGameRule(GameRules.KEEP_INVENTORY, true);
         world.setGameRule(GameRules.ADVANCE_TIME, true);
@@ -149,9 +154,13 @@ public class GameManager {
 
 
         SpreadEntityManager spreadentityManager = new SpreadEntityManager();
+
         boolean success = spreadentityManager.spread(
                 playerInGame,
-                new Location(world, 0, 200, 0),
+                new Location(world,
+                        mapConfigManager.getInt(MapConfigKeys.CENTER_X),
+                        200,
+                        mapConfigManager.getInt(MapConfigKeys.CENTER_Z)),
                 gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_PRE_RISE) / 2.
                 , 50, true, 200
         );

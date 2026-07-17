@@ -59,7 +59,7 @@ public class TextUtils {
     public static void broadcastMessageOp(Component message){
         for (Player player : Bukkit.getServer().getOnlinePlayers()){
             if (player.isOp()){
-                player.sendMessage(message);
+                player.sendMessage(Component.text("[OP]").append(message));
             }
         }
     }

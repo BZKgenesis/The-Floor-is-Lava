@@ -6,6 +6,7 @@ import net.bzkgns.theFloorIsLavaManager.config.ConfigGUI;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
+import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryListener;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
@@ -79,7 +80,14 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
-            worldManager.resetRandomWorld();
+            try {
+                worldManager.resetRandomWorld();
+            } catch (WorldGenerationException e){
+                getLogger().severe("Erreur lors de la génération du monde de jeu : " + e.getMessage());
+                getLogger().severe("Le plugin ne peut pas continuer. Veuillez vérifier les fichiers de configuration et réessayer.");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
         }
         resourcePackManager = new ResourcePackManager(this);
         resourcePackManager.load();
@@ -134,7 +142,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(
                 this,
                 () -> {
-                    List<Entity> entities = worldManager.getGameWorld().getEntities();
+                    World gameWorld = worldManager.getGameWorld();
+                    if (gameWorld == null) return;
+                    List<Entity> entities = gameWorld.getEntities();
                     entities.addAll(worldManager.getLobbyWorld().getEntities());
                     entities.stream()
                             .filter(e -> e instanceof ArmorStand && e.getScoreboardTags().contains("tfl_respawn_team_effect_armorstand"))

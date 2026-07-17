@@ -14,4 +14,20 @@ public class MapConfigKeys {
                     MapConfig::setSpawnSpawnStructure,
                     Boolean::parseBoolean
             );
+    public static final ConfigKey<MapConfig, Integer> CENTER_X =
+            new ConfigKey<>(
+                    "center-x",
+                    "Coordonnée X du centre de la map",
+                    MapConfig::getCenterX,
+                    MapConfig::setCenterX,
+                    Integer::parseInt
+            );
+    public static final ConfigKey<MapConfig, Integer> CENTER_Z =
+            new ConfigKey<>(
+                    "center-z",
+                    "Coordonnée Z du centre de la map",
+                    MapConfig::getCenterZ,
+                    MapConfig::setCenterZ,
+                    Integer::parseInt
+            );
 }
