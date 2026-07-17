@@ -161,7 +161,7 @@ public class ConfigManager<T extends ConfigSection<T>> {
         }
     }
 
-    private void loadFromFile(File file) {
+    public void loadFromFile(File file) {
         FileConfiguration yaml = YamlConfiguration.loadConfiguration(file);
 
         load(yaml);

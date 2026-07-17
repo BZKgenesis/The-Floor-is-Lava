@@ -47,7 +47,7 @@ public class WorldManager {
         ConfigRegistry.addConfig(currentMapConfigManager);
     }
 
-    private ConfigManager<MapConfig> currentMapConfigManager;
+    private final ConfigManager<MapConfig> currentMapConfigManager;
 
     private boolean resettingWorld = false;
 
@@ -134,26 +134,17 @@ public class WorldManager {
 
         if (mapConfig.exists()) {
             plugin.getLogger().info("Chargement de " + mapConfig);
-            currentMapConfigManager =
-                    ConfigLoader.load(new MapConfig(), mapConfig, false);
+            currentMapConfigManager.loadFromFile(mapConfig);
         } else {
             plugin.getLogger().info("Utilisation de defaultMapConfig.yml");
-            currentMapConfigManager =
-                    ConfigLoader.load(
-                            new MapConfig(),
-                            ConfigLoader.pluginConfigFile("defaultMapConfig"),
-                            true
-                    );
+            currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
         }
+        System.out.println("Map config Spawn structure: " + currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE));
     }
 
     private void loadDefaultMapConfig() {
-        currentMapConfigManager =
-                ConfigLoader.load(
-                        new MapConfig(),
-                        ConfigLoader.pluginConfigFile("defaultMapConfig"),
-                        true
-                );
+        currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
+        System.out.println("Default Map config Spawn structure: " + currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE));
     }
 
     private void initializeGameWorld(World world) {
@@ -399,7 +390,7 @@ public class WorldManager {
         isGameWorldLoaded = true;
         recreateWorld(
                 new WorldCreator(GAME_WORLD),
-                true
+                getCurrentMapConfigManager().getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE)
         );
     }
 
