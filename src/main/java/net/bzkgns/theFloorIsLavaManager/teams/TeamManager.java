@@ -1,6 +1,5 @@
 package net.bzkgns.theFloorIsLavaManager.teams;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -10,6 +9,20 @@ import org.bukkit.scoreboard.Team;
 import java.util.*;
 
 public class TeamManager {
+    private final static List<NamedTextColor> colorsAvailable = List.of(
+            NamedTextColor.BLACK,
+            NamedTextColor.DARK_BLUE,
+            NamedTextColor.DARK_GREEN,
+            NamedTextColor.DARK_AQUA,
+            NamedTextColor.DARK_RED,
+            NamedTextColor.DARK_PURPLE,
+            NamedTextColor.GOLD,
+            NamedTextColor.BLUE,
+            NamedTextColor.GREEN,
+            NamedTextColor.AQUA,
+            NamedTextColor.RED,
+            NamedTextColor.LIGHT_PURPLE,
+            NamedTextColor.YELLOW);
     private final Map<String, TeamData> teams = new HashMap<>();
     private final InviteManager inviteManager;
 
@@ -51,20 +64,6 @@ public class TeamManager {
 
 
     public NamedTextColor randomColor() {
-        List<NamedTextColor> colorsAvailable = List.of(
-                NamedTextColor.BLACK,
-                NamedTextColor.DARK_BLUE,
-                NamedTextColor.DARK_GREEN,
-                NamedTextColor.DARK_AQUA,
-                NamedTextColor.DARK_RED,
-                NamedTextColor.DARK_PURPLE,
-                NamedTextColor.GOLD,
-                NamedTextColor.BLUE,
-                NamedTextColor.GREEN,
-                NamedTextColor.AQUA,
-                NamedTextColor.RED,
-                NamedTextColor.LIGHT_PURPLE,
-                NamedTextColor.YELLOW);
         List<NamedTextColor> usableColor = new ArrayList<>(colorsAvailable);
         for (TeamData team : teams.values()){
             usableColor.remove(team.getColor());
@@ -80,12 +79,9 @@ public class TeamManager {
         String name = p.getName();
         NamedTextColor color = randomColor();
 
-
-
-
         Team team = createVanillaTeam(name, color);
 
-        TeamData data = new TeamData(name, color, team);
+        TeamData data = new TeamData(name, color, team, p.getUniqueId());
         data.addMember(p.getUniqueId());
         addPlayerToVanillaTeam(p, name);
         teams.put(name, data);
@@ -131,14 +127,6 @@ public class TeamManager {
         if (t != null) t.unregister();
     }
 
-    public static void broadcastTeamMessage(Component message, TeamData team) {
-        for (UUID playerUUID : team.getMembers()){
-            Player player = Bukkit.getServer().getPlayer(playerUUID);
-            if (player != null)
-                player.sendMessage(message);
-        }
-    }
-
     public void clearTeams() {
         teams.clear();
         Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -158,20 +146,6 @@ public class TeamManager {
     }
 
     public List<NamedTextColor> getAvailableColors() {
-        List<NamedTextColor> colorsAvailable = List.of(
-                NamedTextColor.BLACK,
-                NamedTextColor.DARK_BLUE,
-                NamedTextColor.DARK_GREEN,
-                NamedTextColor.DARK_AQUA,
-                NamedTextColor.DARK_RED,
-                NamedTextColor.DARK_PURPLE,
-                NamedTextColor.GOLD,
-                NamedTextColor.BLUE,
-                NamedTextColor.GREEN,
-                NamedTextColor.AQUA,
-                NamedTextColor.RED,
-                NamedTextColor.LIGHT_PURPLE,
-                NamedTextColor.YELLOW);
         List<NamedTextColor> usableColors = new ArrayList<>(colorsAvailable);
         for (TeamData team : teams.values()){
             usableColors.remove(team.getColor());

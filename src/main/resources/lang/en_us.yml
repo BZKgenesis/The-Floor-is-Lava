@@ -23,6 +23,7 @@ error:
   cannot_break_own_anchor: "<prefix><red>You cannot break your own team inventory anchor."
   not_here: "<prefix><red>You're not supposed to be here."
   cannot_start_preparation_phase: "<prefix><red>Cannot start the preparation phase, check the configuration."
+  empty_name: "<prefix><red>The name cannot be empty."
 
 validation:
   team_created: "<prefix><green>Team created."
@@ -64,6 +65,7 @@ command:
   game_resumed: "<prefix><white>System resumed."
   speed_set: "<prefix><white>Speed set to <speed>"
   speed_current: "<prefix><white>The current speed is <speed>"
+  map_center_set: "<prefix><white>Map center set to <x>, <z>"
 
 debug:
   respawn_locations_header: "respawn locations:"
@@ -76,6 +78,8 @@ debug:
   kit_line: "- kit <kit_name>"
   player_kits_header: "player kits"
   player_kit_line: "- player <player_name> has kit: <kit_name>"
+  player_stats_header: "Player stats"
+  player_stats_line: "- Player <player_name> has stats: <stats> = <value>"
 
 gui:
   config_value: "<yellow><param><gray> = <white><value>"

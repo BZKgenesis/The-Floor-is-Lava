@@ -1,0 +1,132 @@
+package net.bzkgns.theFloorIsLavaManager.debug;
+
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.kits.KitData;
+import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.statistics.PlayerStatistics;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import java.util.Map;
+import java.util.UUID;
+
+public class DebugCommands {
+    private static final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
+    public static ArgumentBuilder <CommandSourceStack, ?> register() {
+        return Commands.literal("debug")
+                .requires(sender -> sender.getSender().isOp())
+                .then(Commands.literal("respawnTeam")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.respawn_locations_header");
+                                for (Map.Entry<String, Location> entry : TeamRespawnManager.getInstance().getRespawnPoints().entrySet()){
+                                    Messages.send(player, "debug.respawn_location_line",
+                                            Placeholder.unparsed("team_name", entry.getKey()),
+                                            Placeholder.unparsed("location", entry.getValue().toString()));
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("gameState")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.game_state", Placeholder.unparsed("state", plugin.getGameManager().getState().toString()));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("team")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.teams_header");
+                                for (String teamName : TeamManager.getInstance().getTeams()){
+                                    TeamData team = TeamManager.getInstance().getTeam(teamName);
+                                    Messages.send(player, "debug.team_line",
+                                            Placeholder.component("team_name", Component.text(teamName, team.getColor())),
+                                            Placeholder.unparsed("members", team.getMembers().toString()));
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("dangerState")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.danger_state", Placeholder.unparsed("state", plugin.getGameManager().getDangerManager().getState().toString()));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("kit")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.kits_header");
+                                for (String kitName : KitManager.getInstance().getAllKits().keySet()){
+                                    Messages.send(player, "debug.kit_line", Placeholder.unparsed("kit_name", kitName));
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .then(Commands.argument("kit_name", StringArgumentType.word()).suggests(
+                                (_, suggestionsBuilder) -> {
+                                    for (String kitName : KitManager.getInstance().getAllKits().keySet()) {
+                                        if (kitName.startsWith(suggestionsBuilder.getRemaining()))
+                                            suggestionsBuilder.suggest(kitName);
+                                    }
+                                    return suggestionsBuilder.buildFuture();
+                                }
+                        ).executes(ctx -> {
+                            String kitName = StringArgumentType.getString(ctx, "kit_name");
+                            KitData kit = KitManager.getInstance().getAllKits().get(kitName);
+                            if (ctx.getSource().getExecutor() instanceof Player player && kit != null) {
+
+                                player.sendMessage(kit.toString());
+                            } else {
+                                Messages.send(ctx.getSource().getSender(), "error.unknown_kit", Placeholder.unparsed("kit_name", kitName));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })))
+                .then(Commands.literal("playerKits")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.player_kits_header");
+                                for (Map.Entry<UUID, KitData> entry : KitManager.getInstance().getPlayerKits().entrySet()){
+                                    Player currentPlayer = plugin.getServer().getPlayer(entry.getKey());
+                                    String playerName = currentPlayer != null ? currentPlayer.getName() : entry.getKey().toString();
+                                    Messages.send(player, "debug.player_kit_line",
+                                            Placeholder.unparsed("player_name", playerName),
+                                            Placeholder.unparsed("kit_name", entry.getValue().getName()));
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("playerStats")
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Messages.send(player, "debug.player_stats_header");
+                                for (Map.Entry<UUID, PlayerStatistics> entry : plugin.getStatisticsManager().getCache().entrySet()){
+                                    Player currentPlayer = plugin.getServer().getPlayer(entry.getKey());
+                                    String playerName = currentPlayer != null ? currentPlayer.getName() : entry.getKey().toString();
+                                    for (Map.Entry<String, Integer> statEntry : entry.getValue().getAll().entrySet()) {
+                                        Messages.send(player, "debug.player_stats_line",
+                                                Placeholder.unparsed("player_name", playerName),
+                                                Placeholder.unparsed("stats", statEntry.getKey()),
+                                                Placeholder.unparsed("value", statEntry.getValue().toString())
+                                        );
+
+                                    }
+                                }
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                );
+    }
+}

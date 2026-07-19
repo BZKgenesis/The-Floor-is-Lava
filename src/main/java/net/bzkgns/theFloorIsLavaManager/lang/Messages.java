@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.lang;
 
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -31,21 +32,48 @@ public final class Messages {
 
     }
 
-    public static void sendPing(Audience audience,
-                            String key,
-                            TagResolver... placeholders){
-        if (audience instanceof Player player) {
-            player.playSound(player.getLocation(), "minecraft:block.note_block.bell", 1.0f, 1.0f);
-        }
-        send(audience, key, placeholders);
-
+    public static void playPing(Player player){
+        player.playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5f, 1.0f);
+    }
+    public static void playAlert(Player player){
+        player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
+                () -> player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f), 2L);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
+                () -> player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f), 4L);
+    }
+    public static void playError(Player player){
+        player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f);
     }
 
     public static void send(Audience audience,
                             String key,
                             TagResolver... placeholders) {
-
         audience.sendMessage(component(audience, key, placeholders));
+    }
+
+    public static void sendPing(Audience audience,
+                            String key,
+                            TagResolver... placeholders) {
+        if (audience instanceof Player player)
+            playPing(player);
+        send(audience, key, placeholders);
+    }
+
+    public static void sendAlert(Audience audience,
+                                String key,
+                                TagResolver... placeholders) {
+        if (audience instanceof Player player)
+            playAlert(player);
+        send(audience, key, placeholders);
+    }
+
+    public static void sendError(Audience audience,
+                                String key,
+                                TagResolver... placeholders) {
+        if (audience instanceof Player player)
+            playError(player);
+        send(audience, key, placeholders);
     }
 
     public static void actionBar(Player player,
@@ -67,38 +95,80 @@ public final class Messages {
 
     }
 
+    public static void broadcastPing(String key,
+                                 TagResolver... placeholders) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            playPing(player);
+            player.sendMessage(component(player, key, placeholders));
+        }
+    }
+    public static void broadcastError(String key,
+                                     TagResolver... placeholders) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            sendError(player, key, placeholders);
+        }
+    }
+
     public static void broadcast(String key,
                                  TagResolver... placeholders) {
-
         for (Player player : Bukkit.getOnlinePlayers()) {
-
-            player.sendMessage(component(player, key, placeholders));
-
+            send(player, key, placeholders);
         }
-
     }
 
     public static void broadcastTeam(@NotNull TeamData team, @NotNull String key,
                                      TagResolver... placeholders) {
-
         for (UUID uuid : team.getMembers()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null)
-                player.sendMessage(component(player, key, placeholders));
-
+                send(player, key, placeholders);
         }
+    }
 
+    public static void broadcastTeamPing(@NotNull TeamData team, @NotNull String key,
+                                     TagResolver... placeholders) {
+        for (UUID uuid : team.getMembers()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null){
+                sendPing(player, key, placeholders);
+            }
+        }
+    }
+
+    public static void broadcastTeamAlert(@NotNull TeamData team, @NotNull String key,
+                                         TagResolver... placeholders) {
+        for (UUID uuid : team.getMembers()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null){
+                sendAlert(player, key, placeholders);
+            }
+        }
     }
 
     public static void broadcastOp(String key,
                                  TagResolver... placeholders) {
-
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isOp())
-                player.sendMessage(component(player, key, placeholders));
-
+                send(player, key, placeholders);
         }
+    }
 
+    public static void broadcastOpPing(String key,
+                                 TagResolver... placeholders) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                sendPing(player, key, placeholders);
+            }
+        }
+    }
+
+    public static void broadcastOpError(String key,
+                                        TagResolver... placeholders) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                sendError(player, key, placeholders);
+            }
+        }
     }
 
 }

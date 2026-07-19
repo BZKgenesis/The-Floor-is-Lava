@@ -69,7 +69,7 @@ public class KitChoiceGUI implements Listener {
             Player player = conn.getPlayer();
             KitManager.getInstance().assignKitToPlayer(player.getUniqueId(),kit.getName());
             KitManager.getInstance().applyKitToPlayer(player);
-            Messages.send(player, "kit.assigned", Placeholder.component("kit_name", kit.getDisplayName()));
+            Messages.send(player, "kit.self_assigned", Placeholder.component("kit_name", kit.getDisplayName()));
         }
     }
 }

@@ -21,7 +21,9 @@ import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnListener;
 import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
-import net.bzkgns.theFloorIsLavaManager.managers.WorldManager;
+import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
+import net.bzkgns.theFloorIsLavaManager.statistics.DatabaseManager;
+import net.bzkgns.theFloorIsLavaManager.statistics.StatisticsManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
@@ -36,6 +38,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaCommands.registerTflCommands;
@@ -51,7 +54,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     private GameManager gameManager;
     private ResourcePackManager resourcePackManager;
     private WorldManager worldManager;
-
+    private StatisticsManager statisticsManager;
+    private DatabaseManager databaseManager;
 
     public static boolean pvp;
 
@@ -62,6 +66,19 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+        databaseManager = new DatabaseManager();
+        try {
+            databaseManager.connect();
+            databaseManager.initializeDatabase();
+        } catch (Exception e) {
+            getLogger().severe("Erreur lors de la connexion à la base de données : " + e.getMessage());
+            getLogger().severe("Le plugin ne peut pas continuer. Veuillez vérifier les fichiers de configuration et réessayer.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        statisticsManager = new StatisticsManager(databaseManager);
+        Bukkit.getPluginManager().registerEvents(statisticsManager, this);
 
         LangManager.getInstance().load();
 
@@ -184,6 +201,12 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             gameManager.stopGame();
         }
         KitManager.getInstance().clearAllPlayerKits();
+        statisticsManager.saveAll();
+        try {
+            databaseManager.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -203,6 +226,14 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     public WorldManager getWorldManager(){
         return worldManager;
+    }
+
+    public StatisticsManager getStatisticsManager() {
+        return statisticsManager;
+    }
+
+    public static boolean getDebugMode() {
+        return true;
     }
 }
 

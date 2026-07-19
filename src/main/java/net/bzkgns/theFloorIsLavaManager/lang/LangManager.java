@@ -12,13 +12,16 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
 
 public class LangManager {
 
     private static LangManager instance;
+
+    private final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
     private final Map<String, YamlConfiguration> languages = new HashMap<>();
 
@@ -43,7 +46,7 @@ public class LangManager {
     private void loadLanguage(String locale) {
 
         File folder = new File(TheFloorIsLavaManager.getInstance().getDataFolder(), "lang");
-        folder.mkdirs();
+        boolean _ = folder.mkdirs();
 
         File file = new File(folder, locale + ".yml");
 
@@ -58,25 +61,42 @@ public class LangManager {
 
     public Component get(Audience audience, String key, TagResolver... placeholders) {
 
-        String locale = ConfigRegistry.getConfigManager("game").getString(GameConfigKeys.DEFAULT_LANG.getKey());
-        if (audience instanceof Player player)
+        String locale = ConfigRegistry.getConfigManager("game")
+                .getString(GameConfigKeys.DEFAULT_LANG.getKey());
+
+        if (audience instanceof Player player) {
             locale = player.locale()
                     .toString()
                     .toLowerCase(Locale.ROOT);
+        }
 
         YamlConfiguration lang = languages.get(locale);
 
-        if (lang == null){
-            lang = languages.get("en_us");
-            System.out.println("Missing language file for locale " + locale + ", falling back to en_us");
+        if (lang == null) {
+            locale = "en_us";
+            lang = languages.get(locale);
+            plugin.getLogger().warning("Missing language file for locale '" + locale + "', falling back to en_us.");
         }
 
         String text = lang.getString(key);
 
-        if (text == null) {
-            text = "<red>Missing translation: " + key;
-            System.out.println("Missing translation for key " + key + " in locale " + locale);
+        if (TheFloorIsLavaManager.getDebugMode()){
+            if (languages.get("fr_fr").getString(key) == null) {
+                reportMissingTranslation("fr_fr", key);
+                plugin.getLogger().warning("Missing translation '" + key + "' for locale 'fr_fr'.");
+            }
+
+            if (languages.get("en_us").getString(key) == null) {
+                reportMissingTranslation("en_us", key);
+                plugin.getLogger().warning("Missing translation '" + key + "' for locale 'en_us'.");
+            }
         }
+
+        if (text == null) {
+            plugin.getLogger().warning("Missing translation '" + key + "' for locale '" + locale + "'.");
+            text = "<red>Missing translation: " + key;
+        }
+
         String prefix = lang.getString("prefix", "");
 
         return mm.deserialize(
@@ -86,6 +106,34 @@ public class LangManager {
                         TagResolver.resolver(placeholders)
                 )
         );
+    }
+    private final Set<String> missingTranslations = new HashSet<>();
+
+    private void reportMissingTranslation(String locale, String key) {
+
+        String uniqueKey = locale + ":" + key;
+
+        if (!missingTranslations.add(uniqueKey)) {
+            return;
+        }
+
+        File file = new File(
+                new File(TheFloorIsLavaManager.getInstance().getDataFolder(), "lang"),
+                "missing_translation_" + locale + ".txt"
+        );
+
+        try {
+            if (!file.exists()) {
+                boolean _ = file.createNewFile();
+            }
+
+            try (FileWriter writer = new FileWriter(file, true)) {
+                writer.write(key + ": \"\"\n");
+            }
+
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Error writing missing translation for locale '" + locale + "' and key '" + key + "'", e);
+        }
     }
 
 }

@@ -55,12 +55,12 @@ public class TextUtils {
             case MINUTES_SECONDS:
                 if (minutes > 0) {
                     if (minutes > 1) {
-                        return Messages.string(audience, "time.minutes_seconds", Placeholder.unparsed("minutes", String.valueOf(minutes)), Placeholder.unparsed("seconds", String.valueOf(seconds)));
+                        return Messages.string(audience, "time.minutes_and_seconds", Placeholder.unparsed("minutes", String.valueOf(minutes)), Placeholder.unparsed("seconds", String.valueOf(seconds)));
                     }
                     if (seconds > 1) {
-                        return Messages.string(audience, "time.minute_seconds", Placeholder.unparsed("seconds", String.valueOf(seconds)));
+                        return Messages.string(audience, "time.minute_and_seconds", Placeholder.unparsed("seconds", String.valueOf(seconds)));
                     }
-                    return Messages.string(audience, "time.minute_second");
+                    return Messages.string(audience, "time.minute_and_second");
                 } else {
                     if (seconds > 1) {
                         return Messages.string(audience, "time.seconds", Placeholder.unparsed("time", String.valueOf(seconds)));
@@ -71,12 +71,12 @@ public class TextUtils {
                 String formattedTime2 = String.format("%d.%03d", seconds, milliseconds);
                 if (minutes > 0) {
                     if (minutes > 1) {
-                        return Messages.string(audience, "time.minutes_seconds", Placeholder.unparsed("minutes", String.valueOf(minutes)), Placeholder.unparsed("seconds",formattedTime2));
+                        return Messages.string(audience, "time.minutes_and_seconds", Placeholder.unparsed("minutes", String.valueOf(minutes)), Placeholder.unparsed("seconds",formattedTime2));
                     }
                     if (seconds > 1) {
-                        return Messages.string(audience, "time.minute_seconds", Placeholder.unparsed("seconds", formattedTime2));
+                        return Messages.string(audience, "time.minute_and_seconds", Placeholder.unparsed("seconds", formattedTime2));
                     }
-                    return Messages.string(audience, "time.minute_second");
+                    return Messages.string(audience, "time.minute_and_second");
                 } else {
                     if (seconds > 1) {
                         return Messages.string(audience, "time.seconds", Placeholder.unparsed("time", formattedTime2));

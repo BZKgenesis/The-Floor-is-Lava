@@ -23,6 +23,7 @@ error:
   cannot_break_own_anchor: "<prefix><red>Vous ne pouvez pas casser votre propre portail d'inventaire d'équipe."
   not_here: "<prefix><red>Tu n'es pas sensé être ici."
   cannot_start_preparation_phase: "<prefix><red>Impossible de démarrer la phase de préparation, vérifiez la configuration."
+  empty_name: "<prefix><red>Le nom ne peut pas être vide."
 
 validation:
   team_created: "<prefix><green>Équipe créée."
@@ -31,7 +32,7 @@ validation:
   request_sent: "<prefix><green>La demande a été envoyée."
   config_saved: "<prefix><green>Configuration sauvegardée."
   value_set: "<prefix><green>Valeur définie pour <param> : <value>"
-  world_reset_success: "<prefix><green>Réinitialisation du monde terminée avec succès."
+  world_reset_success: "<prefix><green>Réinitialisation du monde terminée avec succès. Pour paramétrer le centre de jeu, ainsi que la taille de la zone, vous pouvez prévisualiser la map avec la commande <yellow>/tfl map preview<green>, et définir le centre de la map avec <yellow>/tfl map setcenter<green>."
   world_reset_map_success: "<prefix><green>Réinitialisation du monde avec la map <map_name> terminée avec succès."
   anchor_placed: "<prefix><green>Le portail d'inventaire d'équipe a été placé."
   anchor_removed: "<prefix><green>Le portail d'inventaire d'équipe a été supprimé."
@@ -64,6 +65,7 @@ command:
   game_resumed: "<prefix><white>Reprise du système."
   speed_set: "<prefix><white>Vitesse définie à <speed>"
   speed_current: "<prefix><white>La vitesse actuelle est de <speed>"
+  map_center_set: "<prefix><white>Centre de la map défini à <x>, <z>"
 
 debug:
   respawn_locations_header: "respawn locations:"
@@ -76,6 +78,8 @@ debug:
   kit_line: "- kit <kit_name>"
   player_kits_header: "player kits"
   player_kit_line: "- player <player_name> has kit: <kit_name>"
+  player_stats_header: "Stats du joueur"
+  player_stats_line: "- Joueur <player_name> a la stats: <stats> = <value>"
 
 gui:
   config_value: "<yellow><param><gray> = <white><value>"

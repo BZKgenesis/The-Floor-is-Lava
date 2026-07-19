@@ -2,12 +2,11 @@ package net.bzkgns.theFloorIsLavaManager;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.bzkgns.theFloorIsLavaManager.items.*;
-import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
-import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
+import net.bzkgns.theFloorIsLavaManager.statistics.StatisticType;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
@@ -33,10 +32,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -123,6 +119,16 @@ public class TheFloorIslavaListener implements Listener {
         for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
             player.discoverRecipe(new NamespacedKey(plugin,recipe_key));
         }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        plugin.getStatisticsManager().load(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        plugin.getStatisticsManager().unload(event.getPlayer());
     }
 
     @EventHandler
@@ -238,8 +244,8 @@ public class TheFloorIslavaListener implements Listener {
             );
             event.getEntity().getWorld().strikeLightningEffect(event.getEntity().getLocation());
 
-            // Empêche le respawn auto si jamais tu l'as modifié ailleurs
             if (event.getDamageSource().getCausingEntity() instanceof Player assassin){
+                plugin.getStatisticsManager().increment(assassin, StatisticType.KILLS);
                 for (int slotId = 0; slotId < 36; slotId++){
                     ItemStack stack = player.getInventory().getItem(slotId);
                     if (stack!=null && shouldGiveItem(stack)){
@@ -255,18 +261,12 @@ public class TheFloorIslavaListener implements Listener {
         }
 
         if (plugin.getGameManager().getState() == GameState.RUNNING && plugin.getGameManager().isPlayerInGame(event.getEntity())){
+            plugin.getStatisticsManager().increment(event.getEntity(), StatisticType.DEATHS);
             TeamData team = TeamManager.getInstance().getPlayerTeam(event.getEntity().getUniqueId());
             if (team != null && team.isEliminated()) {
                 plugin.getLogger().info("Team " + team.getName() + " eliminated.");
-                // NOTE i18n : TeamManager.broadcastTeamMessage(Component, TeamData) envoie un unique Component
-                // déjà construit à tous les membres de l'équipe : la langue est donc figée (résolue ici via
-                // Bukkit.getServer(), donc en_us par défaut) pour tous les joueurs, quelle que soit leur locale.
-                // Pour une vraie localisation par joueur, il faudrait adapter broadcastTeamMessage() pour qu'elle
-                // itère sur les membres de l'équipe et appelle Messages.send(player, ...) individuellement.
-                TeamManager.broadcastTeamMessage(
-                        Messages.component(Bukkit.getServer(), "team.eliminated",
-                                Placeholder.component("team_name", team.getName())),
-                        team
+                Messages.broadcastPing("team.eliminated",
+                                Placeholder.component("team_name", team.getName())
                 );
             }
         }
@@ -278,6 +278,11 @@ public class TheFloorIslavaListener implements Listener {
             // localisation par joueur, il faudrait adapter TextUtils.broadcastMessage() pour qu'elle construise
             // un Component par joueur via Messages.component(player, ...).
             if (winningTeam != null) {
+                winningTeam.getMembers().forEach(uuid ->{
+                        Player player = Bukkit.getPlayer(uuid);
+                        if (player != null)
+                            plugin.getStatisticsManager().increment(player, StatisticType.GAMES_WON);
+                });
                 Messages.broadcast( "game.end_team_won",
                                 Placeholder.component("team_name", winningTeam.getName())
                 );
@@ -400,13 +405,7 @@ public class TheFloorIslavaListener implements Listener {
 
     private boolean shouldGiveItem(ItemStack stack){
         List<Material> materials = List.of(Material.DIAMOND, Material.GOLD_INGOT,Material.IRON_INGOT,Material.COPPER_INGOT,Material.AMETHYST_SHARD,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.EGG,Material.SNOWBALL,Material.COBBLESTONE,Material.DIRT,Material.BAKED_POTATO,Material.GRAY_WOOL);
-        if (new TeamInventoryItem().isItem(stack)){
-            return true;
-        }
-        if (new PopupTowerItem().isItem(stack)){
-            return true;
-        }
-        return materials.contains(stack.getType());
+        return materials.contains(stack.getType()) || ItemManager.getAssociatedCustomItem(stack) != null;
     }
 
 

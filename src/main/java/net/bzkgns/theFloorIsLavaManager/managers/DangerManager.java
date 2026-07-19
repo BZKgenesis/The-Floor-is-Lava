@@ -248,9 +248,9 @@ public class DangerManager {
 
         damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, dangerConfigManager.getInt(DangerConfigKeys.DAMAGE_EVERY));
 
-        Messages.broadcast("lava_rising_start");
-        Messages.broadcast("respawn_disabled");
-        Messages.broadcast("arena_shrinking");
+        Messages.broadcast("info.lava_rising_start");
+        Messages.broadcast("info.respawn_disabled");
+        Messages.broadcast("info.arena_shrinking");
 
         if (dangerConfigManager.getBoolean(DangerConfigKeys.PLACE_LAVA)) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 1, 1);

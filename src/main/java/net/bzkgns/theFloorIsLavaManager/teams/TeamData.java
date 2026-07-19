@@ -23,13 +23,15 @@ public class TeamData {
     private NamedTextColor color;
     private final Team vanillaTeam;
     private final List<UUID> members = new ArrayList<>();
+    private final UUID owner;
 
 
-    public TeamData(String id, NamedTextColor color, Team team) {
+    public TeamData(String id, NamedTextColor color, Team team, UUID owner) {
         this.id = id;
         this.name = id;
         this.color = color;
         this.vanillaTeam = team;
+        this.owner = owner;
     }
 
 
@@ -71,5 +73,9 @@ public class TeamData {
             }
         }
         return nbPlayerAlive == 0;
+    }
+
+    public Player getOwner() {
+        return org.bukkit.Bukkit.getPlayer(owner);
     }
 }

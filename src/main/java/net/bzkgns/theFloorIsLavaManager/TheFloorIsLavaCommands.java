@@ -3,34 +3,25 @@ package net.bzkgns.theFloorIsLavaManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
-import net.bzkgns.theFloorIsLavaManager.kits.KitData;
-import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
+import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
+import net.bzkgns.theFloorIsLavaManager.debug.DebugCommands;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
 import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
-import net.bzkgns.theFloorIsLavaManager.managers.GameState;
-import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
-import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
+import net.bzkgns.theFloorIsLavaManager.teams.TeamCommands;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
-import net.kyori.adventure.text.Component;
+import net.bzkgns.theFloorIsLavaManager.world.ResetWorldCommands;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.Location;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Level;
 
 import static net.bzkgns.theFloorIsLavaManager.config.ConfigCommands.registerConfigNode;
 
@@ -121,7 +112,59 @@ public class TheFloorIsLavaCommands {
         root.then(Commands.literal("getSpeed")
                 .requires(sender -> sender.getSender().isOp())
                 .executes( ctx -> getSpeed(ctx,gameManager.getDangerManager())));
-        root.then(Commands.literal("give")
+        root.then(registerGive());
+        root.then(TeamCommands.register());
+        root.then(DebugCommands.register());
+        root.then(Commands.literal("map")
+                .then(Commands.literal("preview") //tp to tfl_game
+                .requires(sender -> sender.getSender().isOp())
+                .executes(ctx ->{
+                    if (ctx.getSource().getExecutor() instanceof Player player){
+                        player.teleport(plugin.getWorldManager().getPreGameSpawnLocation());
+                        player.setGameMode(GameMode.SPECTATOR);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }))
+                .then(ResetWorldCommands.register())
+                .then(Commands.literal("setCenter")
+                        .requires(sender -> sender.getSender().isOp())
+                        .executes(ctx -> {
+                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                Integer x = player.getLocation().getBlockX();
+                                Integer z = player.getLocation().getBlockZ();
+                                setMapCenter(x,
+                                        z);
+                                Messages.send(player, "command.map_center_set",
+                                        Placeholder.unparsed("x", String.valueOf(x)),
+                                        Placeholder.unparsed("z", String.valueOf(z)));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .then(Commands.argument("x", IntegerArgumentType.integer())
+                                .then(Commands.argument("z", IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            if (ctx.getSource().getExecutor() instanceof Player player){
+                                                Integer x = IntegerArgumentType.getInteger(ctx, "x");
+                                                Integer z = IntegerArgumentType.getInteger(ctx, "z");
+                                                setMapCenter(x,
+                                                        z);
+                                                Messages.send(player, "command.map_center_set",
+                                                        Placeholder.unparsed("x", String.valueOf(x)),
+                                                        Placeholder.unparsed("z", String.valueOf(z)));
+                                            }
+                                            return Command.SINGLE_SUCCESS;
+                                        })
+                                )
+                        )
+                )
+
+        );
+
+        return root.build();
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> registerGive() {
+        return Commands.literal("give")
                 .requires(sender -> sender.getSender().isOp())
                 .then(Commands.argument("item_key", StringArgumentType.word()).suggests(
                         (_, suggestionsBuilder) -> {
@@ -139,168 +182,14 @@ public class TheFloorIsLavaCommands {
                         Messages.send(ctx.getSource().getSender(), "error.unknown_item", Placeholder.unparsed("item_key", itemKey));
                     }
                     return Command.SINGLE_SUCCESS;
-                })));
-        root.then(Commands.literal("resetWorld")
-                .requires(sender -> sender.getSender().isOp())
-                .then(Commands.literal("random")
-                        .executes(ctx -> resetWorldRandomCommande(ctx,0,plugin))
-                        .then(Commands.argument("seed", LongArgumentType.longArg()).executes(
-                                ctx -> resetWorldRandomCommande(ctx,LongArgumentType.getLong(ctx,"seed"),plugin)))
-                ).then(Commands.literal("map")
-                        .then(Commands.argument("map_name", StringArgumentType.greedyString()).suggests((_, suggestionsBuilder) ->{
-                                            plugin.getWorldManager().getMapsNames().forEach(name -> {
-                                                if (name.contains(" ")) {
-                                                    suggestionsBuilder.suggest("\"" + name + "\"");
-                                                } else {
-                                                    suggestionsBuilder.suggest(name);
-                                                }
-                                            });
-                                            return suggestionsBuilder.buildFuture();
-                                        }
-                                )
-                                .executes(ctx -> resetWorldMapCommande(ctx,StringArgumentType.getString(ctx,"map_name").replace("\"",""),plugin)))));
-        root.then(Commands.literal("team")
-                .executes( ctx -> {
-                    if (plugin.getGameManager().getState() == GameState.RUNNING){
-                        Messages.send(ctx.getSource().getSender(), "error.cannot_manage_team_during_game");
-                        return Command.SINGLE_SUCCESS;
-                    }
-                    if (ctx.getSource().getExecutor() instanceof Player player){
-                        TeamGUI.openMainMenu(player);
-                    }
-                    return Command.SINGLE_SUCCESS;
                 }));
-        root.then(Commands.literal("debug")
-                .requires(sender -> sender.getSender().isOp())
-                .then(Commands.literal("respawnTeam")
-                        .executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player){
-                                Messages.send(player, "debug.respawn_locations_header");
-                                for (Map.Entry<String, Location> entry : TeamRespawnManager.getInstance().getRespawnPoints().entrySet()){
-                                    Messages.send(player, "debug.respawn_location_line",
-                                            Placeholder.unparsed("team_name", entry.getKey()),
-                                            Placeholder.unparsed("location", entry.getValue().toString()));
-                                }
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-                .then(Commands.literal("gameState")
-                        .executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player){
-                                Messages.send(player, "debug.game_state", Placeholder.unparsed("state", plugin.getGameManager().getState().toString()));
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-                .then(Commands.literal("team")
-                        .executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player){
-                                Messages.send(player, "debug.teams_header");
-                                for (String teamName : TeamManager.getInstance().getTeams()){
-                                    TeamData team = TeamManager.getInstance().getTeam(teamName);
-                                    Messages.send(player, "debug.team_line",
-                                            Placeholder.component("team_name", Component.text(teamName, team.getColor())),
-                                            Placeholder.unparsed("members", team.getMembers().toString()));
-                                }
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-                .then(Commands.literal("dangerState")
-                        .executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player){
-                                Messages.send(player, "debug.danger_state", Placeholder.unparsed("state", plugin.getGameManager().getDangerManager().getState().toString()));
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-                .then(Commands.literal("kit")
-                        .executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player){
-                                Messages.send(player, "debug.kits_header");
-                                for (String kitName : KitManager.getInstance().getAllKits().keySet()){
-                                    Messages.send(player, "debug.kit_line", Placeholder.unparsed("kit_name", kitName));
-                                }
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .then(Commands.argument("kit_name", StringArgumentType.word()).suggests(
-                                (_, suggestionsBuilder) -> {
-                                    for (String kitName : KitManager.getInstance().getAllKits().keySet()) {
-                                        if (kitName.startsWith(suggestionsBuilder.getRemaining()))
-                                            suggestionsBuilder.suggest(kitName);
-                                    }
-                                    return suggestionsBuilder.buildFuture();
-                                }
-                        ).executes(ctx -> {
-                            String kitName = StringArgumentType.getString(ctx, "kit_name");
-                            KitData kit = KitManager.getInstance().getAllKits().get(kitName);
-                            if (ctx.getSource().getExecutor() instanceof Player player && kit != null) {
-
-                                player.sendMessage(kit.toString());
-                            } else {
-                                Messages.send(ctx.getSource().getSender(), "error.unknown_kit", Placeholder.unparsed("kit_name", kitName));
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        })))
-                .then(Commands.literal("playerKits")
-                        .executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player){
-                                Messages.send(player, "debug.player_kits_header");
-                                for (Map.Entry<UUID, KitData> entry : KitManager.getInstance().getPlayerKits().entrySet()){
-                                    Player currentPlayer = plugin.getServer().getPlayer(entry.getKey());
-                                    String playerName = currentPlayer != null ? currentPlayer.getName() : entry.getKey().toString();
-                                    Messages.send(player, "debug.player_kit_line",
-                                            Placeholder.unparsed("player_name", playerName),
-                                            Placeholder.unparsed("kit_name", entry.getValue().getName()));
-                                }
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-
-        );
-
-        return root.build();
     }
 
-    private static int resetWorldRandomCommande(CommandContext<CommandSourceStack> ctx, long seed, TheFloorIsLavaManager plugin){
-        if (ConfigRegistry.getConfigManager("game").hasBeenModified()){
-            Messages.broadcastOp("info.world_reset_random_warning");
-        }
-
-        if (seed == 0){
-            seed = System.currentTimeMillis();
-        }
-        Messages.broadcastOp("info.world_reset_random", Placeholder.unparsed("seed", String.valueOf(seed)));
-
-        Messages.broadcast("info.world_generating");
-        Messages.broadcast("info.world_generating_warning");
-        try{
-            plugin.getWorldManager().resetRandomWorld(seed);
-            Messages.broadcastOp( "validation.world_reset_success");
-        } catch (WorldGenerationException e){
-            Messages.broadcastOp("error.world_reset_failed");
-            TheFloorIsLavaManager.getInstance().getLogger().log(Level.SEVERE, "Erreur lors de la réinitialisation du monde.", e);
-        }
-
-
-        return Command.SINGLE_SUCCESS;
+    private static void setMapCenter(Integer x, Integer z) {
+        ConfigRegistry.getConfigManager("map").set(MapConfigKeys.CENTER_X.getKey(), x.toString());
+        ConfigRegistry.getConfigManager("map").set(MapConfigKeys.CENTER_Z.getKey(), z.toString());
     }
 
-    private static int resetWorldMapCommande(CommandContext<CommandSourceStack> ctx, String map_name, TheFloorIsLavaManager plugin){
 
-        Messages.broadcastOp( "info.world_reset_map", Placeholder.unparsed("map_name", map_name));
-
-        Messages.broadcast( "info.world_generating");
-        Messages.broadcast( "info.world_generating_warning");
-
-        try {
-            plugin.getWorldManager().loadMap(map_name);
-            Messages.broadcastOp( "validation.world_reset_map_success", Placeholder.unparsed("map_name", map_name));
-        }catch (WorldGenerationException e){
-            Messages.broadcastOp( "error.world_reset_map_failed", Placeholder.unparsed("map_name", map_name));
-            TheFloorIsLavaManager.getInstance().getLogger().log(Level.SEVERE, "Erreur lors de la réinitialisation du monde avec la map " + map_name + ".", e);
-        }
-
-
-        return Command.SINGLE_SUCCESS;
-    }
 
 }

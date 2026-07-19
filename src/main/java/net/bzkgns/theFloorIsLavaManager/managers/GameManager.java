@@ -12,6 +12,7 @@ import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.statistics.StatisticType;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -103,7 +104,7 @@ public class GameManager {
             Bukkit.removeBossBar(key);
         }
         if (gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM) > TeamManager.getInstance().getTeams().size()) {
-            Messages.broadcastOp("error.cannot_start_game_not_enough_teams", Placeholder.unparsed("min_teams", String.valueOf(gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM))));
+            Messages.broadcastOpError("error.cannot_start_game_not_enough_teams", Placeholder.unparsed("min_teams", String.valueOf(gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM))));
             return false;
         }
         return startStartingPhase();
@@ -176,12 +177,14 @@ public class GameManager {
 
         if (positions==null) {
             plugin.getLogger().warning("Impossible de répartir les joueurs, vérifiez la configuration !");
-            Messages.broadcastOp("error.cannot_spread_player");
+            Messages.broadcastOpError("error.cannot_spread_player");
             Bukkit.removeBossBar(new NamespacedKey(plugin, "game_bar"));
             state = GameState.LOBBY;
             cancelBossBarTask();
             return false;
         }
+        if (ConfigRegistry.getConfigManager("map").getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE.getKey()))
+            plugin.getWorldManager().placeStructureAtSpawn();
 
         Bukkit.getServer().getOnlinePlayers().forEach(p -> p.teleport(plugin.getWorldManager().getPreGameSpawnLocation()));
         int startingCountdown = gameConfigManager.getInt(GameConfigKeys.STARTING_COUNTDOWN);
@@ -191,7 +194,7 @@ public class GameManager {
                     () -> plugin.getServer().getOnlinePlayers().forEach(
                             p->Messages.send(p,
                                     "info.starting_countdown",
-                                    Placeholder.unparsed("time", formatTime(p,startingCountdown - 3, TextUtils.TimeFormat.SHORTEST)))
+                                    Placeholder.unparsed("time", formatTime(p,3*20, TextUtils.TimeFormat.SHORTEST)))
                     ),
                     startingCountdown*20L - 3*20L
             );
@@ -200,7 +203,7 @@ public class GameManager {
                     () ->  plugin.getServer().getOnlinePlayers().forEach(
                             p->Messages.send(p,
                                     "info.starting_countdown",
-                                    Placeholder.unparsed("time", formatTime(p,startingCountdown - 2, TextUtils.TimeFormat.SHORTEST)))),
+                                    Placeholder.unparsed("time", formatTime(p,2*20, TextUtils.TimeFormat.SHORTEST)))),
                     startingCountdown*20L - 2*20L
             );
         if (startingCountdown > 1)
@@ -208,7 +211,7 @@ public class GameManager {
                     () ->  plugin.getServer().getOnlinePlayers().forEach(
                             p->Messages.send(p,
                                     "info.starting_countdown",
-                                    Placeholder.unparsed("time", formatTime(p,startingCountdown - 1, TextUtils.TimeFormat.SHORTEST)))),
+                                    Placeholder.unparsed("time", formatTime(p,20, TextUtils.TimeFormat.SHORTEST)))),
                     startingCountdown*20L - 20L
             );
         if (startingCountdown > 0) {
@@ -276,6 +279,8 @@ public class GameManager {
 
         playerInGame.forEach(p->
                 KitManager.getInstance().applyKitToPlayer(p));
+
+        playerInGame.forEach(p->plugin.getStatisticsManager().increment(p, StatisticType.GAMES_PLAYED));
 
         phaseRisingTask = Bukkit.getScheduler().scheduleSyncDelayedTask(
                 TheFloorIsLavaManager.getInstance(),

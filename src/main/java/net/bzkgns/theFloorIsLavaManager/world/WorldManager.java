@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.managers;
+package net.bzkgns.theFloorIsLavaManager.world;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigLoader;
@@ -7,10 +7,10 @@ import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.*;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.structure.Structure;
@@ -38,6 +38,7 @@ import static net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager.*;
 public class WorldManager {
 
     private final TheFloorIsLavaManager plugin;
+    private Structure spawnStructure = null;
 
     public WorldManager(){
         this.plugin = TheFloorIsLavaManager.getInstance();
@@ -141,7 +142,7 @@ public class WorldManager {
             currentMapConfigManager.loadFromFile(mapConfig);
         } else {
             plugin.getLogger().info("Utilisation de defaultMapConfig.yml");
-            Messages.broadcastOp("no_map_config");
+            Messages.broadcastOp("warning.no_map_config");
             currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
         }
     }
@@ -152,15 +153,27 @@ public class WorldManager {
 
     private void initializeGameWorld(World world) throws WorldGenerationException {
         StructureManager manager = Bukkit.getStructureManager();
-        Structure structure = null;
+        spawnStructure = null;
 
         try (InputStream structFile = plugin.getResource("tfl_spawn.nbt")) {
             if (structFile != null) {
-                structure = manager.loadStructure(structFile);
+                spawnStructure = manager.loadStructure(structFile);
             }
         } catch (IOException e) {
             throw new ErrorIOWorldAssetsException("Impossible de charger la structure de spawn par défaut.", e);
         }
+
+
+        oldSpawn = world.getSpawnLocation();
+
+        world.setGameRule(GameRules.RESPAWN_RADIUS,0);
+        world.setTime(0);
+        world.setGameRule(GameRules.ADVANCE_TIME,false);
+        world.getWorldBorder().setSize(100000);
+    }
+
+    public void placeStructureAtSpawn() {
+        World world = getGameWorld();
         int center_X = currentMapConfigManager.getInt(MapConfigKeys.CENTER_X);
         int center_Z = currentMapConfigManager.getInt(MapConfigKeys.CENTER_Z);
         world.getNearbyEntities(new BoundingBox(center_X-15,250,center_Z-15,center_X+15,310,center_Z+15))
@@ -170,45 +183,69 @@ public class WorldManager {
                     }
                 });
 
-        if(structure != null){
-            Location pos = new Location(world,center_X-14,279,center_Z-14);
+        Location pos = new Location(world, center_X - 14, 279, center_Z - 14);
 
-            List<Entity> displays = world.getEntities().stream()
-                    .filter(e ->
-                            e.getType()==EntityType.TEXT_DISPLAY && e.getScoreboardTags().contains("tfl_spawn_texts") ||
-                            e.getType()==EntityType.MANNEQUIN && e.getScoreboardTags().contains("tfl_spawn_mannequins") ||
-                            e.getType()==EntityType.ARMOR_STAND && e.getScoreboardTags().contains("tfl_spawn_armor_deco"))
-                    .toList();
-
-            displays.forEach(Entity::remove);
-
-            if (currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE)){
-                structure.place(
-                        pos,
-                        true,
-                        StructureRotation.NONE,
-                        Mirror.NONE,
-                        0,
-                        1f,
-                        new Random()
-                );
+        if (spawnStructure == null) {
+            StructureManager manager = Bukkit.getStructureManager();
+            try (InputStream structFile = plugin.getResource("tfl_spawn.nbt")) {
+                if (structFile != null) {
+                    spawnStructure = manager.loadStructure(structFile);
+                }
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "Impossible de charger la structure de spawn par défaut.", e);
+                return;
             }
         }
-
-        oldSpawn = world.getSpawnLocation();
-        Location spawn;
-        if (currentMapConfigManager.getBoolean(MapConfigKeys.SPAWN_SPAWN_STRUCTURE)){
-            spawn  = new Location(world,center_X+0.5,281,center_Z+0.5);
-        }else{
-            spawn = oldSpawn.clone();
-        }
-
-
+        spawnStructure.place(
+                pos,
+                true,
+                StructureRotation.NONE,
+                Mirror.NONE,
+                0,
+                1f,
+                new Random()
+        );
+        Location spawn  = new Location(world,center_X+0.5,281,center_Z+0.5);
         world.setSpawnLocation(spawn);
-        world.setGameRule(GameRules.RESPAWN_RADIUS,0);
-        world.setTime(0);
-        world.setGameRule(GameRules.ADVANCE_TIME,false);
-        world.getWorldBorder().setSize(100000);
+    }
+
+
+
+    public void placeStructureAtLobby() {
+        World world = getLobbyWorld();
+        world.getNearbyEntities(new BoundingBox(-17,-3,-17,17,15,17))
+                .forEach(entity -> {
+                    if(entity.getType() != EntityType.PLAYER){
+                        entity.remove();
+                    }
+                });
+
+        Location pos = new Location(world, -16, -2, - 16);
+
+        Structure lobbySpawnStructure = null;
+
+        StructureManager manager = Bukkit.getStructureManager();
+        try (InputStream structFile = plugin.getResource("tfl_spawn_lobby.nbt")) {
+            if (structFile != null) {
+                lobbySpawnStructure = manager.loadStructure(structFile);
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Impossible de charger la structure de spawn par défaut.", e);
+            return;
+        }
+        if (lobbySpawnStructure == null) {
+            plugin.getLogger().severe("Impossible de charger la structure de spawn du lobby par défaut.");
+            return;
+        }
+        lobbySpawnStructure.place(
+                pos,
+                true,
+                StructureRotation.NONE,
+                Mirror.NONE,
+                0,
+                1f,
+                new Random()
+        );
     }
 
     private static void copyDirectory(Path source, Path destination) throws IOException {
@@ -579,6 +616,8 @@ public class WorldManager {
 
         Location spawn = new Location(lobby, 0.5, 0, 0.5);
         lobby.setSpawnLocation(spawn);
+
+        placeStructureAtLobby();
 
         plugin.getLogger().info("Monde lobby charge !");
     }

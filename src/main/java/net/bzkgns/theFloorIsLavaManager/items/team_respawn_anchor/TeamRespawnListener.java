@@ -62,7 +62,8 @@ public class TeamRespawnListener implements Listener {
                 TeamRespawnManager.getInstance().removeRespawnPoint(teamName);
                 plugin.getLogger().info(player.getName() + " a cassé le portail d'inventaire d'équipe de l'équipe " + teamName);
                 player.sendActionBar(Messages.component(player, "validation.anchor_removed"));
-                TeamManager.broadcastTeamMessage(Messages.component(player, "team.anchor_removed_broadcast"), TeamManager.getInstance().getTeam(teamName));
+
+                Messages.broadcastTeamAlert(teamData, "team.anchor_removed_broadcast");
                 return;
             }
             plugin.getLogger().warning(player.getName() + " a cassé un portail d'inventaire d'équipe qui n'était pas lié à une équipe.");

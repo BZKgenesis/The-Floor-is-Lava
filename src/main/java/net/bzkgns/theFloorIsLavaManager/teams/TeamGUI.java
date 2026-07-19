@@ -356,7 +356,7 @@ public class TeamGUI implements Listener {
 
         String teamName = view.getText("team_name");
         if (teamName == null || teamName.isBlank()) {
-            Messages.send(player, "error.empty_name");
+            Messages.sendError(player, "error.empty_name");
             openRenameMenu(player);
             return;
         }
@@ -364,7 +364,7 @@ public class TeamGUI implements Listener {
         TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
         if (team != null) {
             team.rename(teamName);
-            Messages.send(player, "team.renamed", Placeholder.component("new_name", Component.text(teamName, team.getColor())));
+            Messages.sendPing(player, "team.renamed", Placeholder.component("new_name", Component.text(teamName, team.getColor())));
             openMainMenu(player);
         }
     }
@@ -388,7 +388,7 @@ public class TeamGUI implements Listener {
         String colorString = event.getIdentifier().asString().substring("tfl:user_input/recolor/".length());
         NamedTextColor newColor = NamedTextColor.NAMES.value(colorString);
         if (newColor == null) {
-            Messages.send(player, "error.invalid_color");
+            Messages.sendError(player, "error.invalid_color");
             openRecolorMenu(player);
             return;
         }
@@ -396,7 +396,7 @@ public class TeamGUI implements Listener {
         TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
         if (team != null) {
             team.changeColor(newColor);
-            Messages.send(player, "team.recolored", Placeholder.component("new_color", Component.text(newColor.toString(), team.getColor())));
+            Messages.sendPing(player, "team.recolored", Placeholder.component("new_color", Component.text(newColor.toString(), team.getColor())));
             openMainMenu(player);
         }
     }
@@ -430,7 +430,7 @@ public class TeamGUI implements Listener {
             case "create_team" -> {
                 TeamManager.getInstance().createTeamForPlayer(player);
                 plugin.getLogger().info(player.getName() + " a créé une équipe");
-                Messages.send(player, "validation.team_created");
+                Messages.sendPing(player, "validation.team_created");
                 openMainMenu(player);
             }
             case "manage_team" -> openManageMenu(player);
@@ -484,15 +484,15 @@ public class TeamGUI implements Listener {
             return;
         }
 
-        TeamManager.broadcastTeamMessage(
-                Messages.component(player, "team.member_joined_broadcast", Placeholder.unparsed("player_name", target.getName())),
-                team
+        Messages.broadcastTeamPing(team,
+                "team.member_joined_broadcast",
+                Placeholder.unparsed("player_name", target.getName())
         );
         team.acceptRequest(target.getUniqueId());
         TeamManager.getInstance().addPlayerToVanillaTeam(target, team.getId());
         TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
 
-        Messages.send(target, "team.request_accepted");
+        Messages.sendPing(target, "team.request_accepted");
         openRequestsMenu(player);
     }
 
@@ -527,10 +527,9 @@ public class TeamGUI implements Listener {
 
         TeamManager.getInstance().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getId());
 
-        Messages.send(player, "team.request_sent");
-        TeamManager.broadcastTeamMessage(
-                Messages.component(player, "team.request_received_broadcast", Placeholder.unparsed("player_name", player.getName())),
-                teamAsked
+        Messages.sendPing(player, "team.request_sent");
+        Player teamOwner = teamAsked.getOwner();
+        Messages.sendPing(teamOwner, "team.request_received_broadcast", Placeholder.unparsed("player_name", player.getName())
         );
         openAskJoinMenu(player);
     }
@@ -553,9 +552,10 @@ public class TeamGUI implements Listener {
         if (team == null) return;
         TeamManager.getInstance().removePlayerFromTeam(kickedPlayer);
         Messages.send(kickedPlayer, "team.kicked", Placeholder.component("team_name", team.getName()));
-        TeamManager.broadcastTeamMessage(
-                Messages.component(player, "team.kicked_broadcast", Placeholder.unparsed("player_name", kickedPlayer.getName())),
-                team
+        Messages.broadcastTeamPing(
+                team,
+                "team.kicked_broadcast",
+                Placeholder.unparsed("player_name", kickedPlayer.getName())
         );
 
         player.closeInventory();
