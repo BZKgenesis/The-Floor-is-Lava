@@ -6,8 +6,8 @@ import org.bukkit.inventory.ItemStack;
 public class TeamManagerItem extends CustomItem {
     public TeamManagerItem() {
         super("team_manager",
-                "Gestion des équipes",
-                "Permet de gérer les équipes",
+                "items.team_manager.display_name",
+                "items.team_manager.lore",
                 Rarity.EPIC,
                 Material.PAPER,
                 true

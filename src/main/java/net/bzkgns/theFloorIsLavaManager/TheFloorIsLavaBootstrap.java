@@ -28,13 +28,13 @@ public class TheFloorIsLavaBootstrap implements PluginBootstrap {
         context.getLifecycleManager().registerEventHandler(RegistryEvents.DIALOG.compose()
                 .newHandler(event -> event.registry().register(
                         DialogKeys.create(Key.key("tfl:menu_dialog")), builder -> builder
-                                .base(DialogBase.builder(Component.text("Title")).build())
+                                .base(DialogBase.builder(Component.text("Quick actions")).build())
                                 .type(
                                         DialogType.multiAction(List.of(
-                                                ActionButton.builder(Component.text("Ouvrir le shop"))
+                                                ActionButton.builder(Component.text("Open shop"))
                                                         .action(DialogAction.staticAction(ClickEvent.runCommand("/shop")))
                                                         .build(),
-                                                ActionButton.builder(Component.text("Ouvrir le gestionnaire d'équipe"))
+                                                ActionButton.builder(Component.text("Open team menu"))
                                                         .action(DialogAction.staticAction(ClickEvent.runCommand("/tfl team")))
                                                         .build()
                                         )).build()

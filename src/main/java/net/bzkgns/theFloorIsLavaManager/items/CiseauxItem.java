@@ -2,6 +2,7 @@ package net.bzkgns.theFloorIsLavaManager.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.CraftingRecipe;
@@ -10,8 +11,16 @@ import org.bukkit.inventory.ShapedRecipe;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CiseauxItem extends CustomItem {
-    public CiseauxItem() {
-        super("ciseaux", "Ciseaux", "Permet de couper les blocs de laine et de les récupérer", Rarity.COMMON, Material.SHEARS, true);
+    public CiseauxItem(){
+        this(null);
+    }
+    public CiseauxItem(Audience audience) {
+        super(audience, "ciseaux",
+                "items.ciseaux.display_name",
+                "items.ciseaux.lore",
+                Rarity.COMMON,
+                Material.SHEARS,
+                true);
     }
 
     @Override

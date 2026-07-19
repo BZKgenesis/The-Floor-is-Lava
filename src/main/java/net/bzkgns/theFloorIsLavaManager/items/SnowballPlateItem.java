@@ -11,8 +11,8 @@ import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.WOOLS_MATERIALS;
 public class SnowballPlateItem extends CustomItem {
     public SnowballPlateItem() {
         super("snowball_plate",
-                "Snowball Plate",
-                "Permet de créer une plaque de neige",
+                "items.snowball_plate.display_name",
+                "items.snowball_plate.lore",
                 Rarity.RARE,
                 Material.SNOWBALL,
                 true

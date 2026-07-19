@@ -4,10 +4,10 @@ import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,8 +33,6 @@ public class ShopGUI implements Listener {
     private static final int[] RESULT_SLOTS = {
             0, 9, 18, 27, 36
     };
-
-    private static final String TITLE = "Shop";
 
     private static final List<ShopRecipe> RECIPES = new ArrayList<>();
     //private static final Map<Inventory, BukkitRunnable> RUNNABLES = new HashMap<>();
@@ -110,7 +108,9 @@ public class ShopGUI implements Listener {
         plugin.getLogger().info("recipe loaded "+RECIPES.size());
     }
     public static void open(Player p, int page) {
-        Inventory inv = Bukkit.createInventory(null, SIZE, Component.text(TITLE).color(TextColor.fromHexString("#FFAA00")).append(Component.text("(Page " + (page + 1) + ")").color(TextColor.fromHexString("#AAAAAA"))));
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.SHOP, page);
+        Inventory inv = Bukkit.createInventory(holder, SIZE, Messages.component(p,"gui.shop.title", Placeholder.unparsed("page", String.valueOf(page+1))));
+        holder.setInventory(inv);
         Map<Integer, IngredientDisplay> animated = new HashMap<>();
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
@@ -123,7 +123,7 @@ public class ShopGUI implements Listener {
             ItemStack display = recipe.result().clone();
             List<Component> display_lore = display.lore();
             if (display_lore == null) display_lore = new ArrayList<>();
-            display_lore.add(Component.text("Clique pour échanger").color(TextColor.fromHexString("#55FF55")));
+            display_lore.add(Messages.component(p, "gui.shop.click_to_exchange"));
             display.lore(display_lore);
             inv.setItem(RESULT_SLOTS[i], display);
 
@@ -143,8 +143,8 @@ public class ShopGUI implements Listener {
         }
 
         // boutons
-        inv.setItem(45, navItem(Component.text("← Précédent").color(TextColor.fromHexString("#FFFF55")), ArrowDirection.LEFT));
-        inv.setItem(53, navItem(Component.text("Suivant →").color(TextColor.fromHexString("#FFFF55")), ArrowDirection.RIGHT));
+        inv.setItem(45, navItem(Messages.component(p, "gui.shop.previous_page"), ArrowDirection.LEFT));
+        inv.setItem(53, navItem(Messages.component(p, "gui.shop.next_page"), ArrowDirection.RIGHT));
 
         p.openInventory(inv);
 
@@ -196,7 +196,7 @@ public class ShopGUI implements Listener {
         LEFT, RIGHT
     }
 
-    private static ItemStack navItem(TextComponent name, ArrowDirection direction) {
+    private static ItemStack navItem(Component name, ArrowDirection direction) {
         ItemStack it = new ItemStack(Material.ARROW);
         switch (direction){
             case LEFT -> it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("left"));
@@ -259,7 +259,8 @@ public class ShopGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getClickedInventory() instanceof PlayerInventory) return;
-        if (!plainText(e.getView().title()).startsWith(TITLE)) return;
+        if (!(e.getView().getTopInventory().getHolder() instanceof MenuHolder holder)) return;
+        if (holder.getType() != MenuHolder.MenuType.SHOP) return;
         e.setCancelled(true);
 
         Player p = (Player) e.getWhoClicked();
@@ -274,7 +275,7 @@ public class ShopGUI implements Listener {
 
         if (e.getWhoClicked() instanceof Player player && player.getGameMode() != GameMode.CREATIVE){
             if (!canPay(p, recipe)) {
-                p.sendMessage(TextUtils.errorMessage("Ingrédients insuffisants."));
+                Messages.send(p, "shop.not_enough_ingredients");
                 p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
                 return;
             }else{
@@ -283,7 +284,7 @@ public class ShopGUI implements Listener {
         }
 
         p.getInventory().addItem(recipe.result().clone());
-        p.sendMessage(TextUtils.validationMessage("Échange réussi."));
+        Messages.send(p, "shop.exchange_success");
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
     }
     private static boolean canPay(Player p, ShopRecipe r) {

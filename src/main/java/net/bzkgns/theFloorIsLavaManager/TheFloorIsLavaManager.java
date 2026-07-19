@@ -11,6 +11,7 @@ import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryListen
 import net.bzkgns.theFloorIsLavaManager.kits.KitChoiceGUI;
 import net.bzkgns.theFloorIsLavaManager.kits.KitCommands;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
+import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.items.*;
@@ -61,6 +62,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+        LangManager.getInstance().load();
 
         gameManager = new GameManager();
 

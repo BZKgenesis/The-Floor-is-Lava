@@ -15,7 +15,12 @@ import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIA
 @SuppressWarnings("UnstableApiUsage")
 public class BatteItem extends CustomItem {
     public BatteItem() {
-        super("batte", "Batte", "Une batte de baseball pour repousser les autres joueurs", Rarity.COMMON, Material.STICK, true);
+        super("batte",
+                "items.batte.display_name",
+                "items.batte.lore",
+                Rarity.COMMON,
+                Material.STICK,
+                true);
     }
 
     @Override

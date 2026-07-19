@@ -1,0 +1,267 @@
+prefix: "<white>[<red>TFL<white>] "
+
+error:
+  generic: "<prefix><red>An error occurred."
+  invalid_name: "<prefix><red>Invalid name."
+  empty_team_name: "<prefix><red>The team name cannot be empty."
+  unknown_parameter: "<prefix><red>Unknown parameter: <param>"
+  invalid_value: "<prefix><red>Invalid value for <param>: <value>"
+  cannot_modify_config_during_game: "<prefix><red>Cannot modify the configuration during an ongoing game."
+  command_for_players_only: "<prefix><red>This command can only be run by a player."
+  cannot_modify_config_parameter: "This parameter cannot be modified by clicking."
+  cannot_start_game_not_enough_teams: "<prefix><red>Cannot start the game, at least <min_teams> teams are required."
+  cannot_spread_player: "<prefix><red>Unable to spread players, check the configuration!"
+  invalid_color: "<prefix><red>Invalid color."
+  pause_failed: "<prefix><red>Cannot pause (current state: <state>)."
+  no_pause_to_resume: "<prefix><red>No pause currently in progress to resume."
+  unknown_item: "<prefix><red>Unknown item: <item_key>"
+  cannot_manage_team_during_game: "<prefix><red>You cannot manage your team during a game."
+  unknown_kit: "<prefix><red>Unknown kit: <kit_name>"
+  world_reset_failed: "<prefix><red>An error occurred while resetting the world."
+  world_reset_map_failed: "<prefix><red>An error occurred while resetting the world with the map <map_name>."
+  no_team_cannot_place_anchor: "<prefix><red>You cannot place the team inventory anchor because you are not in a team."
+  cannot_break_own_anchor: "<prefix><red>You cannot break your own team inventory anchor."
+  not_here: "<prefix><red>You're not supposed to be here."
+  cannot_start_preparation_phase: "<prefix><red>Cannot start the preparation phase, check the configuration."
+
+validation:
+  team_created: "<prefix><green>Team created."
+  team_left: "<prefix><green>You left your team."
+  team_renamed: "<prefix><green>Team renamed to <team>."
+  request_sent: "<prefix><green>Request sent."
+  config_saved: "<prefix><green>Configuration saved."
+  value_set: "<prefix><green>Value set for <param>: <value>"
+  world_reset_success: "<prefix><green>World reset completed successfully."
+  world_reset_map_success: "<prefix><green>World reset with map <map_name> completed successfully."
+  anchor_placed: "<prefix><green>The team inventory anchor has been placed."
+  anchor_removed: "<prefix><green>The team inventory anchor has been removed."
+
+info:
+  request_received: "<prefix><white>New request from <player>."
+  lava_rising_start: "<prefix><red>The lava is starting to rise!"
+  respawn_disabled: "<prefix><red>Respawn is disabled for this game."
+  arena_shrinking: "<prefix><red>The arena is shrinking!"
+  starting_game: "<prefix><white>The game is starting!"
+  spectator_mode_not_in_team: "<prefix><white>You are in spectator mode because you are not in a team."
+  keep_inventory_during_preparation: "<prefix><white>You keep your inventory during the preparation phase."
+  pvp_disabled_during_preparation: "<prefix><white>PVP is disabled during the preparation phase."
+  lava_rising_delay: "<prefix><white>The lava rises in <time>"
+  inventory_no_longer_saved: "<prefix><white>Inventories are no longer being saved"
+  pvp_enabled: "<prefix><white>PVP is enabled"
+  world_reset_random: "<prefix><white>Resetting the world randomly with seed: <seed>"
+  world_reset_map: "<prefix><white>Resetting the world with map: <map_name>"
+  world_generating: "<prefix><white>Generating the game world..."
+  world_generating_warning: "<prefix><yellow>Performance drops may occur during world generation. Please wait..."
+
+command:
+  danger_level: "<prefix><white>The current level is <level>"
+  danger_level_set: "<prefix><white>Level set to <level>"
+  game_starting: "<prefix><green>Starting the system."
+  game_start_error: "<prefix><red>Error starting the system (current state: <state>)."
+  game_stopping: "<prefix><white>Stopping the system."
+  game_paused: "<prefix><white>System paused."
+  game_resumed: "<prefix><white>System resumed."
+  speed_set: "<prefix><white>Speed set to <speed>"
+  speed_current: "<prefix><white>The current speed is <speed>"
+
+debug:
+  respawn_locations_header: "respawn locations:"
+  respawn_location_line: "- respawn point for team <team_name> is at <location>"
+  game_state: "game state: <state>"
+  teams_header: "teams"
+  team_line: "- team <team_name><white> has members: <members>"
+  danger_state: "danger state: <state>"
+  kits_header: "kits"
+  kit_line: "- kit <kit_name>"
+  player_kits_header: "player kits"
+  player_kit_line: "- player <player_name> has kit: <kit_name>"
+
+gui:
+  config_value: "<yellow><param><gray> = <white><value>"
+  config_title: "TFL Configuration - <config_section_name>"
+  main_title: "Team menu"
+  confirm_leave_title: "Leave team?"
+  requests_title: "Pending requests"
+  manage_title: "Kick members"
+  join_title: "Ask to join a team"
+  list_config_title: "<gold>--- Configuration TFL (<config_name>) ---"
+  list_config_element: "<yellow><param><gray> = <white><value><dark_gray> (<description>)"
+  give_all_menu_title: "<gold>Give all available items"
+  shop:
+    title: "<gold>SHop menu <gray>(Page <page>)"
+    click_to_exchange: "<green>Click to exchange"
+    next_page: "<yellow>Next →"
+    previous_page: "<yellow>← Previous"
+  kit:
+    click_to_choose: "Click to choose the kit <kit_name>"
+    menu_title: "Choose a kit"
+
+item:
+  config_name: "<yellow><param>"
+  info_team: "Team information"
+
+item_lore:
+  team_name: "<yellow>Team name: <white><name>"
+  team_members: "<yellow>Team members: <white><members>"
+  config_value: "<yellow>Value: <white><value>"
+  config_description: "<gray><description>"
+  config_increase: "Left click +1 / Shift +10"
+  config_decrease: "Right click -1 / Shift -10"
+  config_toggle: "Left/right click to toggle"
+  cannot_modify_config_parameter: "This parameter cannot be modified by clicking."
+  current_name: "Current name: <name>"
+  leave_warning_line1: "<red>WARNING if you leave,"
+  leave_warning_line2: "<red>your team will be disbanded"
+  owner_member: "<green>- 👑<name>"
+  member: "- <name>"
+  accept_request: "Accept the request"
+  click_kick: "Click to kick the player"
+  cancel_request: "<red>Click to cancel the request"
+
+dialog:
+  rename_title: "Rename the team"
+  team_name_label: "Team name"
+  rename_button: "Rename"
+  rename_button_desc: "Click to rename your team."
+  cancel_button: "Cancel"
+  cancel_rename_desc: "Click to cancel renaming your team."
+  recolor_title: "Change team color"
+  recolor_button_desc: "Click to change your team color."
+  cancel_recolor_desc: "Click to cancel your team's color change."
+  open_shop_title: "Open the shop"
+  open_team_management_title: "Manage the team"
+  quick_actions_title: "Quick actions"
+
+button:
+  create_team: "Create a team"
+  join_team: "Join a team"
+  manage_team: "Manage my team"
+  request_menu: "Received requests"
+  rename_menu: "Rename the team"
+  recolor_menu: "Change team color"
+  leave_team: "Leave team"
+  back: "Back"
+  "yes": "Yes"
+  "no": "No"
+
+warning:
+  no_map_config: "<prefix><yellow>No map configuration found. Using the default configuration."
+
+action_bar:
+  lava_rising_delay: "<red>The lava rises in <white><time> seconds."
+  lava_rising: "<red>The lava is rising!"
+  lava_near_player: "<red>!!WARNING!! The area is coming, you are <white><nb_blocs> blocss<red> away from the area !!"
+  lava_under_player: "<dark_red>YOU ARE IN DANGER, GO UP FAST !!!"
+
+bossbar:
+  lava_rising_delay: "Preparation Phase - Time remaining: <time>"
+  lava_rising: "<red>The lava is rising!"
+
+team:
+  left_team: "<prefix><red>You have left your team."
+  request_expired: "<prefix><red>Request expired."
+  request_denied: "<prefix><red>The request for <team_name><red>'s team has been denied!"
+  request_declined_notice: "<prefix><red>Request denied."
+  member_joined_broadcast: "<prefix><green><player_name> added to the team."
+  request_accepted: "<prefix><green>Your request has been accepted!"
+  request_cancelled: "<prefix><green>Request cancelled"
+  request_received_broadcast: "<prefix><gray>Request received from <player_name>"
+  request_sent: "<prefix><green>The request has been sent"
+  renamed: "<prefix><green>The team has been renamed to <new_name>"
+  recolored: "<prefix><green>The team color has been changed to <new_color>"
+  kicked: "<prefix><red>You have been kicked from <team_name>'s team"
+  kicked_broadcast: "<prefix><red><player_name> has been kicked from the team"
+  anchor_removed_broadcast: "<prefix><red>The team respawn anchor has been removed."
+  anchor_removed_lava_broadcast: "<prefix><red>The team respawn anchor has been destroy by the lava."
+  eliminated: "<prefix><red>Team <team_name><red> has been eliminated."
+  respawn_anchor_team_text_display: "Respawn anchor of the team\n<team_name>"
+
+resourcepack:
+  required: "<red>This resource pack is required"
+
+game:
+  end_team_won: "<prefix><gold>GAME OVER - team <team_name><gold> won!"
+  end_no_winner: "<prefix><gold>GAME OVER - No team won!"
+
+kit:
+  invalid: "<prefix><red>The kit <kit_name> is invalid."
+  self_assigned: "<prefix><green>You chose the kit <kit_name>."
+  cannot_change_kit_in_game: "<prefix><red>You cannot change kits during a game."
+
+shop:
+  not_enough_ingredients: "<prefix><red>Not enough ingredients."
+  exchange_success: "<prefix><green>Exchange successful."
+
+team_inv:
+  action_bar:
+    not_in_team: "<red>You cannot access the team inventory because you are not in a team."
+
+items:
+  team_inv:
+    display_name: "Team Inventory Portal"
+    lore: "Enables access to the team inventory"
+  popup_tower:
+    display_name: "Popup Tower"
+    lore: "Allows you to place a tower that can be used to reach high places"
+  team_respawn_anchor:
+    display_name: "Team Respawn Anchor"
+    lore1: "Allows you to set a respawn point for your team"
+    lore2: "The respawn point will be set at the location of the anchor"
+  batte:
+    display_name: "Baseball bat"
+    lore: "Allows you to hit players and knock them back"
+  ciseaux:
+    display_name: "Shears"
+    lore: "Allows you to cut wool faster"
+  egg_bridge:
+    display_name: "Egg Bridge"
+    lore: "Allows you to easily place a bridge"
+  feather_falling_boots:
+    display_name: "Feather Falling Boots"
+    lore: "Allows you to slow down your fall"
+  fireball:
+    display_name: "Fireball"
+    lore: "Allows you to throw a fireball that explodes on impact"
+  give_all:
+    display_name: "Give all items"
+    lore: "Allows you to give all available items"
+  infinite_wool:
+    display_name: "Infinite Wool"
+    lore: "Allows you to place wool blocks without running out"
+  shop_item:
+    display_name: "Shop"
+    lore: "Allows you to access the shop"
+  snowball_plate:
+    display_name: "Snowball Plate"
+    lore: "Allows you to throw a snowball that creates a plate of snow on impact"
+  team_manager:
+    display_name: "Team Manager"
+    lore: "Allows you to manage your team"
+
+config:
+  game:
+    lava-rising-delay: "Delay (ticks) before the lava starts rising"
+    border-size-prerise: "Border size during preparation"
+    border-size-during-rise: "Border size while the lava is rising"
+    border-resize-time: "Duration (seconds) of the border shrinking"
+    disable-pvp-during-preparation: "Disable PvP during preparation"
+    keep-inventory-during-preparation: "Keep inventory during preparation"
+    fall-damage-reduction: "Fall damage multiplier"
+    min-nb-teams: "Minimum number of teams required to start the game"
+    default-lang: "Server's default language"
+  danger:
+    start-level: "Starting Y level of the lava"
+    end-level: "Final Y level of the lava"
+    surface-level: "Y level of the surface (changes the rising speed)"
+    total-time-below-surface: "Duration (ticks) to rise up to the surface"
+    total-time-above-surface: "Duration (ticks) to rise from the surface to the top"
+    damage: "Zone damage"
+    damage-every: "Damage frequency (ticks)"
+    place-lava: "Actually place lava (otherwise damage only)"
+    show-alert: "Show zone proximity alerts"
+    lava-margin: "Lava margin (blocks) outside the border"
+    increase-size: "Height (blocks) placed per step"
+  map:
+    spawn-spawn-structure: "Whether the spawn structure should be generated at spawn"
+    center-x: "X coordinate of the map's center"
+    center-z: "Z coordinate of the map's center"

@@ -7,8 +7,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import org.bukkit.entity.Player;
 
 public class KitCommands {
@@ -49,7 +49,7 @@ public class KitCommands {
                                 .executes(context -> {
                                     if (context.getSource().getExecutor() instanceof Player player){
                                         if (!player.isOp() && TheFloorIsLavaManager.getInstance().getGameManager().getState() == GameState.RUNNING){
-                                            player.sendMessage(TextUtils.errorMessage("Tu ne peux pas changer de kit en cours de partie."));
+                                            Messages.send(player, "kit.cannot_change_kit_in_game");
                                             return Command.SINGLE_SUCCESS;
                                         }
 

@@ -1,12 +1,15 @@
 package net.bzkgns.theFloorIsLavaManager.config;
 
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import org.bukkit.Bukkit;
+
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class ConfigKey<T extends ConfigSection, R> {
 
     private final String key;
-    private final String description;
+    private final String description_translation_key;
 
     protected final Function<T,R> getter;
     protected final BiConsumer<T,R> setter;
@@ -15,13 +18,13 @@ public class ConfigKey<T extends ConfigSection, R> {
 
     public ConfigKey(
             String key,
-            String description,
+            String description_translation_key,
             Function<T,R> getter,
             BiConsumer<T,R> setter,
             Function<String, R> parser
     ){
         this.key = key;
-        this.description = description;
+        this.description_translation_key = description_translation_key;
         this.getter = getter;
         this.setter = setter;
         this.parser = parser;
@@ -34,7 +37,7 @@ public class ConfigKey<T extends ConfigSection, R> {
 
 
     public String getDescription(){
-        return description;
+        return Messages.string(Bukkit.getServer(), description_translation_key);
     }
 
 

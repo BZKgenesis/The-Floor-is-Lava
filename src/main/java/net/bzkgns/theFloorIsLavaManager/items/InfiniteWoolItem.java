@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack;
 public class InfiniteWoolItem extends CustomItem {
     public InfiniteWoolItem() {
         super("infinite_wool",
-                "Infinite Wool",
-                "Permet de placer des blocs de laine infiniment",
+                "items.infinite_wool.display_name",
+                "items.infinite_wool.lore",
                 Rarity.EPIC,
                 Material.LIGHT_GRAY_WOOL,
                 true

@@ -10,7 +10,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> START_LEVEL =
             new ConfigKey<>(
                     "start-level",
-                    "Niveau Y de départ de la lave",
+                    "config.danger.start-level",
                     DangerConfig::getStartLevel,
                     DangerConfig::setStartLevel,
                     Integer::parseInt
@@ -19,7 +19,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> END_LEVEL =
             new ConfigKey<>(
                     "end-level",
-                    "Niveau Y final de la lave",
+                    "config.danger.end-level",
                     DangerConfig::getEndLevel,
                     DangerConfig::setEndLevel,
                     Integer::parseInt
@@ -28,7 +28,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> SURFACE_LEVEL =
             new ConfigKey<>(
                     "surface-level",
-                    "Niveau Y de la surface (change la vitesse de montée)",
+                    "config.danger.surface-level",
                     DangerConfig::getSurfaceLevel,
                     DangerConfig::setSurfaceLevel,
                     Integer::parseInt
@@ -37,7 +37,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> TOTAL_TIME_BELOW_SURFACE =
             new ConfigKey<>(
                     "total-time-below-surface",
-                    "Durée (ticks) pour monter jusqu'à la surface",
+                    "config.danger.total-time-below-surface",
                     DangerConfig::getTotalTimeBelowSurface,
                     DangerConfig::setTotalTimeBelowSurface,
                     Integer::parseInt
@@ -46,7 +46,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> TOTAL_TIME_ABOVE_SURFACE =
             new ConfigKey<>(
                     "total-time-above-surface",
-                    "Durée (ticks) pour monter de la surface au sommet",
+                    "config.danger.total-time-above-surface",
                     DangerConfig::getTotalTimeAboveSurface,
                     DangerConfig::setTotalTimeAboveSurface,
                     Integer::parseInt
@@ -55,7 +55,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Double> DAMAGE =
             new ConfigKey<>(
                     "damage",
-                    "Dégâts de la zone",
+                    "config.danger.damage",
                     DangerConfig::getDamage,
                     DangerConfig::setDamage,
                     Double::parseDouble
@@ -64,7 +64,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> DAMAGE_EVERY =
             new ConfigKey<>(
                     "damage-every",
-                    "Fréquence (ticks) des dégâts",
+                    "config.danger.damage-every",
                     DangerConfig::getDamageEvery,
                     DangerConfig::setDamageEvery,
                     Integer::parseInt
@@ -73,7 +73,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Boolean> PLACE_LAVA =
             new ConfigKey<>(
                     "place-lava",
-                    "Poser réellement de la lave (sinon dégâts seuls)",
+                    "config.danger.place-lava",
                     DangerConfig::isPlaceLava,
                     DangerConfig::setPlaceLava,
                     Boolean::parseBoolean
@@ -82,7 +82,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Boolean> SHOW_ALERT =
             new ConfigKey<>(
                     "show-alert",
-                    "Afficher les alertes de proximité de la zone",
+                    "config.danger.show-alert",
                     DangerConfig::isShowAlert,
                     DangerConfig::setShowAlert,
                     Boolean::parseBoolean
@@ -91,7 +91,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> LAVA_MARGIN =
             new ConfigKey<>(
                     "lava-margin",
-                    "Marge (blocs) de lave hors bordure",
+                    "config.danger.lava-margin",
                     DangerConfig::getLavaMargin,
                     DangerConfig::setLavaMargin,
                     Integer::parseInt
@@ -100,7 +100,7 @@ public final class DangerConfigKeys {
     public static final ConfigKey<DangerConfig, Integer> INCREASE_SIZE =
             new ConfigKey<>(
                     "increase-size",
-                    "Hauteur (blocs) posée par palier",
+                    "config.danger.increase-size",
                     DangerConfig::getIncreaseSize,
                     DangerConfig::setIncreaseSize,
                     Integer::parseInt

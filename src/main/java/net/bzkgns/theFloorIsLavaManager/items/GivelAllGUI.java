@@ -3,9 +3,8 @@ package net.bzkgns.theFloorIsLavaManager.items;
 import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnItem;
-import net.bzkgns.theFloorIsLavaManager.shop.*;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -17,7 +16,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
 
-import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
 
 public class GivelAllGUI implements Listener {
 
@@ -38,7 +36,9 @@ public class GivelAllGUI implements Listener {
     };
 
     public static void open(Player p) {
-        Inventory inv = Bukkit.createInventory(null, SIZE, Component.text("Menu des items disponibles").color(TextColor.fromHexString("#FFAA00")));
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.GIVE_ALL);
+        Inventory inv = Bukkit.createInventory(holder, SIZE, Messages.component(p,"gui.give_all_menu_title"));
+        holder.setInventory(inv);
 
         for (int i = 0; i < AVAILABLE_ITEMS.length; i++) {
             //noinspection ConstantValue
@@ -75,7 +75,8 @@ public class GivelAllGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getClickedInventory() instanceof PlayerInventory) return;
-        if (!plainText(e.getView().title()).startsWith("Menu des items disponibles")) return;
+        if (!(e.getInventory().getHolder() instanceof MenuHolder holder)) return;
+        if (holder.getType() != MenuHolder.MenuType.GIVE_ALL) return;
         e.setCancelled(true);
 
         Player p = (Player) e.getWhoClicked();

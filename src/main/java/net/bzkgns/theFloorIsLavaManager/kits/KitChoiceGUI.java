@@ -8,9 +8,9 @@ import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,15 +27,15 @@ public class KitChoiceGUI implements Listener {
         for (KitData kit : KitManager.getInstance().getAllKits().values()) {
             String key = "tfl:user_input/choose_kit/"+ kit.getName();
             actions.add(ActionButton.create(
-                    Component.text(kit.getDisplayName()),
-                    Component.text("Cliquer pour choisir le kit " + kit.getDisplayName()),
+                    kit.getDisplayName(),
+                    Messages.component(player, "gui.kit.click_to_choose",Placeholder.component("kit_name", kit.getDisplayName())),
                     100,
                     DialogAction.customClick(Key.key(key), null )
             ));
         }
 
         Dialog dialog = Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.text("Choisir un kit")).build())
+                .base(DialogBase.builder(Messages.component(player, "gui.kit.menu_title")).build())
                 .type(DialogType.multiAction(actions).build()
                 )
         );
@@ -60,7 +60,7 @@ public class KitChoiceGUI implements Listener {
         if (kit == null) {
             if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
                 Player player = conn.getPlayer();
-                player.sendMessage(TextUtils.errorMessage("Kit invalide."));
+                Messages.send(player, "kit.invalid", Placeholder.parsed("kit_name", kitId));
             }
             return;
         }
@@ -69,7 +69,7 @@ public class KitChoiceGUI implements Listener {
             Player player = conn.getPlayer();
             KitManager.getInstance().assignKitToPlayer(player.getUniqueId(),kit.getName());
             KitManager.getInstance().applyKitToPlayer(player);
-            player.sendMessage(TextUtils.validationMessage("Vous avez choisi le kit " + kit.getDisplayName() + "."));
+            Messages.send(player, "kit.assigned", Placeholder.component("kit_name", kit.getDisplayName()));
         }
     }
 }

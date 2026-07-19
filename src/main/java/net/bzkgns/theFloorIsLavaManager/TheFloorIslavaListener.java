@@ -13,8 +13,8 @@ import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
-import net.kyori.adventure.text.Component;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -84,7 +84,7 @@ public class TheFloorIslavaListener implements Listener {
                 plugin.getResourcePackManager().getUrl(),
                 plugin.getResourcePackManager().getSha1(),
                 true,
-                Component.text("Ce pack est obligatoire")
+                Messages.component(player, "resourcepack.required")
         );
         plugin.getLogger().info("Player " + player.getName() + " joined. Total world time: " + event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME));
         plugin.getGameManager().addPlayerToBossBar(player);
@@ -114,7 +114,7 @@ public class TheFloorIslavaListener implements Listener {
         }
         discoverRecipes(event.getPlayer());
         if(event.getPlayer().getWorld().equals(plugin.getServer().getWorld("minecraft:overworld"))){
-            event.getPlayer().sendMessage(TextUtils.errorMessage("Tu n'es pas sensé être ici."));
+            Messages.send(event.getPlayer(), "error.not_here");
         }
     }
 
@@ -243,15 +243,31 @@ public class TheFloorIslavaListener implements Listener {
             TeamData team = TeamManager.getInstance().getPlayerTeam(event.getEntity().getUniqueId());
             if (team != null && team.isEliminated()) {
                 plugin.getLogger().info("Team " + team.getName() + " eliminated.");
-                TeamManager.broadcastTeamMessage(TextUtils.errorMessage("L'équipe ").append(team.getName().append(TextUtils.errorMessage(" a été éliminée.",false))), team);
+                // NOTE i18n : TeamManager.broadcastTeamMessage(Component, TeamData) envoie un unique Component
+                // déjà construit à tous les membres de l'équipe : la langue est donc figée (résolue ici via
+                // Bukkit.getServer(), donc en_us par défaut) pour tous les joueurs, quelle que soit leur locale.
+                // Pour une vraie localisation par joueur, il faudrait adapter broadcastTeamMessage() pour qu'elle
+                // itère sur les membres de l'équipe et appelle Messages.send(player, ...) individuellement.
+                TeamManager.broadcastTeamMessage(
+                        Messages.component(Bukkit.getServer(), "team.eliminated",
+                                Placeholder.component("team_name", team.getName())),
+                        team
+                );
             }
         }
         if (plugin.getGameManager().isGameWinning()){
             TeamData winningTeam = TeamManager.getInstance().getTeamAlive().getFirst();
+            // NOTE i18n : TextUtils.broadcastMessage(Component) envoie un unique Component déjà construit à tous
+            // les joueurs connectés : la langue est donc figée (résolue ici via Bukkit.getServer(), donc en_us
+            // par défaut) pour tout le monde, quelle que soit la locale de chaque joueur. Pour une vraie
+            // localisation par joueur, il faudrait adapter TextUtils.broadcastMessage() pour qu'elle construise
+            // un Component par joueur via Messages.component(player, ...).
             if (winningTeam != null) {
-                TextUtils.broadcastMessage( TextUtils.warningMessage("FIN DE PARTIE - l'équipe ").append(winningTeam.getName()).append(TextUtils.warningMessage(" a gagné !", false)));
+                Messages.broadcast( "game.end_team_won",
+                                Placeholder.component("team_name", winningTeam.getName())
+                );
             }else{
-                TextUtils.broadcastMessage( TextUtils.warningMessage("FIN DE PARTIE - Aucune équipe n'a gagné !"));
+                Messages.broadcast("game.end_no_winner");
             }
             plugin.getGameManager().endGame();
         }
@@ -339,8 +355,8 @@ public class TheFloorIslavaListener implements Listener {
     public void onSnowballHit(ProjectileHitEvent event){
         if (!(event.getEntity() instanceof Snowball snowball)) return;
         if (!(Objects.equals(snowball.getPersistentDataContainer().get(
-                new NamespacedKey(plugin, "snowballPlateEntity"),
-                PersistentDataType.STRING),
+                        new NamespacedKey(plugin, "snowballPlateEntity"),
+                        PersistentDataType.STRING),
                 "snowballPlateEntity"))
         ) return;
         if (!(snowball.getShooter() instanceof Player p)) return;

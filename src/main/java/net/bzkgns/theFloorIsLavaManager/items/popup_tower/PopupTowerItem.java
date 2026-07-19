@@ -13,8 +13,8 @@ public class PopupTowerItem extends CustomItem {
 
     public PopupTowerItem() {
         super("popup_tower",
-                "Popup Tower",
-                "Permet de créer une tour qui se déploie automatiquement",
+                "items.popup_tower.display_name",
+                "items.popup_tower.lore",
                 Rarity.EPIC,
                 Material.CHEST,
                 true

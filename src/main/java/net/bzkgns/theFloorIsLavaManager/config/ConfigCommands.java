@@ -7,10 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 
 import java.util.function.Supplier;
@@ -55,7 +53,8 @@ public class ConfigCommands {
         configNode.then(Commands.literal("save")
                 .executes(ctx -> {
                     configManager.saveConfig();
-                    ctx.getSource().getSender().sendMessage(TextUtils.validationMessage("Configuration sauvegardée."));
+
+                    Messages.send(ctx.getSource().getSender(), "validation.config_saved");
                     return Command.SINGLE_SUCCESS;
                 }));
         return configNode;
@@ -63,14 +62,15 @@ public class ConfigCommands {
 
     private static <T extends ConfigSection<T>> int listConfig(CommandContext<CommandSourceStack> ctx, ConfigManager<T> configManager) {
         T config = configManager.getConfig();
-        ctx.getSource().getSender().sendMessage(Component.text("--- Configuration TFL ---").color(TextColor.fromHexString("#FFAA00")));
+        Messages.send(ctx.getSource().getSender(), "gui.list_config_title",
+                Placeholder.parsed("config_name",config.getName()));
 
         for (ConfigKey<T, ?> k : config.getKeys()) {
-            ctx.getSource().getSender().sendMessage(
-                    Component.text(k.getKey()).color(TextColor.fromHexString("#FFFF55")).append(
-                    Component.text(" = ").color(TextColor.fromHexString("#AAAAAA")).append(
-                    Component.text(k.get(config).toString()).color(TextColor.fromHexString("#FFFFFF")).append(
-                            Component.text("(" + k.getDescription()+ ")").color(TextColor.fromHexString("#555555"))))));
+            Messages.send(ctx.getSource().getSender(),
+                    "gui.list_config_element",
+                    Placeholder.parsed("param", k.getKey()),
+                    Placeholder.parsed("value", k.get(config).toString()),
+                    Placeholder.parsed("description", k.getDescription()));
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -84,15 +84,13 @@ public class ConfigCommands {
         ConfigKey<T, ?> key = configManager.getKey(rawKey);
 
         if (key == null) {
-            ctx.getSource().getSender().sendMessage(
-                    TextUtils.errorMessage("Paramètre inconnu : " + rawKey));
+            Messages.send(ctx.getSource().getSender(), "error.unknown_parameter", Placeholder.unparsed("param", rawKey));
             return Command.SINGLE_SUCCESS;
         }
 
-        ctx.getSource().getSender().sendMessage(
-                TextUtils.textE(key.getKey()).append(
-                TextUtils.text7(" = ")).append(
-                TextUtils.textF(key.get(configManager.getConfig()).toString())));
+        Messages.send(ctx.getSource().getSender(), "gui.config_value",
+                Placeholder.unparsed("param", key.getKey()),
+                Placeholder.unparsed("value", key.get(configManager.getConfig()).toString()));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -103,9 +101,7 @@ public class ConfigCommands {
             Supplier<Boolean> canEdit
     ) {
         if (!canEdit.get()) {
-            ctx.getSource().getSender().sendMessage(Component.text(
-                    "Impossible de modifier la configuration pendant une partie en cours.",
-                    NamedTextColor.RED));
+            Messages.send(ctx.getSource().getSender(), "error.cannot_modify_config_during_game");
             return Command.SINGLE_SUCCESS;
         }
 
@@ -115,31 +111,29 @@ public class ConfigCommands {
         ConfigKey<T, ?> key = configManager.getKey(rawKey);
 
         if (key == null) {
-            ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Paramètre inconnu : " + rawKey));
+            Messages.send(ctx.getSource().getSender(), "error.unknown_parameter", Placeholder.unparsed("param", rawKey));
             return Command.SINGLE_SUCCESS;
         }
 
         try {
             configManager.set(rawKey, rawValue);
         } catch (NumberFormatException e) {
-            ctx.getSource().getSender().sendMessage(TextUtils.errorMessage(
-                    "Valeur invalide pour " + rawKey + " : " + rawValue));
+            Messages.send(ctx.getSource().getSender(), "error.invalid_value", Placeholder.unparsed("param", rawKey), Placeholder.unparsed("value", rawValue));
             return Command.SINGLE_SUCCESS;
         }
 
-        ctx.getSource().getSender().sendMessage(TextUtils.validationMessage(
-                key.getKey() + " défini à " + key.get(configManager.getConfig())));
+        Messages.send(ctx.getSource().getSender(), "validation.value_set", Placeholder.unparsed("param", key.getKey()), Placeholder.unparsed("value", key.get(configManager.getConfig()).toString()));
 
         return Command.SINGLE_SUCCESS;
     }
 
     private static <T extends ConfigSection<T>> int openGui(CommandContext<CommandSourceStack> ctx, ConfigManager<T> configManager) {
         if (!(ctx.getSource().getExecutor() instanceof Player player)) {
-            ctx.getSource().getSender().sendMessage(TextUtils.errorMessage("Commande réservée aux joueurs."));
+            Messages.send(ctx.getSource().getSender(), "error.command_for_players_only");
             return Command.SINGLE_SUCCESS;
         }
         if (!TheFloorIsLavaManager.getInstance().getGameManager().canEditConfig()) {
-            player.sendMessage(Component.text("Impossible d'éditer la configuration pendant une partie en cours.", NamedTextColor.RED));
+            Messages.send(player, "error.cannot_modify_config_during_game");
             return Command.SINGLE_SUCCESS;
         }
         ConfigGUI.open(player, configManager.getConfig());

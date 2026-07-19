@@ -19,7 +19,12 @@ import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIA
 @SuppressWarnings("UnstableApiUsage")
 public class FeatherFallingBoots extends CustomItem{
     public FeatherFallingBoots() {
-        super("feather_falling_boots", "Feather Falling Boots", "Permet de ralentir les chutes", Rarity.RARE, Material.LEATHER_BOOTS, true);
+        super("feather_falling_boots",
+                "items.feather_falling_boots.display_name",
+                "items.feather_falling_boots.lore",
+                Rarity.RARE,
+                Material.LEATHER_BOOTS,
+                true);
     }
 
     @Override

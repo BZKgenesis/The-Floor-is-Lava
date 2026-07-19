@@ -5,9 +5,8 @@ import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnMan
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -194,13 +193,9 @@ public class DangerManager {
             double diffLevel = abs(p.getLocation().y() - dangerLevel);
             if (diffLevel < 10) {
                 if (diffLevel < 5 && p.getLocation().y() > dangerLevel) {
-                    p.sendActionBar(Component.text(
-                            "!!ATTENTION!! La zone se rapproche vous êtes à " + String.format("%.2f", diffLevel) + " blocs de la zone !!"
-                    ).color(TextColor.color(Color.RED.asRGB())));
+                    Messages.actionBar(p, "action.lava_near_player",Placeholder.parsed("nb_blocs", String.format("%.2f", diffLevel)));
                 } else if (p.getLocation().y() < dangerLevel) {
-                    p.sendActionBar(Component.text(
-                            "VOUS ETES DANS LA ZONE REMONTEZ VIIITE !!!"
-                    ).color(TextColor.color(Color.RED.asRGB())));
+                    Messages.actionBar(p, "action.lava_under_player");
                 }
             }
         }
@@ -214,10 +209,10 @@ public class DangerManager {
 
         double diff = increaseSize / increaseAmount;
         if (diff > 100) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va monter dans 2 secondes...")), round(diff) - 40);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va monter dans 3 secondes...")), round(diff) - 60);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va monter dans 1 secondes...")), round(diff) - 20);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave monte !!")), round(diff));
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay", Placeholder.parsed("time", "3")), round(diff) - 40);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay", Placeholder.parsed("time", "2")), round(diff) - 60);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay", Placeholder.parsed("time", "1")), round(diff) - 20);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay"), round(diff));
         }
 
         World world = plugin.getWorldManager().getGameWorld();
@@ -253,9 +248,9 @@ public class DangerManager {
 
         damageTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickDamage, 20, dangerConfigManager.getInt(DangerConfigKeys.DAMAGE_EVERY));
 
-        TextUtils.broadcastMessage(TextUtils.infoMessage("!!ATTENTION!! La lave commence à monter !"));
-        TextUtils.broadcastMessage(TextUtils.infoMessage("Le respawn est désactivé"));
-        TextUtils.broadcastMessage(TextUtils.infoMessage("La zone se rétrécit"));
+        Messages.broadcast("lava_rising_start");
+        Messages.broadcast("respawn_disabled");
+        Messages.broadcast("arena_shrinking");
 
         if (dangerConfigManager.getBoolean(DangerConfigKeys.PLACE_LAVA)) {
             placeLavaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tickPlaceLava, 1, 1);

@@ -20,8 +20,8 @@ public class EggBridgeItem extends CustomItem {
             eggBridgeTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(TheFloorIsLavaManager.getInstance(), new EggBridgeTask(), 1, 1);
         }
         super("egg_bridge",
-                "Pont d'oeufs",
-                "Permet de créer un pont d'oeufs",
+                "items.egg_bridge.display_name",
+                "items.egg_bridge.lore",
                 Rarity.RARE,
                 Material.EGG,
                 true

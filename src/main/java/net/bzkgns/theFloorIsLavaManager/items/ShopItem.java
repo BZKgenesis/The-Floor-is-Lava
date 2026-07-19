@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack;
 public class ShopItem extends CustomItem{
     public ShopItem() {
         super("shop_item",
-                "Shop",
-                "Ouvre le menu du shop",
+                "items.shop_item.display_name",
+                "items.shop_item.lore",
                 Rarity.COMMON,
                 Material.BOOK,
                 true

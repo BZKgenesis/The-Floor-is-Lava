@@ -11,8 +11,8 @@ import java.util.List;
 public class TeamRespawnItem extends CustomItem {
     public TeamRespawnItem() {
         super("team_respawn",
-                "Ancre de réapparition d'équipe",
-                List.of("Permet de réapparaître à l'endroit où l'ancre est posée", "au lieu du spawn du monde de jeu."),
+                "items.team_respawn.display_name",
+                List.of("items.team_respawn_anchor.lore1", "items.team_respawn_anchor.lore2"),
                 Rarity.RARE,
                 TeamRespawnManager.respawnAnchorMaterial,
                 true

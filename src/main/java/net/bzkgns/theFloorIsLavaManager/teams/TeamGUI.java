@@ -9,17 +9,19 @@ import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.datacomponent.item.ItemLore;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -50,44 +52,47 @@ public class TeamGUI implements Listener {
         this.plugin = plugin;
     }
 
-
     public static void openMainMenu(Player p) {
-        Inventory inv = Bukkit.createInventory(null, 27, Component.text("Menu d'équipe"));
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.TEAM_MAIN);
+        Inventory inv = Bukkit.createInventory(holder, 27, Messages.component(p, "gui.main_title"));
+        holder.setInventory(inv);
 
         TeamManager tm = TeamManager.getInstance();
         TeamData team = tm.getPlayerTeam(p.getUniqueId());
 
 
         if (team == null) {
-            inv.setItem(11, createItem(Material.GREEN_WOOL, "Créer une équipe", "create_team"));
-            inv.setItem(15, createItem(Material.LIGHT_BLUE_WOOL, "Rejoindre une équipe", "join_team"));
+            inv.setItem(11, createItem(Material.GREEN_WOOL, Messages.component(p, "button.create_team"), "create_team"));
+            inv.setItem(15, createItem(Material.LIGHT_BLUE_WOOL, Messages.component(p, "button.join_team"), "join_team"));
         } else {
-            if (p.getName().equals(team.getId())){
-                inv.setItem(13, createItem(Material.BLUE_WOOL, "Gérer mon équipe", "manage_team"));
-                inv.setItem(22, createItem(Material.PAPER, "Demandes reçues", "request_menu"));
-                ItemStack renameItem = createItem(Material.NAME_TAG, "Renommer l'équipe", "rename_menu");
-                renameItem.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Nom actuel: ").append(team.getName())).build());
+            if (p.getName().equals(team.getId())) {
+                inv.setItem(13, createItem(Material.BLUE_WOOL, Messages.component(p, "button.manage_team"), "manage_team"));
+                inv.setItem(22, createItem(Material.PAPER, Messages.component(p, "button.request_menu"), "request_menu"));
+                ItemStack renameItem = createItem(Material.NAME_TAG, Messages.component(p, "button.rename_menu"), "rename_menu");
+                renameItem.setData(DataComponentTypes.LORE, ItemLore.lore()
+                        .addLine(Messages.component(p, "item_lore.current_name", Placeholder.component("name", team.getName())))
+                        .build());
                 inv.setItem(3, renameItem);
-                inv.setItem(5, createItem(Material.BRUSH, "Changer la couleur de l'équipe", "recolor_menu"));
-                ItemStack leaveItem = createItem(Material.BARRIER, "Quitter l'équipe", "leave_team");
+                inv.setItem(5, createItem(Material.BRUSH, Messages.component(p, "button.recolor_menu"), "recolor_menu"));
+                ItemStack leaveItem = createItem(Material.BARRIER, Messages.component(p, "button.leave_team"), "leave_team");
                 ItemLore.Builder lore = ItemLore.lore();
-                lore.addLine(Component.text("ATTENTION si vous quittez,"));
-                lore.addLine(Component.text("votre équipe sera dissoute"));
+                lore.addLine(Messages.component(p, "item_lore.leave_warning_line1"));
+                lore.addLine(Messages.component(p, "item_lore.leave_warning_line2"));
                 leaveItem.setData(DataComponentTypes.LORE, lore.build());
                 inv.setItem(11, leaveItem);
-            }else{
-                inv.setItem(11, createItem(Material.BARRIER, "Quitter l'équipe", "leave_team"));
+            } else {
+                inv.setItem(11, createItem(Material.BARRIER, Messages.component(p, "button.leave_team"), "leave_team"));
             }
-            ItemStack memberItem = createItem(Material.BLUE_WOOL, "Information de l'équipe", "info_team");
+            ItemStack memberItem = createItem(Material.BLUE_WOOL, Messages.component(p, "item.info_team"), "info_team");
             ItemLore.Builder lore = ItemLore.lore();
-            lore.addLine(Component.text("Nom de l'équipe: ").append(team.getName()));
-            for (UUID memberUuid : team.getMembers()){
+            lore.addLine(Messages.component(p, "item_lore.team_name", Placeholder.component("name", team.getName())));
+            for (UUID memberUuid : team.getMembers()) {
                 Player member = Bukkit.getPlayer(memberUuid);
-                if (member != null){
-                    if (member.getName().equals(team.getId())){
-                        lore.addLine(Component.text("- \uD83D\uDC51"+member.getName()).color(TextColor.fromHexString("#55FF55")));
+                if (member != null) {
+                    if (member.getName().equals(team.getId())) {
+                        lore.addLine(Messages.component(p, "item_lore.owner_member", Placeholder.unparsed("name", member.getName())));
                     } else {
-                    lore.addLine(Component.text("- "+member.getName()));
+                        lore.addLine(Messages.component(p, "item_lore.member", Placeholder.unparsed("name", member.getName())));
                     }
                 }
             }
@@ -99,72 +104,95 @@ public class TeamGUI implements Listener {
 
 
     public static void openConfirmLeaveMenu(Player p) {
-        Inventory inv = Bukkit.createInventory(null, 27, Component.text("Quitter l'équipe ?"));
-        if (Objects.equals(TeamManager.getInstance().getPlayerTeam(p.getUniqueId()).getId(), p.getName())){
-            ItemStack leaveItem = createItem(Material.GREEN_WOOL, "Oui", "confirm_leaving");
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.TEAM_CONFIRM_LEAVE);
+        Inventory inv = Bukkit.createInventory(holder, 27, Messages.component(p, "gui.confirm_leave_title"));
+        holder.setInventory(inv);
+
+        TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
+        if (team != null && Objects.equals(team.getId(), p.getName())) {
+            ItemStack leaveItem = createItem(Material.GREEN_WOOL, Messages.component(p, "button.yes"), "confirm_leaving");
             ItemLore.Builder lore = ItemLore.lore();
-            lore.addLine(Component.text("ATTENTION si vous quittez,"));
-            lore.addLine(Component.text("votre équipe sera dissoute"));
+            lore.addLine(Messages.component(p, "item_lore.leave_warning_line1"));
+            lore.addLine(Messages.component(p, "item_lore.leave_warning_line2"));
             leaveItem.setData(DataComponentTypes.LORE, lore.build());
             inv.setItem(11, leaveItem);
-        }else{
-            inv.setItem(11, createItem(Material.GREEN_WOOL, "Oui", "confirm_leaving"));
+        } else {
+            inv.setItem(11, createItem(Material.GREEN_WOOL, Messages.component(p, "button.yes"), "confirm_leaving"));
         }
-        inv.setItem(15, createItem(Material.RED_WOOL, "Non", "deny_leaving"));
+        inv.setItem(15, createItem(Material.RED_WOOL, Messages.component(p, "button.no"), "deny_leaving"));
         p.openInventory(inv);
     }
+
     public static void openRequestsMenu(Player p) {
         TeamManager teamManager = TeamManager.getInstance();
-        Inventory inv = Bukkit.createInventory(null, 54, Component.text("Demandes en attente"));
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.TEAM_REQUESTS);
+        Inventory inv = Bukkit.createInventory(holder, 54, Messages.component(p, "gui.requests_title"));
+        holder.setInventory(inv);
+
         int i = 0;
-        for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(teamManager.getPlayerTeam(p.getUniqueId()).getId())){
-            Player target = Bukkit.getServer().getPlayer(playerUuid);
-            if (target!=null){
-                ItemStack item = createItem(Material.GREEN_WOOL, target.getName(), "accept_request");
-                item.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Accepter la demande")).build());
-                if (i < 45)
-                    inv.setItem(i, item);
-                i++;
-            }
-        }
-        inv.setItem(45, createBackItem());
-        p.openInventory(inv);
-    }
-    public static void openManageMenu(Player p) {
-        TeamManager teamManager = TeamManager.getInstance();
-        Inventory inv = Bukkit.createInventory(null, 54, Component.text("Kick des membres"));
-        int i = 0;
-        if (teamManager.getPlayerTeam(p.getUniqueId())!=null){
-            for (UUID playerUuid : teamManager.getPlayerTeam(p.getUniqueId()).getMembers()){
+        TeamData playerTeam = teamManager.getPlayerTeam(p.getUniqueId());
+        if (playerTeam != null) {
+            for (UUID playerUuid : teamManager.getInviteManager().getListOfRequestToTeam(playerTeam.getId())) {
                 Player target = Bukkit.getServer().getPlayer(playerUuid);
-                if (target!=null && !target.getName().equals(p.getName())){
-                    ItemStack item = createItem(Material.RED_WOOL, target.getName(), "kick");
-                    item.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(Component.text("Cliquer pour expulser le joueur")).build());
+                if (target != null) {
+                    ItemStack item = createItem(Material.GREEN_WOOL, target.getName(), "accept_request");
+                    item.setData(DataComponentTypes.LORE, ItemLore.lore()
+                            .addLine(Messages.component(p, "item_lore.accept_request"))
+                            .build());
                     if (i < 45)
                         inv.setItem(i, item);
                     i++;
                 }
             }
-            inv.setItem(45, createBackItem());
+        }
+        inv.setItem(45, createBackItem(p));
+        p.openInventory(inv);
+    }
+
+    public static void openManageMenu(Player p) {
+        TeamManager teamManager = TeamManager.getInstance();
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.TEAM_MANAGE);
+        Inventory inv = Bukkit.createInventory(holder, 54, Messages.component(p, "gui.manage_title"));
+        holder.setInventory(inv);
+
+        int i = 0;
+        if (teamManager.getPlayerTeam(p.getUniqueId()) != null) {
+            for (UUID playerUuid : teamManager.getPlayerTeam(p.getUniqueId()).getMembers()) {
+                Player target = Bukkit.getServer().getPlayer(playerUuid);
+                if (target != null && !target.getName().equals(p.getName())) {
+                    ItemStack item = createItem(Material.RED_WOOL, target.getName(), "kick");
+                    item.setData(DataComponentTypes.LORE, ItemLore.lore()
+                            .addLine(Messages.component(p, "item_lore.click_kick"))
+                            .build());
+                    if (i < 45)
+                        inv.setItem(i, item);
+                    i++;
+                }
+            }
+            inv.setItem(45, createBackItem(p));
             p.openInventory(inv);
         }
     }
+
     public static void openAskJoinMenu(Player p) {
         TeamManager teamManager = TeamManager.getInstance();
-        Inventory inv = Bukkit.createInventory(null, 54, Component.text("Demander à rejoindre une équipe"));
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.TEAM_JOIN);
+        Inventory inv = Bukkit.createInventory(holder, 54, Messages.component(p, "gui.join_title"));
+        holder.setInventory(inv);
+
         int i = 0;
-        for ( String teamName : teamManager.getTeams()){
+        for (String teamName : teamManager.getTeams()) {
             TeamData team = teamManager.getTeam(teamName);
-            if (team !=null){
-                ItemStack item = createItem(BlockUtils.getWoolBlockByNamedTextColor(team.getColor()),team.getNameText());
+            if (team != null) {
+                ItemStack item = createItem(BlockUtils.getWoolBlockByNamedTextColor(team.getColor()), team.getNameText(), "join_team_request");
                 ItemLore.Builder lore = ItemLore.lore();
-                if (teamManager.getInviteManager().hasInvite(p.getUniqueId(), team.getId())){
-                    lore.addLine(Component.text("Cliquer pour annuler la demande").color(TextColor.fromHexString("#FF5555")));
+                if (teamManager.getInviteManager().hasInvite(p.getUniqueId(), team.getId())) {
+                    lore.addLine(Messages.component(p, "item_lore.cancel_request"));
                 }
-                for (UUID memberUuid : team.getMembers()){
+                for (UUID memberUuid : team.getMembers()) {
                     Player member = Bukkit.getPlayer(memberUuid);
-                    if (member != null){
-                        lore.addLine(Component.text("- "+member.getName()));
+                    if (member != null) {
+                        lore.addLine(Messages.component(p, "item_lore.member", Placeholder.unparsed("name", member.getName())));
                     }
                 }
                 item.setData(DataComponentTypes.LORE, lore.build());
@@ -173,17 +201,17 @@ public class TeamGUI implements Listener {
             }
             i++;
         }
-        inv.setItem(45, createBackItem());
+        inv.setItem(45, createBackItem(p));
         p.openInventory(inv);
     }
 
-    public static void openRenameMenu(Player p){
+    public static void openRenameMenu(Player p) {
         TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
-        if (team != null){
+        if (team != null) {
             Dialog dialog = Dialog.create(builder -> builder.empty()
-                    .base(DialogBase.builder(Component.text("Renommer l'équipe"))
+                    .base(DialogBase.builder(Messages.component(p, "dialog.rename_title"))
                             .inputs(List.of(
-                                    DialogInput.text("team_name", Component.text("Nom d'équipe", team.getColor()))
+                                    DialogInput.text("team_name", Messages.component(p, "dialog.team_name_label").color(team.getColor()))
                                             .initial(team.getNameText())
                                             .build()
                             ))
@@ -191,14 +219,14 @@ public class TeamGUI implements Listener {
                     )
                     .type(DialogType.confirmation(
                             ActionButton.create(
-                                    Component.text("Renommer", TextColor.color(0xAEFFC1)),
-                                    Component.text("Cliquer pour renommer votre équipe."),
+                                    Messages.component(p, "dialog.rename_button").color(TextColor.color(0xAEFFC1)),
+                                    Messages.component(p, "dialog.rename_button_desc"),
                                     100,
                                     DialogAction.customClick(Key.key("tfl:user_input/confirm"), null)
                             ),
                             ActionButton.create(
-                                    Component.text("Annuler", TextColor.color(0xFFA0B1)),
-                                    Component.text("Cliquer pour annuler le renommage de votre équipe."),
+                                    Messages.component(p, "dialog.cancel_button").color(TextColor.color(0xFFA0B1)),
+                                    Messages.component(p, "dialog.cancel_rename_desc"),
                                     100,
                                     null // If we set the action to null, it doesn't do anything and closes the dialog
                             )
@@ -208,27 +236,27 @@ public class TeamGUI implements Listener {
         }
     }
 
-    public static void openRecolorMenu(Player p){
+    public static void openRecolorMenu(Player p) {
         TeamData team = TeamManager.getInstance().getPlayerTeam(p.getUniqueId());
-        if (team != null){
+        if (team != null) {
             List<ActionButton> actions = new ArrayList<>();
 
-            for (NamedTextColor color : TeamManager.getInstance().getAvailableColors()){
-                String key = "tfl:user_input/recolor/"+ color;
+            for (NamedTextColor color : TeamManager.getInstance().getAvailableColors()) {
+                String key = "tfl:user_input/recolor/" + color;
                 actions.add(ActionButton.create(
                         Component.text(color.toString(), color),
-                        Component.text("Click to change your team color."),
+                        Messages.component(p, "dialog.recolor_button_desc"),
                         100,
-                        DialogAction.customClick(Key.key(key), null )
+                        DialogAction.customClick(Key.key(key), null)
                 ));
             }
 
             Dialog dialog = Dialog.create(builder -> builder.empty()
-                    .base(DialogBase.builder(Component.text("Changer la couleur de l'équipe")).build())
+                    .base(DialogBase.builder(Messages.component(p, "dialog.recolor_title")).build())
                     .type(DialogType.multiAction(actions)
                             .exitAction(ActionButton.create(
-                                    Component.text("Annuler", TextColor.color(0xFFA0B1)),
-                                    Component.text("Cliquer pour annuler le changement de couleur de votre équipe."),
+                                    Messages.component(p, "dialog.cancel_button").color(TextColor.color(0xFFA0B1)),
+                                    Messages.component(p, "dialog.cancel_recolor_desc"),
                                     100,
                                     null // If we set the action to null, it doesn't do anything and closes the dialog
                             )).build()
@@ -248,7 +276,7 @@ public class TeamGUI implements Listener {
 
     private static ItemStack createItem(Material mat, String name, @SuppressWarnings("SameParameterValue") String id, String customModelData) {
         ItemStack it = new ItemStack(mat);
-        if (!customModelData.isBlank()){
+        if (!customModelData.isBlank()) {
             it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(customModelData).build());
         }
         ItemMeta m = it.getItemMeta();
@@ -259,24 +287,55 @@ public class TeamGUI implements Listener {
         return it;
     }
 
-    private static ItemStack createBackItem() {
-        ItemStack it = new ItemStack(Material.ARROW);
-        it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("back").build());
+    // Variantes acceptant un Component (utilisées pour les libellés traduits via LangManager/Messages)
+    private static ItemStack createItem(Material mat, Component name) {
+        return createItem(mat, name, null, "");
+    }
+
+    private static ItemStack createItem(Material mat, Component name, String customModelData) {
+        return createItem(mat, name, null, customModelData);
+    }
+
+    private static ItemStack createItem(Material mat, Component name, String id, String customModelData) {
+        ItemStack it = new ItemStack(mat);
+        if (customModelData != null && !customModelData.isBlank()) {
+            it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(customModelData).build());
+        }
         ItemMeta m = it.getItemMeta();
-        m.displayName(Component.text("Retour").color(TextColor.fromHexString("#FF5555")));
+        m.displayName(name.color(TextColor.fromHexString("#FFFF55")));
+        if (id != null)
+            m.getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "buttonId"), PersistentDataType.STRING, id);
         it.setItemMeta(m);
         return it;
     }
 
-    private static boolean isBackItem(ItemStack stack) {
-        if (stack.getType() == Material.ARROW) {
-            ItemMeta meta = stack.getItemMeta();
-            if (meta != null && meta.hasCustomModelDataComponent()) {
-                String customModelData = meta.getCustomModelDataComponent().getStrings().getFirst();
-                return customModelData.equals("back");
-            }
+    private static ItemStack createBackItem(Player p) {
+        ItemStack it = new ItemStack(Material.ARROW);
+        it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("back").build());
+        ItemMeta m = it.getItemMeta();
+        m.displayName(Messages.component(p, "button.back").color(TextColor.fromHexString("#FF5555")));
+        it.setItemMeta(m);
+        return it;
+    }
+
+    /**
+     * Récupère l'identifiant du bouton stocké dans le CustomModelData de l'item.
+     * On utilise cet identifiant (fixe, non traduit) pour router les clics,
+     * plutôt que le texte affiché qui change selon la langue du joueur.
+     */
+    private static String getButtonId(ItemStack stack) {
+        if (stack == null) return null;
+        ItemMeta meta = stack.getItemMeta();
+        if (meta != null && meta.hasCustomModelDataComponent()) {
+            List<String> strings = meta.getCustomModelDataComponent().getStrings();
+            if (!strings.isEmpty())
+                return strings.getFirst();
         }
-        return false;
+        return null;
+    }
+
+    private static boolean isBackItem(ItemStack stack) {
+        return "back".equals(getButtonId(stack));
     }
 
     @EventHandler
@@ -290,24 +349,23 @@ public class TeamGUI implements Listener {
             return;
         }
 
+        if (!(event.getCommonConnection() instanceof PlayerGameConnection conn)) {
+            return;
+        }
+        Player player = conn.getPlayer();
+
         String teamName = view.getText("team_name");
         if (teamName == null || teamName.isBlank()) {
-            if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
-                Player player = conn.getPlayer();
-                player.sendMessage(TextUtils.errorMessage("Le nom de l'équipe ne peut pas être vide."));
-                openRenameMenu(player);
-            }
+            Messages.send(player, "error.empty_name");
+            openRenameMenu(player);
             return;
         }
 
-        if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
-            Player player = conn.getPlayer();
-            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
-            if (team != null) {
-                team.rename(teamName);
-                player.sendMessage(TextUtils.validationMessage("L'équipe a été renommée en ").append(Component.text(teamName, team.getColor()) ));
-                openMainMenu(player);
-            }
+        TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+        if (team != null) {
+            team.rename(teamName);
+            Messages.send(player, "team.renamed", Placeholder.component("new_name", Component.text(teamName, team.getColor())));
+            openMainMenu(player);
         }
     }
 
@@ -322,25 +380,24 @@ public class TeamGUI implements Listener {
             return;
         }
 
+        if (!(event.getCommonConnection() instanceof PlayerGameConnection conn)) {
+            return;
+        }
+        Player player = conn.getPlayer();
+
         String colorString = event.getIdentifier().asString().substring("tfl:user_input/recolor/".length());
         NamedTextColor newColor = NamedTextColor.NAMES.value(colorString);
         if (newColor == null) {
-            if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
-                Player player = conn.getPlayer();
-                player.sendMessage(TextUtils.errorMessage("Couleur invalide."));
-                openRecolorMenu(player);
-            }
+            Messages.send(player, "error.invalid_color");
+            openRecolorMenu(player);
             return;
         }
 
-        if (event.getCommonConnection() instanceof PlayerGameConnection conn) {
-            Player player = conn.getPlayer();
-            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
-            if (team != null) {
-                team.changeColor(newColor);
-                player.sendMessage(TextUtils.validationMessage("La couleur de l'équipe à été changée en ").append(Component.text(newColor.toString(), team.getColor()) ));
-                openMainMenu(player);
-            }
+        TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+        if (team != null) {
+            team.changeColor(newColor);
+            Messages.send(player, "team.recolored", Placeholder.component("new_color", Component.text(newColor.toString(), team.getColor())));
+            openMainMenu(player);
         }
     }
 
@@ -348,174 +405,159 @@ public class TeamGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (plugin.getGameManager().getState() == GameState.RUNNING) return;
-        Player player = (Player) event.getWhoClicked();
-        if (plainText(event.getView().title()).equals("Menu d'équipe")) {
-            event.setCancelled(true);
-            if (event.getCurrentItem() == null) return;
-            Component nameComponent = event.getCurrentItem().getItemMeta().displayName();
-            if (nameComponent == null) return;
-            String name = plainText(nameComponent);
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
 
+        event.setCancelled(true);
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null) return;
 
-            if (name.contains("Créer")) {
+        String buttonId = getButtonId(clicked);
+
+        switch (holder.getType()) {
+            case TEAM_MAIN -> handleMainMenuClick(player, buttonId);
+            case TEAM_CONFIRM_LEAVE -> handleConfirmLeaveClick(player, buttonId);
+            case TEAM_REQUESTS -> handleRequestsClick(player, clicked, buttonId, event.isRightClick());
+            case TEAM_MANAGE -> handleManageClick(player, clicked, buttonId);
+            case TEAM_JOIN -> handleJoinClick(player, clicked, buttonId);
+        }
+    }
+
+    private void handleMainMenuClick(Player player, String buttonId) {
+        if (buttonId == null) return;
+
+        switch (buttonId) {
+            case "create_team" -> {
                 TeamManager.getInstance().createTeamForPlayer(player);
-                plugin.getLogger().info( player.getName() + " a créé une équipe");
-                player.sendMessage(TextUtils.validationMessage("Équipe créée."));
+                plugin.getLogger().info(player.getName() + " a créé une équipe");
+                Messages.send(player, "validation.team_created");
                 openMainMenu(player);
             }
-
-            if (name.contains("Gérer")) {
-                openManageMenu(player);
-            }
-
-            if (name.contains("Rejoindre")) {
-                openAskJoinMenu(player);
-            }
-
-            if (name.contains("Demandes")) {
-                openRequestsMenu(player);
-            }
-
-            if (name.contains("Quitter")) {
-                openConfirmLeaveMenu(player);
-            }
-
-            if (name.contains("Renommer")) {
-                openRenameMenu(player);
-            }
-
-            if (name.contains("Changer la couleur")) {
-                openRecolorMenu(player);
-            }
+            case "manage_team" -> openManageMenu(player);
+            case "join_team" -> openAskJoinMenu(player);
+            case "request_menu" -> openRequestsMenu(player);
+            case "leave_team" -> openConfirmLeaveMenu(player);
+            case "rename_menu" -> openRenameMenu(player);
+            case "recolor_menu" -> openRecolorMenu(player);
+            default -> {}
         }
+    }
 
-
-        if (plainText(event.getView().title()).equals("Quitter l'équipe ?")) {
-            event.setCancelled(true);
-            if (event.getCurrentItem() == null) return;
-            Component displayName = event.getCurrentItem().getItemMeta().displayName();
-            if (displayName == null) return;
-            String name = plainText(displayName);
-
-
-            if (name.contains("Oui")) {
-                TeamManager.getInstance().removePlayerFromTeam(player);
-                player.sendMessage(TextUtils.errorMessage("Vous avez quitté votre équipe."));
-                openMainMenu(player);
-            } else if (name.contains("Non")) {
-                openMainMenu(player);
-            }
+    private void handleConfirmLeaveClick(Player player, String buttonId) {
+        if ("confirm_leaving".equals(buttonId)) {
+            TeamManager.getInstance().removePlayerFromTeam(player);
+            Messages.send(player, "team.left_team");
+            openMainMenu(player);
+        } else if ("deny_leaving".equals(buttonId)) {
+            openMainMenu(player);
         }
+    }
 
+    private void handleRequestsClick(Player player, ItemStack clicked, String buttonId, boolean rightClick) {
+        if (isBackItem(clicked)) {
+            openMainMenu(player);
+            return;
+        }
+        if (!"accept_request".equals(buttonId)) return;
+        if (clicked.getItemMeta() == null || clicked.getItemMeta().displayName() == null) return;
 
-        if (plainText(event.getView().title()).equals("Demandes en attente")) {
-            event.setCancelled(true);
-            if (event.getCurrentItem() == null) return;
+        String targetName = plainText(clicked.getItemMeta().displayName());
+        Player target = Bukkit.getPlayer(targetName);
+        plugin.getLogger().info(targetName);
+        if (target == null) return;
 
-            if (isBackItem(event.getCurrentItem())) {
-                openMainMenu(player);
-                return;
-            }
+        TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+        if (team == null) return;
 
-            String targetName = plainText(event.getCurrentItem().getItemMeta().displayName());
-            Player target = Bukkit.getPlayer(targetName);
-            plugin.getLogger().info(targetName);
-            if (target == null) return;
-
-
-
-
-            TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
-            if (team == null) return;
-
-            if (!TeamManager.getInstance().getInviteManager().hasInvite(target.getUniqueId(), team.getId())) {
-                plugin.getLogger().info("no request found for " + targetName);
-                player.sendMessage(TextUtils.errorMessage("Demande expirée."));
-                openRequestsMenu(player);
-                return;
-            }
-
-            if (event.isRightClick()){
-                TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
-                target.sendMessage(TextUtils.errorMessage("La demande pour l'équipe de ").append(team.getName()).append(TextUtils.errorMessage(" a été refusée !",false)));
-                player.sendMessage(TextUtils.errorMessage("Demande refusée."));
-                openRequestsMenu(player);
-                return;
-            }
-            TeamManager.broadcastTeamMessage(TextUtils.validationMessage(target.getName() + " ajouté à l'équipe."), team);
-            team.acceptRequest(target.getUniqueId());
-            TeamManager.getInstance().addPlayerToVanillaTeam(target, team.getId());
-            TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
-
-            target.sendMessage(TextUtils.validationMessage("Votre demande a été acceptée !"));
+        if (!TeamManager.getInstance().getInviteManager().hasInvite(target.getUniqueId(), team.getId())) {
+            plugin.getLogger().info("no request found for " + targetName);
+            Messages.send(player, "team.request_expired");
             openRequestsMenu(player);
+            return;
         }
 
+        if (rightClick) {
+            TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
+            Messages.send(target, "team.request_denied", Placeholder.component("team_name", team.getName()));
+            Messages.send(player, "team.request_declined_notice");
+            openRequestsMenu(player);
+            return;
+        }
 
-        if (plainText(event.getView().title()).equals("Demander à rejoindre une équipe")) {
-            plugin.getLogger().info("Demander à rejoindre une équipe");
-            event.setCancelled(true);
-            if (event.getCurrentItem() == null) return;
-            plugin.getLogger().info("currentItem" + event.getCurrentItem().getItemMeta().displayName());
+        TeamManager.broadcastTeamMessage(
+                Messages.component(player, "team.member_joined_broadcast", Placeholder.unparsed("player_name", target.getName())),
+                team
+        );
+        team.acceptRequest(target.getUniqueId());
+        TeamManager.getInstance().addPlayerToVanillaTeam(target, team.getId());
+        TeamManager.getInstance().getInviteManager().remove(target.getUniqueId());
 
+        Messages.send(target, "team.request_accepted");
+        openRequestsMenu(player);
+    }
 
-            if (isBackItem(event.getCurrentItem())) {
-                openMainMenu(player);
-                return;
-            }
+    private void handleJoinClick(Player player, ItemStack clicked, String buttonId) {
+        plugin.getLogger().info("Demander à rejoindre une équipe");
 
-            String targetName = plainText(event.getCurrentItem().getItemMeta().displayName());
+        if (isBackItem(clicked)) {
+            openMainMenu(player);
+            return;
+        }
+        if (!"join_team_request".equals(buttonId)) return;
+        if (clicked.getItemMeta() == null || clicked.getItemMeta().displayName() == null) return;
 
+        String targetName = plainText(clicked.getItemMeta().displayName());
+        plugin.getLogger().info("currentItem " + targetName);
 
-            TeamData teamAsked = TeamManager.getInstance().getTeam(targetName);
+        TeamData teamAsked = TeamManager.getInstance().getTeam(targetName);
 
-            if (teamAsked == null) {
-                plugin.getLogger().info("teamAsked is null pour " + targetName);
-                return;
-            }
+        if (teamAsked == null) {
+            plugin.getLogger().info("teamAsked is null pour " + targetName);
+            return;
+        }
 
-            if (TeamManager.getInstance().getInviteManager().hasInvite(player.getUniqueId(), teamAsked.getId())) {
-                TeamManager.getInstance().getInviteManager().remove(player.getUniqueId());
-                player.sendMessage(TextUtils.errorMessage("Demande annulée"));
-                openAskJoinMenu(player);
-                return;
-            }
-
-            plugin.getLogger().info(player.getName() + " à demandé de rejoindre " + teamAsked.getId());
-
-            TeamManager.getInstance().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getId());
-
-
-            player.sendMessage(TextUtils.validationMessage("La demande a été envoyé"));
-            TeamManager.broadcastTeamMessage(TextUtils.infoMessage("demande reçu de " + player.getName()), teamAsked);
+        if (TeamManager.getInstance().getInviteManager().hasInvite(player.getUniqueId(), teamAsked.getId())) {
+            TeamManager.getInstance().getInviteManager().remove(player.getUniqueId());
+            Messages.send(player, "team.request_cancelled");
             openAskJoinMenu(player);
+            return;
         }
 
+        plugin.getLogger().info(player.getName() + " à demandé de rejoindre " + teamAsked.getId());
 
-        if (plainText(event.getView().title()).equals("Kick des membres")) {
-            event.setCancelled(true);
-            if (event.getCurrentItem() == null) return;
+        TeamManager.getInstance().getInviteManager().sendRequest(player.getUniqueId(), teamAsked.getId());
 
+        Messages.send(player, "team.request_sent");
+        TeamManager.broadcastTeamMessage(
+                Messages.component(player, "team.request_received_broadcast", Placeholder.unparsed("player_name", player.getName())),
+                teamAsked
+        );
+        openAskJoinMenu(player);
+    }
 
-            if (isBackItem(event.getCurrentItem())) {
-                openMainMenu(player);
-                return;
-            }
-
-            String targetName = plainText(event.getCurrentItem().getItemMeta().displayName());
-
-
-            Player kickedPlayer = plugin.getServer().getPlayer(targetName);
-            if (kickedPlayer == null) return;
-            plugin.getLogger().info("kick" + kickedPlayer.getName());
-
-            TeamData team = TeamManager.getInstance().getTeam(player.getName());
-            if (team == null) return;
-            TeamManager.getInstance().removePlayerFromTeam(kickedPlayer);
-            kickedPlayer.sendMessage(TextUtils.errorMessage("Vous avez été expulsé de l'équipe de ").append(team.getName()));
-            TeamManager.broadcastTeamMessage(TextUtils.errorMessage( kickedPlayer.getName() + " a été expulsé de l'équipe"), team);
-
-            player.closeInventory();
+    private void handleManageClick(Player player, ItemStack clicked, String buttonId) {
+        if (isBackItem(clicked)) {
+            openMainMenu(player);
+            return;
         }
+        if (!"kick".equals(buttonId)) return;
+        if (clicked.getItemMeta() == null || clicked.getItemMeta().displayName() == null) return;
+
+        String targetName = plainText(clicked.getItemMeta().displayName());
+
+        Player kickedPlayer = plugin.getServer().getPlayer(targetName);
+        if (kickedPlayer == null) return;
+        plugin.getLogger().info("kick" + kickedPlayer.getName());
+
+        TeamData team = TeamManager.getInstance().getTeam(player.getName());
+        if (team == null) return;
+        TeamManager.getInstance().removePlayerFromTeam(kickedPlayer);
+        Messages.send(kickedPlayer, "team.kicked", Placeholder.component("team_name", team.getName()));
+        TeamManager.broadcastTeamMessage(
+                Messages.component(player, "team.kicked_broadcast", Placeholder.unparsed("player_name", kickedPlayer.getName())),
+                team
+        );
+
+        player.closeInventory();
     }
 }

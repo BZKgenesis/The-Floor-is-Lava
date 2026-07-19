@@ -1,11 +1,15 @@
 package net.bzkgns.theFloorIsLavaManager.config;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,7 +25,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
-import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.textF;
 
 /**
  * Point de départ pour un GUI d'édition de la configuration (à faire évoluer avec le
@@ -34,8 +37,6 @@ import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.textF;
  */
 public class ConfigGUI implements Listener {
 
-    private static final Component TITLE = Component.text("Configuration TFL");
-
     private final TheFloorIsLavaManager plugin;
 
     public ConfigGUI(TheFloorIsLavaManager plugin) {
@@ -43,38 +44,41 @@ public class ConfigGUI implements Listener {
     }
 
     public static <T extends ConfigSection<T>> void open(Player player, T config) {
-        Inventory inv = Bukkit.createInventory(null, 54, TITLE.append(Component.text(" - " + config.getName())) );
+        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.CONFIG, config.getName());
+        Inventory inv = Bukkit.createInventory(holder, 54,
+                LangManager.getInstance().get(player, "gui.config_title", Placeholder.parsed("config_section_name", config.getName())) );
+        holder.setInventory(inv);
         List<ConfigKey<T, ?>> keys = config.getKeys();
         int i = 0;
         for (ConfigKey<T,?> key : keys) {
-            inv.setItem(i, buildItem(key, config));
+            inv.setItem(i, buildItem(key, config, player));
             i++;
         }
         player.openInventory(inv);
     }
 
-    private static <T extends ConfigSection<?>> ItemStack buildItem(ConfigKey<T,?> key, T config) {
+    private static <T extends ConfigSection<?>> ItemStack buildItem(ConfigKey<T,?> key, T config, Audience audience) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(TextUtils.textE(key.getKey()));
+        meta.displayName(LangManager.getInstance().get(audience, "item.config_name", Placeholder.parsed("param" , key.getKey())));
         if (key.get(config) instanceof Number number) {
             meta.lore(List.of(
-                    TextUtils.text7("Valeur : ").append(textF(number.toString())),
-                    TextUtils.text8(key.getDescription()),
-                    TextUtils.text8("Clic gauche +1 / Shift +10"),
-                    TextUtils.text8("Clic droit -1 / Shift -10")
+                    LangManager.getInstance().get(audience, "item_lore.config_value", Placeholder.parsed("value", number.toString())),
+                    LangManager.getInstance().get(audience, "item_lore.config_description", Placeholder.parsed("description", key.getDescription())),
+                    LangManager.getInstance().get(audience, "item_lore.config_increase"),
+                    LangManager.getInstance().get(audience, "item_lore.config_decrease")
             ));
         } else if (key.get(config) instanceof Boolean bool) {
             meta.lore(List.of(
-                    TextUtils.text7("Valeur : ").append(textF(bool.toString())),
-                    TextUtils.text8(key.getDescription()),
-                    TextUtils.text8("Clic gauche pour inverser la valeur")
+                    LangManager.getInstance().get(audience, "item_lore.config_value", Placeholder.parsed("value", bool.toString())),
+                    LangManager.getInstance().get(audience, "item_lore.config_description", Placeholder.parsed("description", key.getDescription())),
+                    LangManager.getInstance().get(audience, "item_lore.config_toggle")
             ));
         } else {
             meta.lore(List.of(
-                    TextUtils.text7("Valeur : ").append(textF(key.get(config).toString())),
-                    TextUtils.text8(key.getDescription()),
-                    TextUtils.text8("Ce paramètre ne se modifie pas au clic.")
+                    LangManager.getInstance().get(audience, "item_lore.config_value", Placeholder.parsed("value", key.get(config).toString())),
+                    LangManager.getInstance().get(audience, "item_lore.config_description", Placeholder.parsed("description", key.getDescription())),
+                    LangManager.getInstance().get(audience, "item_lore.cannot_modify_config_parameter")
             ));
         }
         item.setItemMeta(meta);
@@ -83,8 +87,13 @@ public class ConfigGUI implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
         if (event.getClickedInventory() instanceof PlayerInventory) return;
-        if (!plainText(event.getView().title()).startsWith(plainText(TITLE))) return;
+        if(!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
+        if(holder.getType() != MenuHolder.MenuType.CONFIG) return;
         Component title = event.getView().title();
 
         if (!(title instanceof TextComponent)) {
@@ -99,14 +108,11 @@ public class ConfigGUI implements Listener {
 
         event.setCancelled(true);
 
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
 
         DangerManager dangerManager = plugin.getGameManager().getDangerManager();
 
         if (!dangerManager.canEditConfig()) {
-            player.sendMessage(TextUtils.errorMessage("La configuration ne peut être modifiée qu'en dehors d'une partie."));
+            Messages.send(player, "error.cannot_modify_config_during_game");
             player.closeInventory();
             return;
         }
@@ -164,7 +170,7 @@ public class ConfigGUI implements Listener {
 
             event.getInventory().setItem(
                     event.getSlot(),
-                    buildItem(key, config)
+                    buildItem(key, config, player)
             );
         } else if (key.get(config) instanceof Boolean bool) {
 
@@ -174,11 +180,11 @@ public class ConfigGUI implements Listener {
 
             event.getInventory().setItem(
                     event.getSlot(),
-                    buildItem(key, config)
+                    buildItem(key, config, player)
             );
 
         } else {
-            player.sendMessage(TextUtils.errorMessage("Ce paramètre ne se modifie pas au clic."));
+            Messages.send(player, "error.cannot_modify_config_parameter");
         }
 
     }
@@ -204,6 +210,7 @@ public class ConfigGUI implements Listener {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends ConfigSection<T>> void setBooleanValue(
             ConfigKey<?, ?> key,
             ConfigSection<?> config,
@@ -225,11 +232,13 @@ public class ConfigGUI implements Listener {
     @SuppressWarnings("unchecked")
     private static ItemStack buildItemUnchecked(
             ConfigKey<?, ?> key,
-            ConfigSection<?> config
+            ConfigSection<?> config,
+            Audience audience
     ) {
         return buildItem(
                 (ConfigKey<ConfigSection<?>, ?>) key,
-                config
+                config,
+                audience
         );
     }
 

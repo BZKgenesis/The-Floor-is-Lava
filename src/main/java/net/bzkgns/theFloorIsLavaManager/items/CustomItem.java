@@ -2,9 +2,11 @@ package net.bzkgns.theFloorIsLavaManager.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.CraftingRecipe;
@@ -28,11 +30,26 @@ public abstract class CustomItem {
         EPIC,
         LEGENDARY
     }
-    protected CustomItem(String key, String name, String description, Rarity rarity, Material material, boolean glint){
-        this(key, name, List.of(description), rarity, material, glint);
+    protected CustomItem(String key, String display_name_translation_key, String description_translation_key, Rarity rarity, Material material, boolean glint){
+        this(key, display_name_translation_key, List.of(description_translation_key), rarity, material, glint);
     }
 
-    protected CustomItem(String key, String name, List<String> description, Rarity rarity, Material material, boolean glint) {
+    protected CustomItem(Audience audience, String key, String display_name_translation_key, String description_translation_key, Rarity rarity, Material material, boolean glint){
+        if (audience == null) {
+            audience = Bukkit.getServer();
+        }
+        this(audience, key, display_name_translation_key, List.of(description_translation_key), rarity, material, glint);
+    }
+
+    protected CustomItem(String key, String display_name_translation_key, List<String> description_translation_keys, Rarity rarity, Material material, boolean glint) {
+        Audience audience = Bukkit.getServer();
+        this(audience, key, display_name_translation_key, description_translation_keys, rarity, material, glint);
+    }
+
+    protected CustomItem(Audience audience, String key, String display_name_translation_key, List<String> description_translation_keys, Rarity rarity, Material material, boolean glint) {
+        if (audience == null) {
+            audience = Bukkit.getServer();
+        }
         itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
         TextColor colorName = switch (rarity) {
@@ -42,8 +59,9 @@ public abstract class CustomItem {
             case EPIC -> TextColor.fromHexString("#A335EE");
             case LEGENDARY -> TextColor.fromHexString("#FF8000");
         };
-        meta.displayName(Component.text(name).color(colorName));
-        List<TextComponent> lore_text = description.stream().map(line -> Component.text(line).color(TextColor.fromHexString("#AAAAAA"))).toList();
+        meta.displayName(Messages.component(audience, display_name_translation_key).color(colorName));
+        Audience finalAudience = audience;
+        List<Component> lore_text = description_translation_keys.stream().map(line -> Messages.component(finalAudience,line).color(TextColor.fromHexString("#AAAAAA"))).toList();
         meta.lore(lore_text);
         meta.getPersistentDataContainer().set(new NamespacedKey(TheFloorIsLavaManager.getInstance(), "key"), PersistentDataType.STRING, key);
         itemStack.setItemMeta(meta);

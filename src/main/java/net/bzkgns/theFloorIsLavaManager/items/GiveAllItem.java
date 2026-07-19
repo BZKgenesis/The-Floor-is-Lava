@@ -6,7 +6,12 @@ import org.bukkit.inventory.ItemStack;
 
 public class GiveAllItem extends CustomItem{
     public GiveAllItem() {
-        super("give_all", "GiveAll", "Ouvre le menu de give", Rarity.COMMON, Material.BOOK, true);
+        super("give_all",
+                "items.give_all.display_name",
+                "items.give_all.lore",
+                Rarity.COMMON,
+                Material.BOOK,
+                true);
     }
 
     @Override

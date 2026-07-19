@@ -10,8 +10,11 @@ import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
+import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -26,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.formatTime;
+import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
 
 public class GameManager {
 
@@ -101,12 +105,12 @@ public class GameManager {
         }
 
         if (gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM) > TeamManager.getInstance().getTeams().size()) {
-            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Impossible de démarrer le jeu, il faut au moins " + gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM) + " équipe(s)."));
+            Messages.broadcastOp("cannot_start_game_not_enough_teams", Placeholder.unparsed("min_teams", String.valueOf(gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM))));
             return false;
         }
 
 
-        bossbar = plugin.getServer().createBossBar(new NamespacedKey(plugin, "game_bar"),"Phase de Préparation - Temps restant : 0:00",  BarColor.BLUE, BarStyle.SOLID);
+        bossbar = plugin.getServer().createBossBar(new NamespacedKey(plugin, "game_bar"), plainText(LangManager.getInstance().get(Bukkit.getServer(), "bossbar.lava_rising_delay")),  BarColor.BLUE, BarStyle.SOLID);
         startPreparationBossBar();
 
         plugin.getServer().getOnlinePlayers().forEach(bossbar::addPlayer);
@@ -137,20 +141,20 @@ public class GameManager {
         playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> p.getScoreboardTags().contains("inGame")).toList());
         noRespawn = false;
 
-        TextUtils.broadcastMessage(TextUtils.infoMessage("Le jeu commence !"));
+        Messages.broadcast("info.starting_game");
         for(Player p : plugin.getServer().getOnlinePlayers()){
             if (!isPlayerInGame(p)){
                 p.setGameMode(GameMode.SPECTATOR);
-                p.sendMessage(TextUtils.infoMessage("Vous êtes en mode spectateur car vous n'êtes pas dans une équipe."));
+                Messages.send(p, "info.spectator_mode_not_in_team");
             }else{
                 initGamePlayer(p);
                 p.give(new ShopItem().giveItem());
             }
         }
         if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires sont sauvegardés (keepInventory)"));
+            Messages.broadcast("info.keep_inventory_during_preparation");
         if (gameConfigManager.getBoolean(GameConfigKeys.DISABLE_PVP_DURING_PREPARATION))
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est désactivé"));
+            Messages.broadcast("info.pvp_disabled_during_preparation");
 
 
         SpreadEntityManager spreadentityManager = new SpreadEntityManager();
@@ -167,7 +171,7 @@ public class GameManager {
 
         if (!success) {
             plugin.getLogger().warning("Impossible de répartir les joueurs, vérifiez la configuration !");
-            TextUtils.broadcastMessageOp(TextUtils.errorMessage("Impossible de répartir les joueurs, vérifiez la configuration !"));
+            Messages.broadcastOp("error.cannot_spread_player");
             Bukkit.removeBossBar(new NamespacedKey(plugin, "game_bar"));
             state = GameState.LOBBY;
             cancelBossBarTask();
@@ -184,13 +188,13 @@ public class GameManager {
                 .forEach(p -> p.setRespawnLocation(p.getLocation(), true));
 
         int lavaRisingDelay = gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY);
-        TextUtils.broadcastMessage(TextUtils.infoMessage("La lave va commencer à monter dans " + lavaRisingDelay / (20 * 60) + " minutes"));
+        Messages.broadcast("info.lava_rising_delay", Placeholder.unparsed("time", formatTime(lavaRisingDelay, TextUtils.TimeFormat.SHORTEST)));
         //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
         int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
         for (int d : delay) {
             if (lavaRisingDelay > d) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
-                        () -> TextUtils.sendActionBar(TextUtils.infoMessage("La lave va commencer à monter dans " + formatTime(d, TextUtils.TimeFormat.SHORTEST) + "...")), lavaRisingDelay - d);
+                        () -> Messages.broadcastActionBar("info.lava_rising_delay", Placeholder.unparsed("time", formatTime(lavaRisingDelay, TextUtils.TimeFormat.SHORTEST))), lavaRisingDelay - d);
             }
         }
         if (!dangerManager.startPreparation()){
@@ -198,7 +202,7 @@ public class GameManager {
                     off_op -> {
                         Player op = off_op.getPlayer();
                         if (op != null) {
-                            op.sendMessage(TextUtils.errorMessage("Impossible de démarrer la phase de préparation, vérifiez la configuration !"));
+                            Messages.send(op, "error.cannot_start_preparation_phase");
                         }
                     }
             );
@@ -243,9 +247,9 @@ public class GameManager {
         }
         world.getWorldBorder().changeSize(gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_DURING_RISE), gameConfigManager.getInt(GameConfigKeys.BORDER_RESIZE_TIME) * 20L);
         if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Les inventaires ne sont plus sauvegardés"));
+            Messages.broadcast("info.inventory_no_longer_saved");
         if (gameConfigManager.getBoolean(GameConfigKeys.DISABLE_PVP_DURING_PREPARATION))
-            TextUtils.broadcastMessage(TextUtils.infoMessage("Le PvP est activé"));
+            Messages.broadcast("info.pvp_enabled");
         dangerManager.startRising();
     }
 
@@ -308,8 +312,7 @@ public class GameManager {
                                 return;
                             }
                             bossbar.setTitle(
-                                    "Phase de préparation - Temps restant : "
-                                            + formatTime(remaining, TextUtils.TimeFormat.SHORTEST)
+                                    plainText(LangManager.getInstance().get(Bukkit.getServer(), "bossbar.lava_rising_delay"))
                             );
 
                             bossbar.setProgress(

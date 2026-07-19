@@ -3,10 +3,10 @@ package net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -58,6 +58,7 @@ public class TeamRespawnManager {
 
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         item.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile().name("MrCodingMen"));
+        TeamData teamData = TeamManager.getInstance().getTeam(teamName);
 
         ItemDisplay playerHeadBlockDisplay = location.getWorld().spawn(location, ItemDisplay.class, itemDisplay -> {
             itemDisplay.setItemStack(item);
@@ -82,7 +83,7 @@ public class TeamRespawnManager {
         });
 
         TextDisplay textDisplay = location.getWorld().spawn(location.clone().add(0, 1.5, 0), TextDisplay.class, display -> {
-            display.text(Component.text("Ancre ce réaparition de l'équipe\n").append(Component.text(teamName).color(TeamManager.getInstance().getTeam(teamName).getColor())));
+            display.text(Messages.component(Bukkit.getServer(),"team.respawn_anchor_team_text_display", Placeholder.component("team_name", teamData.getName())));
             display.setInvulnerable(true);
             display.setGravity(false);
             display.setCustomNameVisible(false);
@@ -177,7 +178,7 @@ public class TeamRespawnManager {
             Location respawnPoint = entry.getValue();
             if (respawnPoint.getY() < plugin.getGameManager().getDangerManager().getDangerLevel()){
                 removeRespawnPoint(teamName);
-                TeamManager.broadcastTeamMessage(TextUtils.errorMessage("Votre point de respawn a été supprimé car il est sous le niveau de danger actuel !"), TeamManager.getInstance().getTeam(teamName));
+                Messages.broadcastTeam(TeamManager.getInstance().getTeam(teamName), "team.anchor_removed_lava_broadcast");
                 plugin.getLogger().info("Respawn point for team " + teamName + " has been removed due to being below the danger level.");
             }
         }

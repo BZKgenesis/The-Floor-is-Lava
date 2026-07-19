@@ -4,6 +4,8 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Equippable;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
@@ -99,8 +101,8 @@ public class KitData {
         return name;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public TextComponent getDisplayName() {
+        return Component.text(displayName);
     }
     public void applyToPlayerNoClear(Player player) {
         player.getInventory().setArmorContents(new ItemStack[4]);

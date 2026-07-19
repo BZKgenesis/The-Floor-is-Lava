@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.items.team_inventory;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -37,7 +37,7 @@ public class TeamInventoryListener implements Listener {
         String team = getTeamOf(player);
 
         if (team == null) {
-            player.sendActionBar(TextUtils.errorMessage("Vous n'êtes pas dans une équipe, donc pas de coffre partagé.", false));
+            Messages.actionBar(player, "team_inv.action_bar.not_in_team");
             return;
         }
 

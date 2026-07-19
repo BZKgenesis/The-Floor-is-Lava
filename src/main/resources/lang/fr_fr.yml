@@ -1,0 +1,267 @@
+prefix: "<white>[<red>TFL<white>] "
+
+error:
+  generic: "<prefix><red>Une erreur est survenue."
+  invalid_name: "<prefix><red>Nom invalide."
+  empty_team_name: "<prefix><red>Le nom de l'équipe ne peut pas être vide."
+  unknown_parameter: "<prefix><red>Paramètre inconnu: <param>"
+  invalid_value: "<prefix><red>Valeur invalide pour <param> : <value>"
+  cannot_modify_config_during_game: "<prefix><red>Impossible de modifier la configuration pendant une partie en cours."
+  command_for_players_only: "<prefix><red>Cette commande ne peut être exécutée que par un joueur."
+  cannot_modify_config_parameter: "Ce paramètre ne se modifie pas au clic."
+  cannot_start_game_not_enough_teams: "<prefix><red>Impossible de démarrer le jeu, il faut au moins <min_teams> équipes."
+  cannot_spread_player: "<prefix><red>Impossible de répartir les joueurs, vérifiez la configuration !"
+  invalid_color: "<prefix><red>Couleur invalide."
+  pause_failed: "<prefix><red>Impossible de mettre en pause (état actuel : <state>)."
+  no_pause_to_resume: "<prefix><red>Aucune pause en cours à reprendre."
+  unknown_item: "<prefix><red>Item inconnu : <item_key>"
+  cannot_manage_team_during_game: "<prefix><red>Vous ne pouvez pas gérer votre équipe pendant une partie."
+  unknown_kit: "<prefix><red>Kit inconnu : <kit_name>"
+  world_reset_failed: "<prefix><red>Erreur lors de la réinitialisation du monde."
+  world_reset_map_failed: "<prefix><red>Erreur lors de la réinitialisation du monde avec la map <map_name>."
+  no_team_cannot_place_anchor: "<prefix><red>Vous ne pouvez pas placer le portail d'inventaire d'équipe car vous n'êtes pas dans une équipe."
+  cannot_break_own_anchor: "<prefix><red>Vous ne pouvez pas casser votre propre portail d'inventaire d'équipe."
+  not_here: "<prefix><red>Tu n'es pas sensé être ici."
+  cannot_start_preparation_phase: "<prefix><red>Impossible de démarrer la phase de préparation, vérifiez la configuration."
+
+validation:
+  team_created: "<prefix><green>Équipe créée."
+  team_left: "<prefix><green>Vous avez quitté votre équipe."
+  team_renamed: "<prefix><green>L'équipe a été renommée en <team>."
+  request_sent: "<prefix><green>La demande a été envoyée."
+  config_saved: "<prefix><green>Configuration sauvegardée."
+  value_set: "<prefix><green>Valeur définie pour <param> : <value>"
+  world_reset_success: "<prefix><green>Réinitialisation du monde terminée avec succès."
+  world_reset_map_success: "<prefix><green>Réinitialisation du monde avec la map <map_name> terminée avec succès."
+  anchor_placed: "<prefix><green>Le portail d'inventaire d'équipe a été placé."
+  anchor_removed: "<prefix><green>Le portail d'inventaire d'équipe a été supprimé."
+
+info:
+  request_received: "<prefix><white>Nouvelle demande de <player>."
+  lava_rising_start: "<prefix><red>La lave commence à monter !"
+  respawn_disabled: "<prefix><red>Le respawn est désactivé pour cette partie."
+  arena_shrinking: "<prefix><red>L'arène est en train de rétrécir !"
+  starting_game: "<prefix><white>Le jeu commence !"
+  spectator_mode_not_in_team: "<prefix><white>Vous êtes en mode spectateur car vous n'êtes pas dans une équipe."
+  keep_inventory_during_preparation: "<prefix><white>Vous gardez votre inventaire pendant la phase de préparation."
+  pvp_disabled_during_preparation: "<prefix><white>Le PVP est désactivé pendant la phase de préparation."
+  lava_rising_delay: "<prefix><white>La lave monte dans <time>"
+  inventory_no_longer_saved: "<prefix><white>Les inventaires ne sont plus sauvegardés"
+  pvp_enabled: "<prefix><white>Le PVP est activé"
+  world_reset_random: "<prefix><white>Réinitialisation du monde aléatoire avec la seed : <seed>"
+  world_reset_map: "<prefix><white>Réinitialisation du monde avec la map : <map_name>"
+  world_generating: "<prefix><white>Génération du monde de jeu en cours..."
+  world_generating_warning: "<prefix><yellow>Des chutes de performance peuvent survenir pendant la génération du monde. Veuillez patienter..."
+
+command:
+  danger_level: "<prefix><white>Le niveau actuel est de <level>"
+  danger_level_set: "<prefix><white>Niveau défini à <level>"
+  game_starting: "<prefix><green>Démarrage du système."
+  game_start_error: "<prefix><red>Erreur dans le démarrage du système (état actuel : <state>)."
+  game_stopping: "<prefix><white>Arrêt du système."
+  game_paused: "<prefix><white>Pause du système."
+  game_resumed: "<prefix><white>Reprise du système."
+  speed_set: "<prefix><white>Vitesse définie à <speed>"
+  speed_current: "<prefix><white>La vitesse actuelle est de <speed>"
+
+debug:
+  respawn_locations_header: "respawn locations:"
+  respawn_location_line: "- respawn point for team <team_name> is at <location>"
+  game_state: "game state: <state>"
+  teams_header: "teams"
+  team_line: "- team <team_name><white> has members: <members>"
+  danger_state: "danger state: <state>"
+  kits_header: "kits"
+  kit_line: "- kit <kit_name>"
+  player_kits_header: "player kits"
+  player_kit_line: "- player <player_name> has kit: <kit_name>"
+
+gui:
+  config_value: "<yellow><param><gray> = <white><value>"
+  config_title: "Configuration TFL - <config_section_name>"
+  main_title: "Menu d'équipe"
+  confirm_leave_title: "Quitter l'équipe ?"
+  requests_title: "Demandes en attente"
+  manage_title: "Kick des membres"
+  join_title: "Demander à rejoindre une équipe"
+  list_config_title: "<gold>--- Configuration TFL (<config_name>) ---"
+  list_config_element: "<yellow><param><gray> = <white><value><dark_gray> (<description>)"
+  give_all_menu_title: "<gold>Menu des items disponibles"
+  shop:
+    title: "<gold>Menu de la boutique <gray>(Page <page>)"
+    click_to_exchange: "<green>Cliquer pour échanger"
+    next_page: "<yellow>Suivant →"
+    previous_page: "<yellow>← Précédent"
+  kit:
+    click_to_choose: "Cliquer pour choisir le kit <kit_name>"
+    menu_title: "Choisir un kit"
+
+item:
+  config_name: "<yellow><param>"
+  info_team: "Information de l'équipe"
+
+item_lore:
+  team_name: "<yellow>Nom de l'équipe: <white><team>"
+  team_members: "<yellow>Membres de l'équipe: <white><members>"
+  config_value: "<yellow>Valeur: <white><value>"
+  config_description: "<gray><description>"
+  config_increase: "Clic gauche +1 / Shift +10"
+  config_decrease: "Clic droit -1 / Shift -10"
+  config_toggle: "Clic gauche/droit pour basculer"
+  cannot_modify_config_parameter: "Ce paramètre ne se modifie pas au clic."
+  current_name: "Nom actuel: <name>"
+  leave_warning_line1: "<red>ATTENTION si vous quittez,"
+  leave_warning_line2: "<red>votre équipe sera dissoute"
+  owner_member: "<green>- 👑<name>"
+  member: "- <name>"
+  accept_request: "Accepter la demande"
+  click_kick: "Cliquer pour expulser le joueur"
+  cancel_request: "<red>Cliquer pour annuler la demande"
+
+dialog:
+  rename_title: "Renommer l'équipe"
+  team_name_label: "Nom d'équipe"
+  rename_button: "Renommer"
+  rename_button_desc: "Cliquer pour renommer votre équipe."
+  cancel_button: "Annuler"
+  cancel_rename_desc: "Cliquer pour annuler le renommage de votre équipe."
+  recolor_title: "Changer la couleur de l'équipe"
+  recolor_button_desc: "Cliquer pour changer la couleur de votre équipe."
+  cancel_recolor_desc: "Cliquer pour annuler le changement de couleur de votre équipe."
+  open_shop_title: "Ouvrir la boutique"
+  open_team_management_title: "Gérer l'équipe"
+  quick_actions_title: "Actions rapides"
+
+button:
+  create_team: "Créer une équipe"
+  join_team: "Rejoindre une équipe"
+  manage_team: "Gérer mon équipe"
+  request_menu: "Demandes reçues"
+  rename_menu: "Renommer l'équipe"
+  recolor_menu: "Changer la couleur de l'équipe"
+  leave_team: "Quitter l'équipe"
+  back: "Retour"
+  "yes": "Oui"
+  "no": "Non"
+
+warning:
+  no_map_config: "<prefix><yellow>Aucune configuration de carte n'a été trouvée. Utilisation de la configuration par défaut."
+
+action_bar:
+  lava_rising_delay: "<red>La lave monte dans <white><time> secondes."
+  lava_rising: "<red>La lave monte !"
+  lava_near_player: "<red>!!ATTENTION!! La zone se rapproche vous êtes à <white><nb_blocs> blocs<red> de la zone !!"
+  lava_under_player: "<dark_red>VOUS ETES DANS LA ZONE REMONTEZ VIIITE !!!"
+
+bossbar:
+  lava_rising_delay: "Phase de Préparation - Temps restant : <time>"
+  lava_rising: "<red>La lave monte !"
+
+team:
+  left_team: "<prefix><red>Vous avez quitté votre équipe."
+  request_expired: "<prefix><red>Demande expirée."
+  request_denied: "<prefix><red>La demande pour l'équipe de <team_name><red> a été refusée !"
+  request_declined_notice: "<prefix><red>Demande refusée."
+  member_joined_broadcast: "<prefix><green><player_name> ajouté à l'équipe."
+  request_accepted: "<prefix><green>Votre demande a été acceptée !"
+  request_cancelled: "<prefix><green>Demande annulée"
+  request_received_broadcast: "<prefix><gray>Demande reçue de <player_name>"
+  request_sent: "<prefix><green>La demande a été envoyée"
+  renamed: "<prefix><green>L'équipe a été renommée en <new_name>"
+  recolored: "<prefix><green>La couleur de l'équipe a été changée en <new_color>"
+  kicked: "<prefix><red>Vous avez été expulsé de l'équipe de <team_name>"
+  kicked_broadcast: "<prefix><red><player_name> a été expulsé de l'équipe"
+  anchor_removed_broadcast: "<prefix><red>Le portail d'inventaire d'équipe a été supprimé."
+  anchor_removed_lava_broadcast: "<prefix><red>Le portail d'inventaire d'équipe a été détruit par la lave."
+  eliminated: "<prefix><red>L'équipe <team_name><red> a été éliminée."
+  respawn_anchor_team_text_display: "Ancre de réapparition de l'équipe\n<team_name>"
+
+resourcepack:
+  required: "<red>Ce pack est obligatoire"
+
+game:
+  end_team_won: "<prefix><gold>FIN DE PARTIE - l'équipe <team_name><gold> a gagné !"
+  end_no_winner: "<prefix><gold>FIN DE PARTIE - Aucune équipe n'a gagné !"
+
+kit:
+  invalid: "<prefix><red>Le kit <kit_name> est invalide."
+  self_assigned: "<prefix><green>Vous avez choisi le kit <kit_name>."
+  cannot_change_kit_in_game: "<prefix><red>Vous ne pouvez pas changer de kit pendant une partie."
+
+shop:
+  not_enough_ingredients: "<prefix><red>Ingrédients insuffisants."
+  exchange_success: "<prefix><green>Échange réussi."
+
+team_inv:
+  action_bar:
+    not_in_team: "<red>Vous ne pouvez pas accéder à l'inventaire d'équipe car vous n'êtes pas dans une équipe."
+
+items:
+  team_inv:
+    display_name: "Portail d'inventaire d'équipe"
+    lore: "Permet aux membres de l'équipe de partager un inventaire commun."
+  popup_tower:
+    display_name: "Tour de popup"
+    lore: "Permet de créer une tour qui se déploie automatiquement"
+  team_respawn_anchor:
+    display_name: "Ancre de réapparition d'équipe"
+    lore1: "Permet de réapparaître à l'endroit où l'ancre est posée"
+    lore2: "au lieu du spawn du monde de jeu."
+  batte:
+    display_name: "Batte"
+    lore: "Une batte de baseball pour repousser les autres joueurs"
+  ciseaux:
+    display_name: "Ciseaux"
+    lore: "Permet de couper les blocs de laine et de les récupérer"
+  egg_bridge:
+    display_name: "Pont d'oeufs"
+    lore: "Permet de créer un pont d'oeufs"
+  feather_falling_boots:
+    display_name: "Bottes de chute"
+    lore: "Permet de ralentir les chutes"
+  fireball:
+    display_name: "Boule de feu"
+    lore: "Permet de lancer une boule de feu"
+  give_all:
+    display_name: "Donner tous les items"
+    lore: "Permet de donner tous les items disponibles"
+  infinite_wool:
+    display_name: "Laine infinie"
+    lore: "Permet de placer des blocs de laine infiniment"
+  shop_item:
+    display_name: "Boutique"
+    lore: "Permet d'acheter des items avec des ingrédients"
+  snowball_plate:
+    display_name: "Plaque de neige"
+    lore: "Permet de créer une plaque de neige"
+  team_manager:
+    display_name: "Gestionnaire d'équipe"
+    lore: "Permet de gérer votre équipe"
+
+config:
+  game:
+    lava-rising-delay: "Délai (ticks) avant que la lave commence à monter"
+    border-size-prerise: "Taille de bordure pendant la préparation"
+    border-size-during-rise: "Taille de bordure pendant la montée de la lave"
+    border-resize-time: "Durée (secondes) du rétrécissement de la bordure"
+    disable-pvp-during-preparation: "Désactiver le PvP pendant la préparation"
+    keep-inventory-during-preparation: "Garder l'inventaire pendant la préparation"
+    fall-damage-reduction: "Multiplicateur de dégâts de chute"
+    min-nb-teams: "Nombre minimum d'équipes pour démarrer la partie"
+    default-lang: "Langue par défaut du serveur"
+  danger:
+    start-level: "Niveau Y de départ de la lave"
+    end-level: "Niveau Y final de la lave"
+    surface-level: "Niveau Y de la surface (change la vitesse de montée)"
+    total-time-below-surface: "Durée (ticks) pour monter jusqu'à la surface"
+    total-time-above-surface: "Durée (ticks) pour monter de la surface au sommet"
+    damage: "Dégâts de la zone"
+    damage-every: "Fréquence (ticks) des dégâts"
+    place-lava: "Poser réellement de la lave (sinon dégâts seuls)"
+    show-alert: "Afficher les alertes de proximité de la zone"
+    lava-margin: "Marge (blocs) de lave hors bordure"
+    increase-size: "Hauteur (blocs) posée par palier"
+  map:
+    spawn-spawn-structure: "Si la structure de spawn doit être générée au spawn"
+    center-x: "Coordonnée X du centre de la map"
+    center-z: "Coordonnée Z du centre de la map"

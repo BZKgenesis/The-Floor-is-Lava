@@ -6,7 +6,7 @@ import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.*;
-import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -140,7 +140,7 @@ public class WorldManager {
             currentMapConfigManager.loadFromFile(mapConfig);
         } else {
             plugin.getLogger().info("Utilisation de defaultMapConfig.yml");
-            TextUtils.broadcastMessageOp(TextUtils.warningMessage("Aucune configuration de map trouvée, utilisation de la configuration par défaut."));
+            Messages.broadcastOp("no_map_config");
             currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
         }
     }

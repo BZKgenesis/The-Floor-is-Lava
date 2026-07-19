@@ -16,7 +16,12 @@ import org.bukkit.plugin.Plugin;
 @SuppressWarnings("UnstableApiUsage")
 public class FireBallItem extends CustomItem {
     public FireBallItem() {
-        super("fireball", "Fire Ball", "Permet de lancer une boule de feu", Rarity.RARE, Material.FIRE_CHARGE, true);
+        super("fireball",
+                "items.fireball.display_name",
+                "items.fireball.lore",
+                Rarity.RARE,
+                Material.FIRE_CHARGE,
+                true);
     }
 
     @Override

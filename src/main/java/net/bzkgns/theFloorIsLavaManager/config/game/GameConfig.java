@@ -14,6 +14,7 @@ public class GameConfig implements ConfigSection<GameConfig> {
     private boolean keepInventoryDuringPreparation = true;
     private double fallDamageReduction = 0.5;
     private int minNbTeam = 1;
+    private String default_lang = "fr_fr";
 
     private static final List<ConfigKey<GameConfig, ?>> KEYS = List.of(
             GameConfigKeys.LAVA_RISING_DELAY,
@@ -23,7 +24,8 @@ public class GameConfig implements ConfigSection<GameConfig> {
             GameConfigKeys.DISABLE_PVP_DURING_PREPARATION,
             GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION,
             GameConfigKeys.FALL_DAMAGE_REDUCTION,
-            GameConfigKeys.MIN_NB_TEAM
+            GameConfigKeys.MIN_NB_TEAM,
+            GameConfigKeys.DEFAULT_LANG
 
     );
 
@@ -50,6 +52,9 @@ public class GameConfig implements ConfigSection<GameConfig> {
 
     public int getMinNbTeam() { return minNbTeam; }
     public void setMinNbTeam(int v) { this.minNbTeam = v; }
+
+    public String getDefaultLang() { return default_lang; }
+    public void setDefaultLang(String v) { this.default_lang = v; }
 
     @Override
     public String getName() {
