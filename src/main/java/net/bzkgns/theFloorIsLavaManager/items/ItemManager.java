@@ -1,7 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
 
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.inventory.CraftingRecipe;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,21 +34,21 @@ public final class ItemManager {
         return new ArrayList<>(ITEMS.keySet());
     }
 
-    public static List<String> getAllCraftableItemKeys(){
+    public static List<String> getAllCraftableItemKeys(Audience audience){
         List<String> craftableItemKeys = new ArrayList<>();
         for (CustomItem item : ITEMS.values()) {
-            if (item.getRecipe() != null) {
+            if (item.getRecipe(audience) != null) {
                 craftableItemKeys.add(item.getKey());
             }
         }
         return craftableItemKeys;
     }
 
-    public static List<CraftingRecipe> getAllCraftingRecipes(){
+    public static List<CraftingRecipe> getAllCraftingRecipes(Audience audience){
         List<CraftingRecipe> recipes = new ArrayList<>();
         for (CustomItem item : ITEMS.values()) {
-            if (item.getRecipe() != null) {
-                recipes.add(item.getRecipe());
+            if (item.getRecipe(audience) != null) {
+                recipes.add(item.getRecipe(audience));
             }
         }
         return recipes;
@@ -54,6 +56,15 @@ public final class ItemManager {
 
     public static CustomItem getItemByKey(String key){
         return ITEMS.get(key);
+    }
+
+    public static CustomItem getAssociatedCustomItem(ItemStack itemStack) {
+        for (CustomItem item : ITEMS.values()) {
+            if (item.isItem(itemStack)) {
+                return item;
+            }
+        }
+        return null;
     }
 
 }

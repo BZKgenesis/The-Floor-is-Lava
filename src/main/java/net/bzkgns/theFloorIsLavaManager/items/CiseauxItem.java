@@ -11,11 +11,8 @@ import org.bukkit.inventory.ShapedRecipe;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CiseauxItem extends CustomItem {
-    public CiseauxItem(){
-        this(null);
-    }
-    public CiseauxItem(Audience audience) {
-        super(audience, "ciseaux",
+    public CiseauxItem() {
+        super( "ciseaux",
                 "items.ciseaux.display_name",
                 "items.ciseaux.lore",
                 Rarity.COMMON,
@@ -24,15 +21,15 @@ public class CiseauxItem extends CustomItem {
     }
 
     @Override
-    public ItemStack giveItem() {
-        ItemStack ciseauxItem = itemStack.clone();
+    public ItemStack giveItem(Audience audience) {
+        ItemStack ciseauxItem = createBaseItemStack(audience);
         ciseauxItem.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().add(Enchantment.EFFICIENCY,3));
         return ciseauxItem;
     }
 
     @Override
-    public CraftingRecipe getRecipe() {
-        ShapedRecipe ciseauxRecipe = new ShapedRecipe(key, giveItem());
+    public CraftingRecipe getRecipe(Audience audience) {
+        ShapedRecipe ciseauxRecipe = new ShapedRecipe(key, giveItem(audience));
         ciseauxRecipe.shape(" A","A ");
         ciseauxRecipe.setIngredient('A', Material.IRON_INGOT);
         return ciseauxRecipe;

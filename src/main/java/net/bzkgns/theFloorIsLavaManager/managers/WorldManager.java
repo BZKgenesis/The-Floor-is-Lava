@@ -66,7 +66,8 @@ public class WorldManager {
     }
 
     public void resetRandomWorld(long seed) throws WorldGenerationException {
-        loadDefaultMapConfig();
+        if (!ConfigRegistry.getConfigManager("map").hasBeenModified())
+            loadDefaultMapConfig();
         isGameWorldLoaded = false;
         plugin.getGameManager().stopGame();
 
@@ -363,7 +364,9 @@ public class WorldManager {
             resettingWorld = false;
             throw new NoMapFoundException("La map \"" + mapName + "\" est introuvable dans le dossier \"" + mapsFolder.getAbsolutePath() + "\".");
         }
-        loadMapConfig(mapFolder);
+
+        if (!ConfigRegistry.getConfigManager("map").hasBeenModified())
+            loadMapConfig(mapFolder);
 
         Path tempExtractDir = null;
 
@@ -569,6 +572,7 @@ public class WorldManager {
         lobby.setGameRule(GameRules.ADVANCE_WEATHER, false);
         lobby.setGameRule(GameRules.SPAWN_MOBS, false);
         lobby.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);
+        lobby.setGameRule(GameRules.KEEP_INVENTORY, true);
         lobby.setStorm(false);
         lobby.setThundering(false);
         lobby.getWorldBorder().setSize(100000);

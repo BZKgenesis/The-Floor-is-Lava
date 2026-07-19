@@ -5,6 +5,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -59,6 +61,11 @@ public class BlockUtils {
 
     public static boolean canPlaceBlock(BlockPos pos){
         return pos.getY() <= 278 || pos.getY() >= 297 || abs(pos.getX()) >= 15 || abs(pos.getZ()) >= 15;
+    }
+
+    public static boolean isWaterlogged(Block block) {
+        return block.getBlockData() instanceof Waterlogged waterlogged
+                && waterlogged.isWaterlogged();
     }
 
 }

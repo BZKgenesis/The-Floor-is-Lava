@@ -19,6 +19,6 @@ public class InfiniteWool implements Listener {
 
         Player player = event.getPlayer();
 
-        Bukkit.getScheduler().runTask(TheFloorIsLavaManager.getInstance(), () -> player.getInventory().setItem(event.getHand(), infinite.giveItem()));
+        Bukkit.getScheduler().runTask(TheFloorIsLavaManager.getInstance(), () -> player.getInventory().setItem(event.getHand(), infinite.giveItem(event.getPlayer())));
     }
 }

@@ -24,9 +24,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.formatTime;
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
@@ -95,6 +93,7 @@ public class GameManager {
         player.setAllowFlight(true);
     }
 
+
     public boolean startGame() {
         TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
@@ -103,22 +102,28 @@ public class GameManager {
         if (Bukkit.getBossBar(key) != null) {
             Bukkit.removeBossBar(key);
         }
-
         if (gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM) > TeamManager.getInstance().getTeams().size()) {
-            Messages.broadcastOp("cannot_start_game_not_enough_teams", Placeholder.unparsed("min_teams", String.valueOf(gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM))));
+            Messages.broadcastOp("error.cannot_start_game_not_enough_teams", Placeholder.unparsed("min_teams", String.valueOf(gameConfigManager.getInt(GameConfigKeys.MIN_NB_TEAM))));
             return false;
         }
+        return startStartingPhase();
+    }
 
 
-        bossbar = plugin.getServer().createBossBar(new NamespacedKey(plugin, "game_bar"), plainText(LangManager.getInstance().get(Bukkit.getServer(), "bossbar.lava_rising_delay")),  BarColor.BLUE, BarStyle.SOLID);
-        startPreparationBossBar();
-
-        plugin.getServer().getOnlinePlayers().forEach(bossbar::addPlayer);
-
+    private boolean startStartingPhase() {
+        TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
         if (state != GameState.LOBBY) {
             return false;
         }
-        state = GameState.RUNNING;
+        state = GameState.STARTING;
+
+        playerInGame.forEach(e -> {
+            if (e instanceof Player p){
+                p.setAllowFlight(false);
+            }
+        });
+
+
         World world = plugin.getWorldManager().getGameWorld();
         world.getWorldBorder().setSize(gameConfigManager.getInt(GameConfigKeys.BORDER_SIZE_PRE_RISE));
         ConfigManager<MapConfig> mapConfigManager = ConfigRegistry.getConfigManager("map");
@@ -134,12 +139,13 @@ public class GameManager {
             TheFloorIsLavaManager.pvp = false;
         }
         plugin.getServer().getOnlinePlayers().forEach(p -> p.getScoreboardTags().remove("inGame"));
-                plugin.getServer().getOnlinePlayers().stream()
-                        .filter(p -> plugin.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(p) != null)
-                        .forEach(p -> p.addScoreboardTag("inGame")
-                        );
+        plugin.getServer().getOnlinePlayers().stream()
+                .filter(p -> plugin.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(p) != null)
+                .forEach(p -> p.addScoreboardTag("inGame")
+                );
         playerInGame.addAll(plugin.getServer().getOnlinePlayers().stream().filter(p -> p.getScoreboardTags().contains("inGame")).toList());
         noRespawn = false;
+
 
         Messages.broadcast("info.starting_game");
         for(Player p : plugin.getServer().getOnlinePlayers()){
@@ -148,7 +154,7 @@ public class GameManager {
                 Messages.send(p, "info.spectator_mode_not_in_team");
             }else{
                 initGamePlayer(p);
-                p.give(new ShopItem().giveItem());
+                p.give(new ShopItem().giveItem(p));
             }
         }
         if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
@@ -156,10 +162,9 @@ public class GameManager {
         if (gameConfigManager.getBoolean(GameConfigKeys.DISABLE_PVP_DURING_PREPARATION))
             Messages.broadcast("info.pvp_disabled_during_preparation");
 
-
         SpreadEntityManager spreadentityManager = new SpreadEntityManager();
 
-        boolean success = spreadentityManager.spread(
+        Map<UUID, Location> positions = spreadentityManager.spread(
                 playerInGame,
                 new Location(world,
                         mapConfigManager.getInt(MapConfigKeys.CENTER_X),
@@ -169,7 +174,7 @@ public class GameManager {
                 , 50, true, 200
         );
 
-        if (!success) {
+        if (positions==null) {
             plugin.getLogger().warning("Impossible de répartir les joueurs, vérifiez la configuration !");
             Messages.broadcastOp("error.cannot_spread_player");
             Bukkit.removeBossBar(new NamespacedKey(plugin, "game_bar"));
@@ -177,24 +182,85 @@ public class GameManager {
             cancelBossBarTask();
             return false;
         }
-        playerInGame.forEach(e -> {
-            if (e instanceof Player p){
-                p.setAllowFlight(false);
-            }
-        });
+
+        Bukkit.getServer().getOnlinePlayers().forEach(p -> p.teleport(plugin.getWorldManager().getPreGameSpawnLocation()));
+        int startingCountdown = gameConfigManager.getInt(GameConfigKeys.STARTING_COUNTDOWN);
+
+        if (startingCountdown > 3)
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
+                    () -> plugin.getServer().getOnlinePlayers().forEach(
+                            p->Messages.send(p,
+                                    "info.starting_countdown",
+                                    Placeholder.unparsed("time", formatTime(p,startingCountdown - 3, TextUtils.TimeFormat.SHORTEST)))
+                    ),
+                    startingCountdown*20L - 3*20L
+            );
+        if (startingCountdown > 2)
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
+                    () ->  plugin.getServer().getOnlinePlayers().forEach(
+                            p->Messages.send(p,
+                                    "info.starting_countdown",
+                                    Placeholder.unparsed("time", formatTime(p,startingCountdown - 2, TextUtils.TimeFormat.SHORTEST)))),
+                    startingCountdown*20L - 2*20L
+            );
+        if (startingCountdown > 1)
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
+                    () ->  plugin.getServer().getOnlinePlayers().forEach(
+                            p->Messages.send(p,
+                                    "info.starting_countdown",
+                                    Placeholder.unparsed("time", formatTime(p,startingCountdown - 1, TextUtils.TimeFormat.SHORTEST)))),
+                    startingCountdown*20L - 20L
+            );
+        if (startingCountdown > 0) {
+            plugin.getServer().getOnlinePlayers().forEach(
+                    p->Messages.send(p,
+                            "info.starting_countdown", Placeholder.unparsed("time", formatTime(p,startingCountdown, TextUtils.TimeFormat.SHORTEST))));
+        }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> startRunningPhase(plugin, positions), startingCountdown*20L);
+        return true;
+    }
+
+    private void startRunningPhase(TheFloorIsLavaManager plugin, Map<UUID, Location> positions) {
+        if (state != GameState.STARTING) {
+            return;
+        }
+        state = GameState.RUNNING;
+
+
+        bossbar = plugin.getServer().createBossBar(new NamespacedKey(plugin, "game_bar"), plainText(LangManager.getInstance().get(Bukkit.getServer(), "bossbar.lava_rising_delay")),  BarColor.BLUE, BarStyle.SOLID);
+        startPreparationBossBar();
+
+        plugin.getServer().getOnlinePlayers().forEach(bossbar::addPlayer);
+
+        if (positions != null) {
+            this.state = GameState.RUNNING;
+            positions.forEach((uuid, location) -> {
+                Player player = plugin.getServer().getPlayer(uuid);
+                if (player != null && playerInGame.contains(player)) {
+                    player.teleport(location);
+                }
+            });
+        }
+
 
         playerInGame.stream()
                 .filter(Objects::nonNull)
                 .forEach(p -> p.setRespawnLocation(p.getLocation(), true));
 
         int lavaRisingDelay = gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY);
-        Messages.broadcast("info.lava_rising_delay", Placeholder.unparsed("time", formatTime(lavaRisingDelay, TextUtils.TimeFormat.SHORTEST)));
+        plugin.getServer().getOnlinePlayers().forEach(
+                p->Messages.send(p,
+                        "info.lava_rising_delay",
+                        Placeholder.unparsed("time", formatTime(p,lavaRisingDelay, TextUtils.TimeFormat.SHORTEST))));
         //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
         int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
         for (int d : delay) {
             if (lavaRisingDelay > d) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
-                        () -> Messages.broadcastActionBar("info.lava_rising_delay", Placeholder.unparsed("time", formatTime(lavaRisingDelay, TextUtils.TimeFormat.SHORTEST))), lavaRisingDelay - d);
+                        () -> plugin.getServer().getOnlinePlayers().forEach(
+                                p->Messages.actionBar(p,
+                                        "info.lava_rising_delay",
+                                        Placeholder.unparsed("time", formatTime(p,lavaRisingDelay, TextUtils.TimeFormat.SHORTEST)))), lavaRisingDelay - d);
             }
         }
         if (!dangerManager.startPreparation()){
@@ -207,6 +273,7 @@ public class GameManager {
                     }
             );
         }
+
         playerInGame.forEach(p->
                 KitManager.getInstance().applyKitToPlayer(p));
 
@@ -215,7 +282,6 @@ public class GameManager {
                 this::startRisingPhase,
                 gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY)
         );
-        return true;
     }
 
     public boolean isGameWinning() {
@@ -312,7 +378,7 @@ public class GameManager {
                                 return;
                             }
                             bossbar.setTitle(
-                                    plainText(LangManager.getInstance().get(Bukkit.getServer(), "bossbar.lava_rising_delay"))
+                                    plainText(Messages.component(Bukkit.getServer(), "bossbar.lava_rising_delay", Placeholder.unparsed("time", formatTime(remaining, TextUtils.TimeFormat.SHORTEST_CLOCK_LIKE))))
                             );
 
                             bossbar.setProgress(

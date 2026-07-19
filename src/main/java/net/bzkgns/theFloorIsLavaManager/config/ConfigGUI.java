@@ -10,7 +10,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,7 +23,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
-import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
 
 /**
  * Point de départ pour un GUI d'édition de la configuration (à faire évoluer avec le
@@ -99,15 +97,7 @@ public class ConfigGUI implements Listener {
         if (!(title instanceof TextComponent)) {
             return;
         }
-
-        String rawTitle = PlainTextComponentSerializer.plainText().serialize(title);
-
-        if (!rawTitle.startsWith("Configuration TFL - ")) {
-            return;
-        }
-
         event.setCancelled(true);
-
 
         DangerManager dangerManager = plugin.getGameManager().getDangerManager();
 
@@ -117,7 +107,7 @@ public class ConfigGUI implements Listener {
             return;
         }
 
-        String configName = rawTitle.substring("Configuration TFL - ".length());
+        String configName = holder.getConfigName();
 
         ConfigSection<?> config = ConfigRegistry.getConfigManager(configName).getConfig();
 
@@ -158,6 +148,7 @@ public class ConfigGUI implements Listener {
             Player player,
             InventoryClickEvent event
     ) {
+        System.out.println("Clicked on config key: " + key.getKey() + " with value: " + key.get(config));
         if (key.get(config) instanceof Number number) {
             double current = number.doubleValue();
 

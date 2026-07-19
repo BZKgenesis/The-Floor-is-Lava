@@ -123,7 +123,6 @@ public class ConfigCommands {
         }
 
         Messages.send(ctx.getSource().getSender(), "validation.value_set", Placeholder.unparsed("param", key.getKey()), Placeholder.unparsed("value", key.get(configManager.getConfig()).toString()));
-
         return Command.SINGLE_SUCCESS;
     }
 

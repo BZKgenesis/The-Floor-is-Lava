@@ -52,6 +52,7 @@ info:
   world_reset_map: "<prefix><white>Resetting the world with map: <map_name>"
   world_generating: "<prefix><white>Generating the game world..."
   world_generating_warning: "<prefix><yellow>Performance drops may occur during world generation. Please wait..."
+  starting_countdown: "<prefix><white>Starting countdown: <time> remaining."
 
 command:
   danger_level: "<prefix><white>The current level is <level>"
@@ -196,6 +197,18 @@ team_inv:
   action_bar:
     not_in_team: "<red>You cannot access the team inventory because you are not in a team."
 
+time:
+  second: "1 second"
+  minute: "1 minute"
+  hour: "1 hour"
+  seconds: "<time> seconds"
+  minutes: "<time> minutes"
+  hours: "<time> hours"
+  minutes_and_seconds: "<minutes> minutes and <seconds> seconds"
+  minutes_and_second: "<minutes> minutes and 1 second"
+  minute_and_seconds: "1 minute and <seconds> seconds"
+  minute_and_second: "1 minute and 1 second"
+
 items:
   team_inv:
     display_name: "Team Inventory Portal"
@@ -249,6 +262,7 @@ config:
     fall-damage-reduction: "Fall damage multiplier"
     min-nb-teams: "Minimum number of teams required to start the game"
     default-lang: "Server's default language"
+    starting-countdown: "Starting countdown (seconds) before the game starts"
   danger:
     start-level: "Starting Y level of the lava"
     end-level: "Final Y level of the lava"

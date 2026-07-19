@@ -52,6 +52,7 @@ info:
   world_reset_map: "<prefix><white>Réinitialisation du monde avec la map : <map_name>"
   world_generating: "<prefix><white>Génération du monde de jeu en cours..."
   world_generating_warning: "<prefix><yellow>Des chutes de performance peuvent survenir pendant la génération du monde. Veuillez patienter..."
+  starting_countdown: "<prefix><white>Début de la partie : <time> restantes."
 
 command:
   danger_level: "<prefix><white>Le niveau actuel est de <level>"
@@ -196,6 +197,18 @@ team_inv:
   action_bar:
     not_in_team: "<red>Vous ne pouvez pas accéder à l'inventaire d'équipe car vous n'êtes pas dans une équipe."
 
+time:
+  second: "1 seconde"
+  minute: "1 minute"
+  hour: "1 heure"
+  seconds: "<time> secondes"
+  minutes: "<time> minutes"
+  hours: "<time> heures"
+  minutes_and_seconds: "<minutes> minutes et <seconds> secondes"
+  minutes_and_second: "<minutes> minutes et 1 seconde"
+  minute_and_seconds: "1 minute et <seconds> secondes"
+  minute_and_second: "1 minute et 1 seconde"
+
 items:
   team_inv:
     display_name: "Portail d'inventaire d'équipe"
@@ -249,6 +262,7 @@ config:
     fall-damage-reduction: "Multiplicateur de dégâts de chute"
     min-nb-teams: "Nombre minimum d'équipes pour démarrer la partie"
     default-lang: "Langue par défaut du serveur"
+    starting-countdown: "Durée (secondes) du compte à rebours avant le début de la partie"
   danger:
     start-level: "Niveau Y de départ de la lave"
     end-level: "Niveau Y final de la lave"

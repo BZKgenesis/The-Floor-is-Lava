@@ -3,6 +3,7 @@ package net.bzkgns.theFloorIsLavaManager.items;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.Weapon;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.CraftingRecipe;
@@ -24,8 +25,8 @@ public class BatteItem extends CustomItem {
     }
 
     @Override
-    public ItemStack giveItem() {
-        ItemStack batteItem = itemStack.clone();
+    public ItemStack giveItem(Audience audience) {
+        ItemStack batteItem = createBaseItemStack(audience);
         batteItem.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().add(Enchantment.KNOCKBACK, 3));
         batteItem.setData(DataComponentTypes.MAX_DAMAGE, 10);
         batteItem.setData(DataComponentTypes.MAX_STACK_SIZE, 1);
@@ -34,9 +35,9 @@ public class BatteItem extends CustomItem {
     }
 
     @Override
-    public CraftingRecipe getRecipe() {
+    public CraftingRecipe getRecipe(Audience audience) {
 
-        ShapedRecipe batteRecipe = new ShapedRecipe(key, giveItem());
+        ShapedRecipe batteRecipe = new ShapedRecipe(key, giveItem(audience));
         batteRecipe.shape("  A", " B ", "C  ");
         batteRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(RESOURCE_MATERIALS));
         batteRecipe.setIngredient('B', Material.IRON_INGOT);

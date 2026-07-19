@@ -15,6 +15,7 @@ public class GameConfig implements ConfigSection<GameConfig> {
     private double fallDamageReduction = 0.5;
     private int minNbTeam = 1;
     private String default_lang = "fr_fr";
+    private int startingCountdown = 10;
 
     private static final List<ConfigKey<GameConfig, ?>> KEYS = List.of(
             GameConfigKeys.LAVA_RISING_DELAY,
@@ -25,7 +26,8 @@ public class GameConfig implements ConfigSection<GameConfig> {
             GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION,
             GameConfigKeys.FALL_DAMAGE_REDUCTION,
             GameConfigKeys.MIN_NB_TEAM,
-            GameConfigKeys.DEFAULT_LANG
+            GameConfigKeys.DEFAULT_LANG,
+            GameConfigKeys.STARTING_COUNTDOWN
 
     );
 
@@ -55,6 +57,9 @@ public class GameConfig implements ConfigSection<GameConfig> {
 
     public String getDefaultLang() { return default_lang; }
     public void setDefaultLang(String v) { this.default_lang = v; }
+
+    public int getStartingCountdown() { return startingCountdown; }
+    public void setStartingCountdown(int v) { this.startingCountdown = v; }
 
     @Override
     public String getName() {

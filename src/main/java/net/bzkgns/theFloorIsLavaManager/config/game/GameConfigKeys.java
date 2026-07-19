@@ -87,5 +87,14 @@ public final class GameConfigKeys {
                     String::valueOf
             );
 
+    public static final ConfigKey<GameConfig, Integer> STARTING_COUNTDOWN =
+            new ConfigKey<>(
+                    "starting-countdown",
+                    "config.game.starting-countdown",
+                    GameConfig::getStartingCountdown,
+                    GameConfig::setStartingCountdown,
+                    Integer::parseInt
+            );
+
 
 }

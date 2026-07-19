@@ -1,9 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.items.team_inventory;
 
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 public class TeamInventoryItem extends CustomItem {
     public TeamInventoryItem() {
@@ -17,14 +17,9 @@ public class TeamInventoryItem extends CustomItem {
     }
 
     @Override
-    public ItemStack giveItem(){
-        return itemStack.clone();
-    }
+    public CraftingRecipe getRecipe(Audience audience) {
 
-    @Override
-    public CraftingRecipe getRecipe() {
-
-        ShapedRecipe teamInvRecipe = new ShapedRecipe(key, giveItem());
+        ShapedRecipe teamInvRecipe = new ShapedRecipe(key, giveItem(audience));
         teamInvRecipe.shape("ABA","BCB","ABA");
         teamInvRecipe.setIngredient('A', Material.DIAMOND);
         teamInvRecipe.setIngredient('B', Material.IRON_INGOT);

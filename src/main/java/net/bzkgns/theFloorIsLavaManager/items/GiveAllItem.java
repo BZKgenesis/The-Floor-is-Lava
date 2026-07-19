@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
 
 public class GiveAllItem extends CustomItem{
     public GiveAllItem() {
@@ -15,13 +15,7 @@ public class GiveAllItem extends CustomItem{
     }
 
     @Override
-    public ItemStack giveItem() {
-        return itemStack.clone();
-    }
-
-
-    @Override
-    public CraftingRecipe getRecipe() {
+    public CraftingRecipe getRecipe(Audience audience) {
         return null;
     }
 }

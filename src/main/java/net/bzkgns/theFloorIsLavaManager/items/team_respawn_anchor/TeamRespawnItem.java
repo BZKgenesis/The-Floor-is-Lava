@@ -1,9 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor;
 
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 
 import java.util.List;
@@ -20,14 +20,9 @@ public class TeamRespawnItem extends CustomItem {
     }
 
     @Override
-    public ItemStack giveItem() {
-        return itemStack.clone();
-    }
+    public CraftingRecipe getRecipe(Audience audience) {
 
-    @Override
-    public CraftingRecipe getRecipe() {
-
-        ShapedRecipe teamRespawnAnchorRecipe = new ShapedRecipe(key, giveItem());
+        ShapedRecipe teamRespawnAnchorRecipe = new ShapedRecipe(key, giveItem(audience));
         teamRespawnAnchorRecipe.shape("ABA","BCB","ABA");
         teamRespawnAnchorRecipe.setIngredient('A', Material.DIAMOND);
         teamRespawnAnchorRecipe.setIngredient('B', Material.OBSIDIAN);

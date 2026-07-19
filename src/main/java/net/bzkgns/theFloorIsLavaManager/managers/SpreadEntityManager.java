@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
+import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
@@ -15,7 +16,7 @@ public class SpreadEntityManager {
 
     private final Random random = new Random();
 
-    public <T extends Entity> boolean spread(
+    public <T extends Entity> Map<UUID, Location> spread(
             Collection<T> entities,
             Location center,
             double maxRadius,
@@ -34,19 +35,20 @@ public class SpreadEntityManager {
         );
 
         if (positions.size() != groups.size()) {
-            return false;
+            return null;
         }
-
+        Map<UUID, Location> finalPositions = new HashMap<>();
         for (int i = 0; i < groups.size(); i++) {
             Location pos = positions.get(i);
 
             for (Entity player : groups.get(i)) {
-                player.teleport(pos);
+                finalPositions.put(player.getUniqueId(), pos);
             }
         }
 
-        return true;
+        return finalPositions;
     }
+
     private <T extends Entity> List<List<T>> createGroups(
             Collection<T> entities,
             boolean teams
@@ -77,6 +79,7 @@ public class SpreadEntityManager {
 
         return new ArrayList<>(map.values());
     }
+
     private List<Location> generatePositions(
             int amount,
             Location center,
@@ -84,26 +87,16 @@ public class SpreadEntityManager {
             double minDistance,
             int maxY
     ) {
-
         List<Location> result = new ArrayList<>();
-
         int attempts = 10000;
 
-
-        while(result.size() < amount && attempts-- > 0) {
+        while (result.size() < amount && attempts-- > 0) {
 
             double angle = random.nextDouble() * Math.PI * 2;
             double distance = random.nextDouble() * radius;
 
-
-            double x =
-                    center.getX()
-                            + Math.cos(angle) * distance;
-
-            double z =
-                    center.getZ()
-                            + Math.sin(angle) * distance;
-
+            double x = center.getX() + Math.cos(angle) * distance;
+            double z = center.getZ() + Math.sin(angle) * distance;
 
             Location loc = findSurface(
                     center.getWorld(),
@@ -112,28 +105,23 @@ public class SpreadEntityManager {
                     maxY
             );
 
-
-            if(loc == null)
+            if (loc == null)
                 continue;
 
-
             boolean valid = true;
-
-            for(Location other : result) {
-                if(other.distance(loc) < minDistance) {
+            for (Location other : result) {
+                if (other.distance(loc) < minDistance) {
                     valid = false;
                     break;
                 }
             }
 
-
-            if(valid)
+            if (valid)
                 result.add(loc);
         }
-
-
         return result;
     }
+
     private Location findSurface(World world, double x, double z, int maxY) {
         int bx = (int) Math.floor(x);
         int bz = (int) Math.floor(z);
@@ -141,9 +129,8 @@ public class SpreadEntityManager {
         int y = world.getHighestBlockYAt(
                 bx,
                 bz,
-                HeightMap.WORLD_SURFACE
+                HeightMap.MOTION_BLOCKING_NO_LEAVES
         );
-
         for (int currentY = y; currentY > world.getMinHeight(); currentY--) {
 
             Block ground = world.getBlockAt(bx, currentY, bz);
@@ -153,13 +140,11 @@ public class SpreadEntityManager {
             if (currentY > maxY) {
                 break;
             }
-
             // Bloc sur lequel on peut marcher
             if (ground.getType().isSolid()
                     && !ground.isLiquid()
-                    && above.isPassable() && !above.isLiquid()
-                    && above2.isPassable() && !above2.isLiquid()) {
-
+                    && above.isPassable() && !above.isLiquid() && !BlockUtils.isWaterlogged(above)
+                    && above2.isPassable() && !above2.isLiquid() && !BlockUtils.isWaterlogged(above2)) {
                 return new Location(
                         world,
                         bx + 0.5,
@@ -168,7 +153,6 @@ public class SpreadEntityManager {
                 );
             }
         }
-
         return null;
     }
 }

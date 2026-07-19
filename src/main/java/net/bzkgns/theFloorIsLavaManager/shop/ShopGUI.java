@@ -65,7 +65,7 @@ public class ShopGUI implements Listener {
         RECIPES.clear();
         TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
-        for (String recipe_key : ItemManager.getAllCraftableItemKeys()){
+        for (String recipe_key : ItemManager.getAllCraftableItemKeys(Bukkit.getServer())){
             //plugin.getLogger().info("recipe : "+recipe_key);
             NamespacedKey key = new NamespacedKey(plugin, recipe_key);
             Recipe recipe = Bukkit.getRecipe(key);
@@ -120,7 +120,7 @@ public class ShopGUI implements Listener {
             if (start + i >= RECIPES.size()) break;
 
             ShopRecipe recipe = RECIPES.get(start + i);
-            ItemStack display = recipe.result().clone();
+            ItemStack display = recipe.result(p).clone();
             List<Component> display_lore = display.lore();
             if (display_lore == null) display_lore = new ArrayList<>();
             display_lore.add(Messages.component(p, "gui.shop.click_to_exchange"));

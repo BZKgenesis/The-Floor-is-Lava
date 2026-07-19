@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class ConfigManager<T extends ConfigSection<T>> {
 
+    private boolean hasBeenModified = false;
+
     private final T config;
 
     private final File configFile;
@@ -98,12 +100,13 @@ public class ConfigManager<T extends ConfigSection<T>> {
 
         if (configKey == null)
             throw new IllegalArgumentException("Unknown key " + key);
-
+        hasBeenModified = true;
         configKey.setFromString(config, value);
     }
 
     @SuppressWarnings("unused")
     public void load(FileConfiguration fileConfig) {
+        hasBeenModified = false;
 
         for (ConfigKey<T, ?> key : keys.values()) {
             loadKey(fileConfig, key);
@@ -148,6 +151,7 @@ public class ConfigManager<T extends ConfigSection<T>> {
 
     private void saveToFile(File file) {
         FileConfiguration yaml = new YamlConfiguration();
+        hasBeenModified = false;
 
         save(yaml);
 
@@ -163,6 +167,7 @@ public class ConfigManager<T extends ConfigSection<T>> {
 
     public void loadFromFile(File file) {
         FileConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        hasBeenModified = false;
 
         load(yaml);
     }
@@ -173,5 +178,9 @@ public class ConfigManager<T extends ConfigSection<T>> {
 
     public void loadConfig() {
         loadFromFile(configFile);
+    }
+
+    public boolean hasBeenModified() {
+        return hasBeenModified;
     }
 }

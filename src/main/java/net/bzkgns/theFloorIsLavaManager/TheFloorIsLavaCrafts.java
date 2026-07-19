@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager;
 
 import net.bzkgns.theFloorIsLavaManager.items.*;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.*;
@@ -12,7 +13,7 @@ public class TheFloorIsLavaCrafts {
 
     public void setCrafts(Plugin plugin){
 
-        for (CraftingRecipe craft : ItemManager.getAllCraftingRecipes()){
+        for (CraftingRecipe craft : ItemManager.getAllCraftingRecipes(Bukkit.getServer())){
             plugin.getServer().addRecipe(craft);
         }
 

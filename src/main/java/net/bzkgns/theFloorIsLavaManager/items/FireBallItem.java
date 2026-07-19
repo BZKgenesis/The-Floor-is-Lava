@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
@@ -25,7 +26,7 @@ public class FireBallItem extends CustomItem {
     }
 
     @Override
-    public ItemStack giveItem() {
+    public ItemStack giveItem(Audience audience) {
         Plugin firebalPlugin = Bukkit.getPluginManager().getPlugin("ThrowableFireballs");
         if (firebalPlugin == null) {
             Bukkit.getLogger().warning("ThrowableFireballs plugin not found. Fireball item will not be created.");
@@ -54,8 +55,8 @@ public class FireBallItem extends CustomItem {
     }
 
     @Override
-    public CraftingRecipe getRecipe() {
-        ItemStack fireballItem = giveItem();
+    public CraftingRecipe getRecipe(Audience audience) {
+        ItemStack fireballItem = giveItem(audience);
         if (fireballItem.getType() == Material.AIR) {
             return null; // Return null if the item is not created
         }

@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 
@@ -20,13 +20,8 @@ public class SnowballPlateItem extends CustomItem {
     }
 
     @Override
-    public ItemStack giveItem(){
-        return itemStack.clone();
-    }
-
-    @Override
-    public CraftingRecipe getRecipe() {
-        ShapedRecipe snowballPlateRecipe = new ShapedRecipe(key, giveItem());
+    public CraftingRecipe getRecipe(Audience audience) {
+        ShapedRecipe snowballPlateRecipe = new ShapedRecipe(key, giveItem(audience));
         snowballPlateRecipe.shape(" A ","ABA"," A ");
         snowballPlateRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(WOOLS_MATERIALS));
         snowballPlateRecipe.setIngredient('B', Material.IRON_INGOT);

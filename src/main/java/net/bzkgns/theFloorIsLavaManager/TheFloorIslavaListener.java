@@ -32,6 +32,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -92,8 +93,8 @@ public class TheFloorIslavaListener implements Listener {
         switch (plugin.getGameManager().getState()){
             case LOBBY -> {
                 GameManager.initLobbyPlayer(event.getPlayer());
-                event.getPlayer().give(new TeamManagerItem().giveItem());
-                event.getPlayer().give(new GiveAllItem().giveItem());
+                event.getPlayer().give(new TeamManagerItem().giveItem(event.getPlayer()));
+                event.getPlayer().give(new GiveAllItem().giveItem(event.getPlayer()));
             }
             case RUNNING -> {
                 event.getPlayer().setAllowFlight(false);
@@ -211,6 +212,20 @@ public class TheFloorIslavaListener implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void OnCraft(CraftItemEvent event){
+        if (event.getWhoClicked() instanceof Player player){
+            if (event.getCurrentItem() == null) return;
+            CustomItem customItem = ItemManager.getAssociatedCustomItem(event.getCurrentItem());
+            if (customItem != null){
+                ItemStack newItem = customItem.giveItem(player);
+                newItem.setAmount(event.getCurrentItem().getAmount());
+                event.setCurrentItem(newItem);
+            }
+        }
+    }
+
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         plugin.getLogger().info("OnDeath with respawn");

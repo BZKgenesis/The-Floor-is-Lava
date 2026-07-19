@@ -1,9 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.items.popup_tower;
 
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 
@@ -21,15 +21,10 @@ public class PopupTowerItem extends CustomItem {
         );
     }
 
-    @Override
-    public ItemStack giveItem(){
-
-        return itemStack.clone();
-    }
 
     @Override
-    public CraftingRecipe getRecipe() {
-        ShapedRecipe popupTowerRecipe = new ShapedRecipe(key, giveItem());
+    public CraftingRecipe getRecipe(Audience audience) {
+        ShapedRecipe popupTowerRecipe = new ShapedRecipe(key, giveItem(audience));
         popupTowerRecipe.shape("ABA","BCB","ABA");
         popupTowerRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(WOOLS_MATERIALS));
         popupTowerRecipe.setIngredient('B', Material.IRON_INGOT);

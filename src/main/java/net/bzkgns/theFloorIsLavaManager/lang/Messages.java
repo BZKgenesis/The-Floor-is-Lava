@@ -31,12 +31,21 @@ public final class Messages {
 
     }
 
+    public static void sendPing(Audience audience,
+                            String key,
+                            TagResolver... placeholders){
+        if (audience instanceof Player player) {
+            player.playSound(player.getLocation(), "minecraft:block.note_block.bell", 1.0f, 1.0f);
+        }
+        send(audience, key, placeholders);
+
+    }
+
     public static void send(Audience audience,
                             String key,
                             TagResolver... placeholders) {
 
         audience.sendMessage(component(audience, key, placeholders));
-
     }
 
     public static void actionBar(Player player,

@@ -1,10 +1,10 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 
@@ -29,14 +29,10 @@ public class EggBridgeItem extends CustomItem {
 
     }
 
-    @Override
-    public ItemStack giveItem(){
-        return itemStack.clone();
-    }
 
     @Override
-    public CraftingRecipe getRecipe() {
-        ShapedRecipe eggBridgeRecipe = new ShapedRecipe(key, giveItem());
+    public CraftingRecipe getRecipe(Audience audience) {
+        ShapedRecipe eggBridgeRecipe = new ShapedRecipe(key, giveItem(audience));
         eggBridgeRecipe.shape("AAA","ABA","AAA");
         eggBridgeRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(WOOLS_MATERIALS));
         eggBridgeRecipe.setIngredient('B', new RecipeChoice.MaterialChoice(RESOURCE_MATERIALS));

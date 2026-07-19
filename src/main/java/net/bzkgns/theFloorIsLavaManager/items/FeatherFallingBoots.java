@@ -4,6 +4,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -28,8 +29,8 @@ public class FeatherFallingBoots extends CustomItem{
     }
 
     @Override
-    public ItemStack giveItem() {
-        ItemStack item = itemStack.clone();
+    public ItemStack giveItem(Audience audience) {
+        ItemStack item = createBaseItemStack(audience);
         item.setData(
                 DataComponentTypes.ATTRIBUTE_MODIFIERS,
                 ItemAttributeModifiers.itemAttributes().addModifier(
@@ -45,8 +46,8 @@ public class FeatherFallingBoots extends CustomItem{
     }
 
     @Override
-    public CraftingRecipe getRecipe() {
-        ShapedRecipe eggBridgeRecipe = new ShapedRecipe(key, giveItem());
+    public CraftingRecipe getRecipe(Audience audience) {
+        ShapedRecipe eggBridgeRecipe = new ShapedRecipe(key, giveItem(audience));
         eggBridgeRecipe.shape("A A","ABA");
         eggBridgeRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(Material.IRON_INGOT));
         eggBridgeRecipe.setIngredient('B', new RecipeChoice.MaterialChoice(RESOURCE_MATERIALS));

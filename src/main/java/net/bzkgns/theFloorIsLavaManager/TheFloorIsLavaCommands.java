@@ -134,7 +134,7 @@ public class TheFloorIsLavaCommands {
                 ).executes(ctx -> {
                     String itemKey = StringArgumentType.getString(ctx, "item_key");
                     if (ctx.getSource().getExecutor() instanceof Player player && ItemManager.getAllItemKeys().contains(itemKey)) {
-                        player.give(ItemManager.getItemByKey(itemKey).giveItem());
+                        player.give(ItemManager.getItemByKey(itemKey).giveItem(player));
                     } else {
                         Messages.send(ctx.getSource().getSender(), "error.unknown_item", Placeholder.unparsed("item_key", itemKey));
                     }
@@ -261,6 +261,9 @@ public class TheFloorIsLavaCommands {
     }
 
     private static int resetWorldRandomCommande(CommandContext<CommandSourceStack> ctx, long seed, TheFloorIsLavaManager plugin){
+        if (ConfigRegistry.getConfigManager("game").hasBeenModified()){
+            Messages.broadcastOp("info.world_reset_random_warning");
+        }
 
         if (seed == 0){
             seed = System.currentTimeMillis();

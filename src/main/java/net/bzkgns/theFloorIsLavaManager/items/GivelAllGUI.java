@@ -21,18 +21,18 @@ public class GivelAllGUI implements Listener {
 
     private static final int SIZE = 54;
 
-    private static final ItemStack[] AVAILABLE_ITEMS = new ItemStack[]{
-            new ShopItem().giveItem(),
-            new BatteItem().giveItem(),
-            new CiseauxItem().giveItem(),
-            new EggBridgeItem().giveItem(),
-            new FireBallItem().giveItem(),
-            new SnowballPlateItem().giveItem(),
-            new PopupTowerItem().giveItem(),
-            new TeamRespawnItem().giveItem(),
-            new TeamInventoryItem().giveItem(),
-            new InfiniteWoolItem().giveItem(),
-            new FeatherFallingBoots().giveItem()
+    private static final CustomItem[] AVAILABLE_ITEMS = new CustomItem[]{
+            new ShopItem(),
+            new BatteItem(),
+            new CiseauxItem(),
+            new EggBridgeItem(),
+            new FireBallItem(),
+            new SnowballPlateItem(),
+            new PopupTowerItem(),
+            new TeamRespawnItem(),
+            new TeamInventoryItem(),
+            new InfiniteWoolItem(),
+            new FeatherFallingBoots()
     };
 
     public static void open(Player p) {
@@ -44,7 +44,7 @@ public class GivelAllGUI implements Listener {
             //noinspection ConstantValue
             if (i >= SIZE)
                 break;
-            inv.setItem(i, AVAILABLE_ITEMS[i]);
+            inv.setItem(i, AVAILABLE_ITEMS[i].giveItem(p));
         }
         p.openInventory(inv);
     }
