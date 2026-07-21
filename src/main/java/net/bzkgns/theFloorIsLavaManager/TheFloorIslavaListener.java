@@ -2,7 +2,8 @@ package net.bzkgns.theFloorIsLavaManager;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.bzkgns.theFloorIsLavaManager.items.*;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.items.items.*;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
@@ -25,6 +26,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -133,10 +135,22 @@ public class TheFloorIslavaListener implements Listener {
 
     @EventHandler
     public void onPlaced(BlockPlaceEvent event){
+        if (!BlockUtils.canPlaceBlock(event.getBlockPlaced().getLocation())) {
+            event.setCancelled(true);
+            return;
+        }
         Player player = event.getPlayer();
         Block block = event.getBlockPlaced();
         if (block.getType().toString().endsWith("WOOL")){
             block.setType(getWoolBlockByPlayer(player));
+        }
+    }
+
+
+    @EventHandler
+    public void onBroke(BlockBreakEvent event){
+        if (!BlockUtils.canPlaceBlock(event.getBlock().getLocation())) {
+            event.setCancelled(true);
         }
     }
 
@@ -306,6 +320,7 @@ public class TheFloorIslavaListener implements Listener {
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         player.teleport(respawnPos);
                         player.setGameMode(GameMode.SURVIVAL);
+                        player.setAllowFlight(true);
                     });
                     return;
                 }
@@ -313,12 +328,14 @@ public class TheFloorIslavaListener implements Listener {
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         player.teleport(deathLocation);
                         player.setGameMode(GameMode.SURVIVAL);
+                        player.setAllowFlight(true);
                     });
                     return;
                 }
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getLobbySpawnLocation());
                     player.setGameMode(GameMode.SURVIVAL);
+                    player.setAllowFlight(true);
                 });
             }
             case RUNNING  -> {

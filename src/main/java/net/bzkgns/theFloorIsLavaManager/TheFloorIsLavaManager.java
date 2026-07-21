@@ -7,7 +7,11 @@ import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
-import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryListener;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.InfiniteWool;
+import net.bzkgns.theFloorIsLavaManager.items.gui.GivelAllGUI;
+import net.bzkgns.theFloorIsLavaManager.items.items.*;
+import net.bzkgns.theFloorIsLavaManager.listener.FireBallCustomListener;
+import net.bzkgns.theFloorIsLavaManager.listener.TeamInventoryListener;
 import net.bzkgns.theFloorIsLavaManager.kits.KitChoiceGUI;
 import net.bzkgns.theFloorIsLavaManager.kits.KitCommands;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
@@ -15,11 +19,11 @@ import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.items.*;
-import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerItem;
-import net.bzkgns.theFloorIsLavaManager.items.popup_tower.PopupTowerListener;
-import net.bzkgns.theFloorIsLavaManager.items.team_inventory.TeamInventoryItem;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnItem;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnListener;
+import net.bzkgns.theFloorIsLavaManager.items.items.PopupTowerItem;
+import net.bzkgns.theFloorIsLavaManager.listener.PopupTowerListener;
+import net.bzkgns.theFloorIsLavaManager.items.items.TeamInventoryItem;
+import net.bzkgns.theFloorIsLavaManager.items.items.TeamRespawnItem;
+import net.bzkgns.theFloorIsLavaManager.listener.TeamRespawnListener;
 import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
 import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.DatabaseManager;
@@ -100,7 +104,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new TeamManagerItem(),
                 new GiveAllItem(),
                 new InfiniteWoolItem(),
-                new FeatherFallingBoots()
+                new FeatherFallingBootsItem(),
+                new FireBallCustomItem()
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
@@ -128,6 +133,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
         getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
         getServer().getPluginManager().registerEvents(new KitChoiceGUI(), this);
+        getServer().getPluginManager().registerEvents(new FireBallCustomListener(), this);
 
         TeamManager.getInstance().clearTeams();
 
@@ -208,6 +214,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             throw new RuntimeException(e);
         }
     }
+
+
 
 
     public double getFallDamageReduction(){

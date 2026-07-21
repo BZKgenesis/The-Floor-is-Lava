@@ -155,7 +155,7 @@ public class WorldManager {
         StructureManager manager = Bukkit.getStructureManager();
         spawnStructure = null;
 
-        try (InputStream structFile = plugin.getResource("tfl_spawn.nbt")) {
+        try (InputStream structFile = plugin.getResource("structures/tfl_spawn.nbt")) {
             if (structFile != null) {
                 spawnStructure = manager.loadStructure(structFile);
             }
@@ -187,7 +187,7 @@ public class WorldManager {
 
         if (spawnStructure == null) {
             StructureManager manager = Bukkit.getStructureManager();
-            try (InputStream structFile = plugin.getResource("tfl_spawn.nbt")) {
+            try (InputStream structFile = plugin.getResource("structures/tfl_spawn.nbt")) {
                 if (structFile != null) {
                     spawnStructure = manager.loadStructure(structFile);
                 }
@@ -211,7 +211,7 @@ public class WorldManager {
 
 
 
-    public void placeStructureAtLobby() {
+    public void placeStructuresAtLobby() {
         World world = getLobbyWorld();
         world.getNearbyEntities(new BoundingBox(-17,-3,-17,17,15,17))
                 .forEach(entity -> {
@@ -225,7 +225,7 @@ public class WorldManager {
         Structure lobbySpawnStructure = null;
 
         StructureManager manager = Bukkit.getStructureManager();
-        try (InputStream structFile = plugin.getResource("tfl_spawn_lobby.nbt")) {
+        try (InputStream structFile = plugin.getResource("structures/tfl_spawn_lobby.nbt")) {
             if (structFile != null) {
                 lobbySpawnStructure = manager.loadStructure(structFile);
             }
@@ -246,6 +246,105 @@ public class WorldManager {
                 1f,
                 new Random()
         );
+        placeRandomCubes(manager);
+    }
+
+    private List<Location> generatePositions(float spacing, int radius, int spawnRadius) {
+        Random random = new Random();
+
+        World world = getLobbyWorld();
+        Location spawn = getLobbySpawnLocation();
+
+        List<Location> candidates = new ArrayList<>();
+
+        int cells = (int) Math.ceil(radius / spacing);
+
+        for (int gx = -cells; gx <= cells; gx++) {
+            for (int gz = -cells; gz <= cells; gz++) {
+
+                double x = gx * spacing;
+                double z = gz * spacing;
+
+
+                x += (random.nextDouble() - 0.5) * spacing * 0.6;
+                z += (random.nextDouble() - 0.5) * spacing * 0.6;
+
+                // Hors du disque
+                if (x * x + z * z > radius * radius)
+                    continue;
+
+                Location loc = new Location(world, x, spawn.getY(), z);
+
+                // Rayon interdit autour du spawn
+                if (loc.distanceSquared(spawn) < spawnRadius * spawnRadius)
+                    continue;
+
+                loc.setY(world.getHighestBlockYAt(loc));
+
+                candidates.add(loc);
+            }
+        }
+
+        Collections.shuffle(candidates, random);
+//
+//        if (candidates.size() > nbPos) {
+//            return new ArrayList<>(candidates.subList(0, nbPos));
+//        }
+
+        return candidates;
+    }
+
+    private void placeRandomCubes(StructureManager manager){
+        List<Structure> smallCubeStructures = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            try (InputStream structFile = plugin.getResource("structures/small/cube_" + i + ".nbt")) {
+                if (structFile != null) {
+                    smallCubeStructures.add(manager.loadStructure(structFile));
+                }
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "Impossible de charger la structure de cube " + i + ".", e);
+            }
+        }
+
+        List<Structure> bigCubeStructures = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            try (InputStream structFile = plugin.getResource("structures/big/cube_" + i + ".nbt")) {
+                if (structFile != null) {
+                    bigCubeStructures.add(manager.loadStructure(structFile));
+                }
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "Impossible de charger la structure de cube " + i + ".", e);
+            }
+        }
+
+        for (Location pos : generatePositions(7, 100, 40)) {
+            Structure randomCube = smallCubeStructures.get(new Random().nextInt(smallCubeStructures.size()));
+            StructureRotation rotation = StructureRotation.values()[new Random().nextInt(StructureRotation.values().length)];
+            randomCube.place(
+                    pos,
+                    false,
+                    rotation,
+                    Mirror.NONE,
+                    0,
+                    1f,
+                    new Random()
+            );
+        }
+
+        for (Location pos : generatePositions(40, 200, 80)) {
+            Structure randomCube = bigCubeStructures.get(new Random().nextInt(bigCubeStructures.size()));
+            StructureRotation rotation = StructureRotation.values()[new Random().nextInt(StructureRotation.values().length)];
+            randomCube.place(
+                    pos,
+                    true,
+                    rotation,
+                    Mirror.NONE,
+                    0,
+                    1f,
+                    new Random()
+            );
+        }
+
     }
 
     private static void copyDirectory(Path source, Path destination) throws IOException {
@@ -617,7 +716,7 @@ public class WorldManager {
         Location spawn = new Location(lobby, 0.5, 0, 0.5);
         lobby.setSpawnLocation(spawn);
 
-        placeStructureAtLobby();
+        placeStructuresAtLobby();
 
         plugin.getLogger().info("Monde lobby charge !");
     }

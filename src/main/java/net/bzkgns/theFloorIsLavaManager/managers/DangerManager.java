@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
 import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfigKeys;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.config.danger.DangerConfig;

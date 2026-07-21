@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.teams;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

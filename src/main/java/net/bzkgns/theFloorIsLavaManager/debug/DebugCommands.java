@@ -6,7 +6,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
-import net.bzkgns.theFloorIsLavaManager.items.team_respawn_anchor.TeamRespawnManager;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitData;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;

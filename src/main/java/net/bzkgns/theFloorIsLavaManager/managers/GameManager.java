@@ -8,7 +8,7 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
-import net.bzkgns.theFloorIsLavaManager.items.ShopItem;
+import net.bzkgns.theFloorIsLavaManager.items.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;

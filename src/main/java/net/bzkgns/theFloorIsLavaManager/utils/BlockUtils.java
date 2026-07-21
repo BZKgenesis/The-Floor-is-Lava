@@ -1,9 +1,11 @@
 package net.bzkgns.theFloorIsLavaManager.utils;
 
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;
@@ -54,18 +56,29 @@ public class BlockUtils {
     }
 
     public static Material getWoolBlockByNamedTextColor(NamedTextColor color){
-
         List<TextColor> keys = blockColor.keySet().stream().toList();
         return blockColor.get(TextColor.nearestColorTo(keys,color));
-    }
-
-    public static boolean canPlaceBlock(BlockPos pos){
-        return pos.getY() <= 278 || pos.getY() >= 297 || abs(pos.getX()) >= 15 || abs(pos.getZ()) >= 15;
     }
 
     public static boolean isWaterlogged(Block block) {
         return block.getBlockData() instanceof Waterlogged waterlogged
                 && waterlogged.isWaterlogged();
     }
+
+    public static boolean canPlaceBlock(Location pos){
+        int SIZE = 17;
+        int HEIGHT = 18;
+        WorldManager manager =TheFloorIsLavaManager.getInstance().getWorldManager();
+        if (pos.getWorld().equals(manager.getGameWorld())){
+            int Y_LEVEL = 278;
+            return pos.getY() <= Y_LEVEL || pos.getY() >= Y_LEVEL+HEIGHT || abs(pos.getX()) >= SIZE || abs(pos.getZ()) >= SIZE;
+        } else if (pos.getWorld().equals(manager.getLobbyWorld())) {
+            int Y_LEVEL = -1;
+            return pos.getY() <= Y_LEVEL || pos.getY() >= Y_LEVEL+HEIGHT || abs(pos.getX()) >= SIZE || abs(pos.getZ()) >= SIZE;
+        } else {
+            return true;
+        }
+    }
+
 
 }
