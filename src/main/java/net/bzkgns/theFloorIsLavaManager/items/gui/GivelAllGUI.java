@@ -28,14 +28,14 @@ public class GivelAllGUI implements Listener {
             new BatteItem(),
             new CiseauxItem(),
             new EggBridgeItem(),
-            new FireBallItem(),
             new SnowballPlateItem(),
             new PopupTowerItem(),
             new TeamRespawnItem(),
             new TeamInventoryItem(),
             new InfiniteWoolItem(),
             new FeatherFallingBootsItem(),
-            new FireBallCustomItem()
+            new FireBallCustomItem(),
+            new TntItem()
     };
 
     public static void open(Player p) {

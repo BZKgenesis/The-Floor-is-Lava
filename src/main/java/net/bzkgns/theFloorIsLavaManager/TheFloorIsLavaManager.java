@@ -10,8 +10,7 @@ import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.InfiniteWool;
 import net.bzkgns.theFloorIsLavaManager.items.gui.GivelAllGUI;
 import net.bzkgns.theFloorIsLavaManager.items.items.*;
-import net.bzkgns.theFloorIsLavaManager.listener.FireBallCustomListener;
-import net.bzkgns.theFloorIsLavaManager.listener.TeamInventoryListener;
+import net.bzkgns.theFloorIsLavaManager.listener.*;
 import net.bzkgns.theFloorIsLavaManager.kits.KitChoiceGUI;
 import net.bzkgns.theFloorIsLavaManager.kits.KitCommands;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
@@ -20,10 +19,8 @@ import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.items.PopupTowerItem;
-import net.bzkgns.theFloorIsLavaManager.listener.PopupTowerListener;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamRespawnItem;
-import net.bzkgns.theFloorIsLavaManager.listener.TeamRespawnListener;
 import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
 import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.DatabaseManager;
@@ -53,7 +50,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     public static final String GAME_WORLD = "tfl_game";
     public static final String MAPS_FOLDER = "TheFloorIsLava-maps";
 
-    public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "fireball", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
+    public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
 
     private GameManager gameManager;
     private ResourcePackManager resourcePackManager;
@@ -95,7 +92,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new BatteItem(),
                 new CiseauxItem(),
                 new EggBridgeItem(),
-                new FireBallItem(),
                 new PopupTowerItem(),
                 new ShopItem(),
                 new SnowballPlateItem(),
@@ -105,7 +101,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new GiveAllItem(),
                 new InfiniteWoolItem(),
                 new FeatherFallingBootsItem(),
-                new FireBallCustomItem()
+                new FireBallCustomItem(),
+                new TntItem()
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
@@ -134,6 +131,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
         getServer().getPluginManager().registerEvents(new KitChoiceGUI(), this);
         getServer().getPluginManager().registerEvents(new FireBallCustomListener(), this);
+        getServer().getPluginManager().registerEvents(new TntListener(), this);
 
         TeamManager.getInstance().clearTeams();
 

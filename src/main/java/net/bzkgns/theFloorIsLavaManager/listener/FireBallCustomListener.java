@@ -4,19 +4,24 @@ import net.bzkgns.theFloorIsLavaManager.items.items.FireBallCustomItem;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 
 public class FireBallCustomListener implements Listener {
     private static final int FIREBALL_COOLDOWN = 20;
     private static final float FIREBALL_POWER = 2.0f;
     private static final float FIREBALL_SPEED = 1.0f;
+    private static final float FIREBALL_DAMAGE_REDUCTION = 0.25f;
     private static final boolean FIREBALL_PLACE_FIRE = false;
     @EventHandler
     public void onFireBallUse(PlayerInteractEvent event) {
@@ -73,7 +78,42 @@ public class FireBallCustomListener implements Listener {
         if (victimTeam != null && victimTeam.equals(shooterTeam))
             return;
 
+
+
         // Réduit les dégâts à 25 %
-        event.setDamage(event.getDamage() * 0.25);
+        event.setDamage(event.getDamage() * FIREBALL_DAMAGE_REDUCTION);
+    }
+
+    @EventHandler
+    public void onFireballExplode(EntityExplodeEvent event) {
+
+        if (!(event.getEntity() instanceof Fireball fireball))
+            return;
+
+        Location explosion = fireball.getLocation();
+
+        for (Entity entity : explosion.getWorld().getNearbyEntities(
+                explosion,
+                5,
+                5,
+                5
+        )) {
+
+            if (!(entity instanceof Player player))
+                continue;
+
+
+            Vector knockback = player.getLocation()
+                    .toVector()
+                    .subtract(explosion.toVector())
+                    .normalize()
+                    .multiply(2.5);
+
+            knockback.setY(0.8);
+
+            player.setVelocity(
+                    player.getVelocity().add(knockback)
+            );
+        }
     }
 }

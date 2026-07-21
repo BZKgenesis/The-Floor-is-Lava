@@ -254,6 +254,9 @@ items:
   team_manager:
     display_name: "Team Manager"
     lore: "Allows you to manage your team"
+  tnt:
+    display_name: "TnT"
+    lore: "Allows you to place a TnT block that explodes after a few seconds"
 
 config:
   game:

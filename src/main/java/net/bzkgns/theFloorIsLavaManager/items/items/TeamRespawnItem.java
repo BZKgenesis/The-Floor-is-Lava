@@ -12,7 +12,7 @@ import java.util.List;
 public class TeamRespawnItem extends CustomItem {
     public TeamRespawnItem() {
         super("team_respawn",
-                "items.team_respawn.display_name",
+                "items.team_respawn_anchor.display_name",
                 List.of("items.team_respawn_anchor.lore1", "items.team_respawn_anchor.lore2"),
                 Rarity.RARE,
                 TeamRespawnManager.respawnAnchorMaterial,

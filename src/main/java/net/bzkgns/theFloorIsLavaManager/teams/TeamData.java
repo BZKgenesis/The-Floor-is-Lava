@@ -78,4 +78,8 @@ public class TeamData {
     public Player getOwner() {
         return org.bukkit.Bukkit.getPlayer(owner);
     }
+
+    public Team getVanillaTeam() {
+        return vanillaTeam;
+    }
 }

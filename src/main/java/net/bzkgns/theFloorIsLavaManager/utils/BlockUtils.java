@@ -26,38 +26,67 @@ public class BlockUtils {
 
     public static final List<Material> WOOLS_MATERIALS = List.of(Material.WHITE_WOOL,Material.ORANGE_WOOL,Material.MAGENTA_WOOL,Material.LIGHT_BLUE_WOOL,Material.YELLOW_WOOL,Material.LIME_WOOL,Material.PINK_WOOL,Material.GRAY_WOOL,Material.LIGHT_GRAY_WOOL,Material.CYAN_WOOL,Material.PURPLE_WOOL,Material.BLUE_WOOL,Material.BROWN_WOOL,Material.GREEN_WOOL,Material.RED_WOOL,Material.BLACK_WOOL);
 
-    private static final HashMap<TextColor, Material> blockColor = new HashMap<>();
+    private static final HashMap<TextColor, Material> woolColor = new HashMap<>();
     static {
-        blockColor.put(TextColor.color(15000804), Material.WHITE_WOOL);
-        blockColor.put(TextColor.color(15367733), Material.ORANGE_WOOL);
-        blockColor.put(TextColor.color(12470729), Material.MAGENTA_WOOL);
-        blockColor.put(TextColor.color(6522834),  Material.LIGHT_BLUE_WOOL);
-        blockColor.put(TextColor.color(12760348), Material.YELLOW_WOOL);
-        blockColor.put(TextColor.color(3783214),  Material.LIME_WOOL);
-        blockColor.put(TextColor.color(14254489), Material.PINK_WOOL);
-        blockColor.put(TextColor.color(4276545),  Material.GRAY_WOOL);
-        blockColor.put(TextColor.color(10528679), Material.LIGHT_GRAY_WOOL);
-        blockColor.put(TextColor.color(2519441),  Material.CYAN_WOOL);
-        blockColor.put(TextColor.color(8271039),  Material.PURPLE_WOOL);
-        blockColor.put(TextColor.color(2437523),  Material.BLUE_WOOL);
-        blockColor.put(TextColor.color(5649180),  Material.BROWN_WOOL);
-        blockColor.put(TextColor.color(3558168),  Material.GREEN_WOOL);
-        blockColor.put(TextColor.color(10365735), Material.RED_WOOL);
-        blockColor.put(TextColor.color(1578004),  Material.BLACK_WOOL);
+        woolColor.put(TextColor.color(15000804), Material.WHITE_WOOL);
+        woolColor.put(TextColor.color(15367733), Material.ORANGE_WOOL);
+        woolColor.put(TextColor.color(12470729), Material.MAGENTA_WOOL);
+        woolColor.put(TextColor.color(6522834),  Material.LIGHT_BLUE_WOOL);
+        woolColor.put(TextColor.color(12760348), Material.YELLOW_WOOL);
+        woolColor.put(TextColor.color(3783214),  Material.LIME_WOOL);
+        woolColor.put(TextColor.color(14254489), Material.PINK_WOOL);
+        woolColor.put(TextColor.color(4276545),  Material.GRAY_WOOL);
+        woolColor.put(TextColor.color(10528679), Material.LIGHT_GRAY_WOOL);
+        woolColor.put(TextColor.color(2519441),  Material.CYAN_WOOL);
+        woolColor.put(TextColor.color(8271039),  Material.PURPLE_WOOL);
+        woolColor.put(TextColor.color(2437523),  Material.BLUE_WOOL);
+        woolColor.put(TextColor.color(5649180),  Material.BROWN_WOOL);
+        woolColor.put(TextColor.color(3558168),  Material.GREEN_WOOL);
+        woolColor.put(TextColor.color(10365735), Material.RED_WOOL);
+        woolColor.put(TextColor.color(1578004),  Material.BLACK_WOOL);
+    }
+
+    private static final HashMap<TextColor, Material> concreteColor = new HashMap<>();
+    static {
+        concreteColor.put(TextColor.color(15000804), Material.WHITE_CONCRETE);
+        concreteColor.put(TextColor.color(15367733), Material.ORANGE_CONCRETE);
+        concreteColor.put(TextColor.color(12470729), Material.MAGENTA_CONCRETE);
+        concreteColor.put(TextColor.color(6522834),  Material.LIGHT_BLUE_CONCRETE);
+        concreteColor.put(TextColor.color(12760348), Material.YELLOW_CONCRETE);
+        concreteColor.put(TextColor.color(3783214),  Material.LIME_CONCRETE);
+        concreteColor.put(TextColor.color(14254489), Material.PINK_CONCRETE);
+        concreteColor.put(TextColor.color(4276545),  Material.GRAY_CONCRETE);
+        concreteColor.put(TextColor.color(10528679), Material.LIGHT_GRAY_CONCRETE);
+        concreteColor.put(TextColor.color(2519441),  Material.CYAN_CONCRETE);
+        concreteColor.put(TextColor.color(8271039),  Material.PURPLE_CONCRETE);
+        concreteColor.put(TextColor.color(2437523),  Material.BLUE_CONCRETE);
+        concreteColor.put(TextColor.color(5649180),  Material.BROWN_CONCRETE);
+        concreteColor.put(TextColor.color(3558168),  Material.GREEN_CONCRETE);
+        concreteColor.put(TextColor.color(10365735), Material.RED_CONCRETE);
+        concreteColor.put(TextColor.color(1578004),  Material.BLACK_CONCRETE);
     }
     public static Material getWoolBlockByPlayer(Player p){
         Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team = board.getEntryTeam(p.getName());
         if (team != null){
-            List<TextColor> keys = blockColor.keySet().stream().toList();
-            return blockColor.get(TextColor.nearestColorTo(keys, team.color()));
+            List<TextColor> keys = woolColor.keySet().stream().toList();
+            return woolColor.get(TextColor.nearestColorTo(keys, team.color()));
+        }
+        return DEFAULT_WOOL_COLOR;
+    }
+    public static Material getConcreteBlockByPlayer(Player p){
+        Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+        Team team = board.getEntryTeam(p.getName());
+        if (team != null){
+            List<TextColor> keys = concreteColor.keySet().stream().toList();
+            return concreteColor.get(TextColor.nearestColorTo(keys, team.color()));
         }
         return DEFAULT_WOOL_COLOR;
     }
 
     public static Material getWoolBlockByNamedTextColor(NamedTextColor color){
-        List<TextColor> keys = blockColor.keySet().stream().toList();
-        return blockColor.get(TextColor.nearestColorTo(keys,color));
+        List<TextColor> keys = woolColor.keySet().stream().toList();
+        return woolColor.get(TextColor.nearestColorTo(keys,color));
     }
 
     public static boolean isWaterlogged(Block block) {

@@ -254,6 +254,9 @@ items:
   team_manager:
     display_name: "Gestionnaire d'équipe"
     lore: "Permet de gérer votre équipe"
+  tnt:
+    display_name: "TnT"
+    lore: "Permet de poser du TnT"
 
 config:
   game:
