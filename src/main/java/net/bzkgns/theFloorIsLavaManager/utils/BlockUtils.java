@@ -67,13 +67,13 @@ public class BlockUtils {
 
     public static boolean canPlaceBlock(Location pos){
         int SIZE = 17;
-        int HEIGHT = 18;
+        int HEIGHT = 19;
         WorldManager manager =TheFloorIsLavaManager.getInstance().getWorldManager();
         if (pos.getWorld().equals(manager.getGameWorld())){
-            int Y_LEVEL = 278;
+            int Y_LEVEL = 277;
             return pos.getY() <= Y_LEVEL || pos.getY() >= Y_LEVEL+HEIGHT || abs(pos.getX()) >= SIZE || abs(pos.getZ()) >= SIZE;
         } else if (pos.getWorld().equals(manager.getLobbyWorld())) {
-            int Y_LEVEL = -1;
+            int Y_LEVEL = -2;
             return pos.getY() <= Y_LEVEL || pos.getY() >= Y_LEVEL+HEIGHT || abs(pos.getX()) >= SIZE || abs(pos.getZ()) >= SIZE;
         } else {
             return true;

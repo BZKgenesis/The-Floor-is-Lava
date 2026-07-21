@@ -25,14 +25,8 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -161,6 +155,22 @@ public class TheFloorIslavaListener implements Listener {
         if (stack.getType().toString().endsWith("WOOL") && !(stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE) != null && Boolean.TRUE.equals(stack.getData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE)))){
             item.setItemStack(new ItemStack(Material.LIGHT_GRAY_WOOL, stack.getAmount()));
         }
+    }
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        filterProtectedBlocks(event.blockList());
+    }
+
+    @EventHandler
+    public void onBlockExplode(BlockExplodeEvent event) {
+        filterProtectedBlocks(event.blockList());
+    }
+
+    private void filterProtectedBlocks(List<Block> blocks) {
+
+        blocks.removeIf(block ->
+                !BlockUtils.canPlaceBlock(block.getLocation())
+        );
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
