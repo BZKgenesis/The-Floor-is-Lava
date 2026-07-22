@@ -22,6 +22,7 @@ import net.bzkgns.theFloorIsLavaManager.items.items.PopupTowerItem;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamRespawnItem;
 import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
+import net.bzkgns.theFloorIsLavaManager.sidebar.SidebarManager;
 import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.DatabaseManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticsManager;
@@ -57,6 +58,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     private WorldManager worldManager;
     private StatisticsManager statisticsManager;
     private DatabaseManager databaseManager;
+    private SidebarManager sidebarManager;
 
     public static boolean pvp;
 
@@ -67,6 +69,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        sidebarManager = new SidebarManager();
 
         databaseManager = new DatabaseManager();
         try {
@@ -215,6 +218,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         }
     }
 
+    public SidebarManager getSidebarManager(){
+        return sidebarManager;
+    }
 
 
 

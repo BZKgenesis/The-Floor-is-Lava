@@ -1,12 +1,15 @@
 package net.bzkgns.theFloorIsLavaManager;
 
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.DyedItemColor;
 import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
+import net.bzkgns.theFloorIsLavaManager.sidebar.provider.LobbySidebarProvider;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticType;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
@@ -44,6 +47,15 @@ public class TheFloorIslavaListener implements Listener {
     private final TheFloorIsLavaManager plugin;
 
     private final Map<UUID, Location> deathLocations = new HashMap<>();
+
+
+    private static final List<Material> DYABLE_ITEMS =
+            List.of(
+                    Material.LEATHER_HELMET,
+                    Material.LEATHER_CHESTPLATE,
+                    Material.LEATHER_LEGGINGS,
+                    Material.LEATHER_BOOTS
+            );
 
 
     public TheFloorIslavaListener(TheFloorIsLavaManager plugin) {
@@ -84,9 +96,10 @@ public class TheFloorIslavaListener implements Listener {
 
         switch (plugin.getGameManager().getState()){
             case LOBBY -> {
-                GameManager.initLobbyPlayer(event.getPlayer());
-                event.getPlayer().give(new TeamManagerItem().giveItem(event.getPlayer()));
-                event.getPlayer().give(new GiveAllItem().giveItem(event.getPlayer()));
+                GameManager.initLobbyPlayer(player);
+                player.give(new TeamManagerItem().giveItem(player));
+                player.give(new GiveAllItem().giveItem(player));
+                plugin.getSidebarManager().show(player, new LobbySidebarProvider());
             }
             case RUNNING -> {
                 event.getPlayer().setAllowFlight(false);
@@ -108,6 +121,22 @@ public class TheFloorIslavaListener implements Listener {
         discoverRecipes(event.getPlayer());
         if(event.getPlayer().getWorld().equals(plugin.getServer().getWorld("minecraft:overworld"))){
             Messages.send(event.getPlayer(), "error.not_here");
+        }
+    }
+
+
+    @EventHandler
+    public void onPlayerEquip(PlayerArmorChangeEvent event){
+        if (DYABLE_ITEMS.contains(event.getNewItem().getType())){
+            ItemStack armor = event.getNewItem();
+            Player player = event.getPlayer();
+            TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+            if (teamData != null){
+                armor.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor(Color.fromRGB(teamData.getColor().value())));
+            }else{
+                armor.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor(Color.fromRGB(Color.SILVER.asRGB())));
+            }
+            player.getInventory().setItem(event.getSlot(), armor);
         }
     }
 

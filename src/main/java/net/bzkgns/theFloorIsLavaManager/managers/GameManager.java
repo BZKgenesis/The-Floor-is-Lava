@@ -77,6 +77,7 @@ public class GameManager {
             TheFloorIsLavaManager.getInstance().getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + player.getName());
             return;
         }
+        TheFloorIsLavaManager.getInstance().getSidebarManager().hide(player);
         player.setHealth(healthAttribute.getValue());
         player.setFoodLevel(20);
         player.setSaturation(20);
@@ -89,6 +90,15 @@ public class GameManager {
     }
 
     public static void initLobbyPlayer(Player player) {
+        AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
+        if (healthAttribute == null) {
+            TheFloorIsLavaManager.getInstance().getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + player.getName());
+            return;
+        }
+        player.setHealth(healthAttribute.getValue());
+        player.setFoodLevel(20);
+        player.setSaturation(20);
+        player.setExhaustion(0);
         TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
         player.setGameMode(GameMode.SURVIVAL);
         player.teleport(plugin.getWorldManager().getLobbySpawnLocation());

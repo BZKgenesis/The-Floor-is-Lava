@@ -1,11 +1,14 @@
 package net.bzkgns.theFloorIsLavaManager.kits;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import org.bukkit.Material;
 import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -13,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class KitManager {
     private static KitManager instance;
     private final Map<String,KitData> kits = new HashMap<>();
@@ -37,35 +41,58 @@ public class KitManager {
         kits.put("default",
                 new KitData(
                         "default",
-                        "Default Kit"
+                        "Default Kit",
+                        List.of(
+                                new ItemStack(Material.LEATHER_LEGGINGS),
+                                new ItemStack(Material.LEATHER_BOOTS)),
+                        List.of()
                 )
         );
+        ItemStack pickaxe = new ItemStack(Material.IRON_PICKAXE);
+        pickaxe.setData(DataComponentTypes.ENCHANTMENTS,
+                ItemEnchantments.itemEnchantments()
+                        .add(Enchantment.EFFICIENCY, 3)
+                        .add(Enchantment.UNBREAKING, 1));
         kits.put("miner",
                 new KitData(
                         "miner",
                         "Miner Kit",
-                        List.of(new ItemStack(Material.IRON_HELMET),new ItemStack(Material.IRON_CHESTPLATE)),
-                        List.of( new ItemStack(Material.STONE, 64), new ItemStack(Material.BREAD,64)),
-                        List.of(),
-                        List.of("tfl_kit_miner"),
-                        List.of(
-                                new PotionEffect(PotionEffectType.HASTE, -1, 1, false, false, false)
-                        )
-                )
-        );
-        kits.put("sac_a_pv",
-                new KitData(
-                        "sac_a_pv",
-                        "Sac à PV Kit",
-                        List.of(new ItemStack(Material.IRON_HELMET),new ItemStack(Material.IRON_CHESTPLATE)),
-                        List.of( new ItemStack(Material.STONE, 64), new ItemStack(Material.BREAD,64)),
+                        List.of(new ItemStack(Material.IRON_HELMET),
+                                new ItemStack(Material.IRON_CHESTPLATE),
+                                new ItemStack(Material.LEATHER_LEGGINGS),
+                                new ItemStack(Material.LEATHER_BOOTS)),
+                        List.of( pickaxe, new ItemStack(Material.TORCH,64)),
                         List.of(
                                 new AttributeModifier(
                                         Objects.requireNonNull(Registry.ATTRIBUTE.getKey(Attribute.MAX_HEALTH)),
-                                        10.0,
+                                        -4.0,
                                         AttributeModifier.Operation.ADD_NUMBER
                                 )
+                        ),
+                        List.of("tfl_kit_miner"),
+                        List.of(
+                                new PotionEffect(PotionEffectType.HASTE, -1, 0, false, false, false)
                         )
+                )
+        );
+        kits.put("tank",
+                new KitData(
+                        "tank",
+                        "Sac à PV Kit",
+                        List.of(
+                                new ItemStack(Material.LEATHER_LEGGINGS),
+                                new ItemStack(Material.LEATHER_BOOTS)),
+                        List.of( new ItemStack(Material.IRON_SWORD, 1), new ItemStack(Material.BREAD,64)),
+                        List.of(
+                                new AttributeModifier(
+                                        Objects.requireNonNull(Registry.ATTRIBUTE.getKey(Attribute.MAX_HEALTH)),
+                                        5.0,
+                                        AttributeModifier.Operation.ADD_NUMBER
+                                )
+                        ),
+                        List.of("tfl_kit_"),
+                        List.of(new PotionEffect(PotionEffectType.SLOWNESS, -1, 0, false, false, false))
+
                 )
         );
     }
@@ -85,6 +112,12 @@ public class KitManager {
                 TheFloorIsLavaManager.getInstance().getLogger().severe("Default kit not found. Player " + player.getUniqueId() + " will not receive any kit.");
             }
         }
+
+        AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
+        if (healthAttribute == null) return;
+
+        player.setHealth(healthAttribute.getValue());
+
     }
 
     public void applyKitToPlayerAttributeOnly(Player player) {
@@ -161,6 +194,10 @@ public class KitManager {
                 clearPlayerKit(player);
             }
         }
+    }
+
+    public KitData getPlayerKit(Player player){
+        return playerKits.get(player.getUniqueId());
     }
 
     public List<String> getKitNames() {

@@ -166,7 +166,9 @@ public class TeamRespawnManager {
     public Location getPlayerTeamRespawnPosition(UUID playerUUID) {
         TeamData playerTeam = TeamManager.getInstance().getPlayerTeam(playerUUID);
         if (playerTeam != null) {
-            return getRespawnPoint(playerTeam.getId()).clone().add(.5, 1, .5); // Return the respawn point for the player's team, adjusted to be above the block
+            Location loc = getRespawnPoint(playerTeam.getId());
+            if (loc == null) return null;
+            return loc.clone().add(.5, 1, .5); // Return the respawn point for the player's team, adjusted to be above the block
 
         }
         return null; // Return null if the player is not in a team or no respawn point is set
