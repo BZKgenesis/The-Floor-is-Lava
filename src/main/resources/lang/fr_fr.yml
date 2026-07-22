@@ -257,6 +257,9 @@ items:
   tnt:
     display_name: "TnT"
     lore: "Permet de poser du TnT"
+  parachute:
+    display_name: "Parachute"
+    lore: "Permet de prévenir de chutes mortelles"
 
 config:
   game:

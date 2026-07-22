@@ -96,7 +96,7 @@ public class TntListener implements Listener {
                     PersistentDataType.STRING,
                     player.getUniqueId().toString());
 
-
+            tnt.setCustomNameVisible(true);
             tnt.setVelocity( new Vector(0,TNT_SPAWN_Y_VELOCITY,0) );
 
             TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());

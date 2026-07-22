@@ -14,7 +14,14 @@ public class DatabaseManager {
     private final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
     public void connect() throws SQLException {
-        File file = new File(plugin.getDataFolder(), "stats.db");
+
+        File folder = plugin.getDataFolder();
+
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        File file = new File(folder, "stats.db");
 
         connection = DriverManager.getConnection(
                 "jdbc:sqlite:" + file.getAbsolutePath()

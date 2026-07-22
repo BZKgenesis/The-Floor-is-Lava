@@ -102,7 +102,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new InfiniteWoolItem(),
                 new FeatherFallingBootsItem(),
                 new FireBallCustomItem(),
-                new TntItem()
+                new TntItem(),
+                new ParachuteItem()
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
@@ -132,6 +133,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new KitChoiceGUI(), this);
         getServer().getPluginManager().registerEvents(new FireBallCustomListener(), this);
         getServer().getPluginManager().registerEvents(new TntListener(), this);
+        getServer().getPluginManager().registerEvents(new ParachuteListener(), this);
 
         TeamManager.getInstance().clearTeams();
 

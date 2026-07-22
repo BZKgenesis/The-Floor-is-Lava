@@ -24,6 +24,8 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
@@ -83,6 +85,7 @@ public class GameManager {
         player.getInventory().setArmorContents(new ItemStack[0]);
         player.setGameMode(GameMode.SURVIVAL);
         player.setAllowFlight(false);
+        player.removePotionEffect(PotionEffectType.SATURATION);
     }
 
     public static void initLobbyPlayer(Player player) {
@@ -92,6 +95,7 @@ public class GameManager {
         player.setRespawnLocation(plugin.getWorldManager().getLobbySpawnLocation(), true);
         player.getInventory().clear();
         player.setAllowFlight(true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, -1, 1, false, false, false));
     }
 
 

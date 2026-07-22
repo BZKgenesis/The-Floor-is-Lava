@@ -257,6 +257,9 @@ items:
   tnt:
     display_name: "TnT"
     lore: "Allows you to place a TnT block that explodes after a few seconds"
+  parachute:
+    display_name: "Parachute"
+    lore: "Allows you to dodge deadly fall damage"
 
 config:
   game:

@@ -35,7 +35,8 @@ public class GivelAllGUI implements Listener {
             new InfiniteWoolItem(),
             new FeatherFallingBootsItem(),
             new FireBallCustomItem(),
-            new TntItem()
+            new TntItem(),
+            new ParachuteItem()
     };
 
     public static void open(Player p) {

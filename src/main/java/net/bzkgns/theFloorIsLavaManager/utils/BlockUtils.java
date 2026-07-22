@@ -22,6 +22,8 @@ public class BlockUtils {
 
     private static final Material DEFAULT_WOOL_COLOR = Material.LIGHT_GRAY_WOOL;
 
+    private static final Material DEFAULT_CONCRETE_COLOR = Material.LIGHT_GRAY_CONCRETE;
+
     public static final List<Material> RESOURCE_MATERIALS = List.of(Material.DIAMOND,Material.GOLD_INGOT,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.AMETHYST_SHARD);
 
     public static final List<Material> WOOLS_MATERIALS = List.of(Material.WHITE_WOOL,Material.ORANGE_WOOL,Material.MAGENTA_WOOL,Material.LIGHT_BLUE_WOOL,Material.YELLOW_WOOL,Material.LIME_WOOL,Material.PINK_WOOL,Material.GRAY_WOOL,Material.LIGHT_GRAY_WOOL,Material.CYAN_WOOL,Material.PURPLE_WOOL,Material.BLUE_WOOL,Material.BROWN_WOOL,Material.GREEN_WOOL,Material.RED_WOOL,Material.BLACK_WOOL);
@@ -81,7 +83,7 @@ public class BlockUtils {
             List<TextColor> keys = concreteColor.keySet().stream().toList();
             return concreteColor.get(TextColor.nearestColorTo(keys, team.color()));
         }
-        return DEFAULT_WOOL_COLOR;
+        return DEFAULT_CONCRETE_COLOR;
     }
 
     public static Material getWoolBlockByNamedTextColor(NamedTextColor color){
@@ -102,7 +104,7 @@ public class BlockUtils {
             int Y_LEVEL = 277;
             return pos.getY() <= Y_LEVEL || pos.getY() >= Y_LEVEL+HEIGHT || abs(pos.getX()) >= SIZE || abs(pos.getZ()) >= SIZE;
         } else if (pos.getWorld().equals(manager.getLobbyWorld())) {
-            int Y_LEVEL = -2;
+            int Y_LEVEL = -3;
             return pos.getY() <= Y_LEVEL || pos.getY() >= Y_LEVEL+HEIGHT || abs(pos.getX()) >= SIZE || abs(pos.getZ()) >= SIZE;
         } else {
             return true;
