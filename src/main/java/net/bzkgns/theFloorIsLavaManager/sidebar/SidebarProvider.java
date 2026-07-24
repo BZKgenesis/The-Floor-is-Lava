@@ -1,14 +1,23 @@
 package net.bzkgns.theFloorIsLavaManager.sidebar;
 
-import net.kyori.adventure.text.Component;
+
+import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
+import net.megavex.scoreboardlibrary.api.sidebar.component.ComponentSidebarLayout;
 import org.bukkit.entity.Player;
 
-import java.util.List;
+public abstract class SidebarProvider {
 
-public interface SidebarProvider {
+    protected ComponentSidebarLayout layout;
 
-    List<SidebarLine> getLines(Player player);
+    public SidebarProvider(Player player) {
+        this.layout = createLayout(player);
+    }
 
-    Component getTitle();
+    protected abstract ComponentSidebarLayout createLayout(Player player);
+
+    public void apply(Sidebar sidebar) {
+        layout.apply(sidebar);
+    }
+
 
 }

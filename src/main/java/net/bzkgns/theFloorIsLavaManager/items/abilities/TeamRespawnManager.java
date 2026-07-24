@@ -17,6 +17,8 @@ import org.joml.Vector3f;
 
 import java.util.*;
 
+import static net.bzkgns.theFloorIsLavaManager.utils.EntityUtils.recursivelyRemovePassengers;
+
 @SuppressWarnings("UnstableApiUsage")
 public class TeamRespawnManager {
     private static TeamRespawnManager instance;
@@ -117,12 +119,6 @@ public class TeamRespawnManager {
         respawnEffects.put(teamName, baseArmorStand);
     }
 
-    private void recursivelyRemovePassengers(Entity entity) {
-        for (Entity passenger : entity.getPassengers()) {
-            recursivelyRemovePassengers(passenger);
-            passenger.remove();
-        }
-    }
 
     public Location getRespawnPoint(String teamName) {
         return respawnPoints.get(teamName);

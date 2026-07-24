@@ -12,19 +12,15 @@ import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.sidebar.provider.LobbySidebarProvider;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticType;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
-import net.bzkgns.theFloorIsLavaManager.teams.TeamGUI;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
-import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Egg;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,10 +28,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
@@ -99,7 +92,7 @@ public class TheFloorIslavaListener implements Listener {
                 GameManager.initLobbyPlayer(player);
                 player.give(new TeamManagerItem().giveItem(player));
                 player.give(new GiveAllItem().giveItem(player));
-                plugin.getSidebarManager().show(player, new LobbySidebarProvider());
+                plugin.getSidebarManager().show(player, new LobbySidebarProvider(player));
             }
             case RUNNING -> {
                 event.getPlayer().setAllowFlight(false);
@@ -124,6 +117,12 @@ public class TheFloorIslavaListener implements Listener {
         }
     }
 
+    private void discoverRecipes(Player player){
+        for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
+            player.discoverRecipe(new NamespacedKey(plugin,recipe_key));
+        }
+    }
+
 
     @EventHandler
     public void onPlayerEquip(PlayerArmorChangeEvent event){
@@ -137,12 +136,6 @@ public class TheFloorIslavaListener implements Listener {
                 armor.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor(Color.fromRGB(Color.SILVER.asRGB())));
             }
             player.getInventory().setItem(event.getSlot(), armor);
-        }
-    }
-
-    private void discoverRecipes(Player player){
-        for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
-            player.discoverRecipe(new NamespacedKey(plugin,recipe_key));
         }
     }
 
@@ -168,7 +161,6 @@ public class TheFloorIslavaListener implements Listener {
             block.setType(getWoolBlockByPlayer(player));
         }
     }
-
 
     @EventHandler
     public void onBroke(BlockBreakEvent event){
@@ -196,7 +188,6 @@ public class TheFloorIslavaListener implements Listener {
     }
 
     private void filterProtectedBlocks(List<Block> blocks) {
-
         blocks.removeIf(block ->
                 !BlockUtils.canPlaceBlock(block.getLocation())
         );
@@ -211,52 +202,6 @@ public class TheFloorIslavaListener implements Listener {
                 }
             }
         }
-    }
-
-    @EventHandler
-    public void onTeamManagerInteract(PlayerInteractEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND) {
-            return; // Ignore la main secondaire
-        }
-
-        Action action = event.getAction();
-
-        if (action != Action.RIGHT_CLICK_AIR &&
-                action != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-        if (!event.hasItem()) return;
-
-        ItemStack item = event.getItem();
-        if (item == null) return;
-        if (!new TeamManagerItem().isItem(item)) return;
-        if (plugin.getGameManager().getState()==GameState.RUNNING) return;
-
-        event.setCancelled(true);
-        TeamGUI.openMainMenu(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onShopInteract(PlayerInteractEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND) {
-            return; // Ignore la main secondaire
-        }
-
-        Action action = event.getAction();
-
-        if (action != Action.RIGHT_CLICK_AIR &&
-                action != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-        if (!event.hasItem()) return;
-
-        ItemStack item = event.getItem();
-        if (item == null) return;
-        if (!new ShopItem().isItem(item)) return;
-
-        event.setCancelled(true);
-
-        ShopGUI.open(event.getPlayer(),0);
     }
 
     @EventHandler
@@ -401,68 +346,8 @@ public class TheFloorIslavaListener implements Listener {
         }
     }
 
-
-    @EventHandler
-    public void onEggBridgeLaunch(ProjectileLaunchEvent event){
-        if (!(event.getEntity() instanceof Egg egg)) return;
-        if (!(egg.getShooter() instanceof Player p)) return;
-
-        ItemStack item = p.getInventory().getItemInMainHand();
-        if (!new EggBridgeItem().isItem(item)) return;
-        event.getEntity().getPersistentDataContainer().set(
-                new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class),"eggBridgeEntity"),
-                PersistentDataType.STRING,
-                "eggBridgeEntity");
-    }
-    @EventHandler
-    public void onSnowballPlateLaunch(ProjectileLaunchEvent event){
-        if (!(event.getEntity() instanceof Snowball snowball)) return;
-        if (!(snowball.getShooter() instanceof Player p)) return;
-
-        ItemStack item = p.getInventory().getItemInMainHand();
-        if (!new SnowballPlateItem().isItem(item)) return;
-        event.getEntity().getPersistentDataContainer().set(
-                new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "snowballPlateEntity"),
-                PersistentDataType.STRING,
-                "snowballPlateEntity");
-    }
-
-    @EventHandler
-    public void onSnowballHit(ProjectileHitEvent event){
-        if (!(event.getEntity() instanceof Snowball snowball)) return;
-        if (!(Objects.equals(snowball.getPersistentDataContainer().get(
-                        new NamespacedKey(plugin, "snowballPlateEntity"),
-                        PersistentDataType.STRING),
-                "snowballPlateEntity"))
-        ) return;
-        if (!(snowball.getShooter() instanceof Player p)) return;
-
-        Location loc = snowball.getLocation().getBlock().getLocation();
-        fillAround(loc, 4, BlockUtils.getWoolBlockByPlayer(p));
-    }
-
-    private void fillAround(Location center, @SuppressWarnings("SameParameterValue") int radius, Material material) {
-        World world = center.getWorld();
-        int cx = center.getBlockX();
-        int cy = center.getBlockY();
-        int cz = center.getBlockZ();
-
-        for (int x = cx - radius; x <= cx + radius; x++) {
-            for (int z = cz - radius; z <= cz + radius; z++) {
-                Block b = world.getBlockAt(x, cy, z);
-
-                // Si tu veux éviter de remplacer n’importe quoi :
-                if (!b.getType().isSolid()) {
-                    b.setType(material, false);
-                }
-            }
-        }
-    }
-
     private boolean shouldGiveItem(ItemStack stack){
         List<Material> materials = List.of(Material.DIAMOND, Material.GOLD_INGOT,Material.IRON_INGOT,Material.COPPER_INGOT,Material.AMETHYST_SHARD,Material.EMERALD,Material.REDSTONE,Material.LAPIS_LAZULI,Material.EGG,Material.SNOWBALL,Material.COBBLESTONE,Material.DIRT,Material.BAKED_POTATO,Material.GRAY_WOOL);
         return materials.contains(stack.getType()) || ItemManager.getAssociatedCustomItem(stack) != null;
     }
-
-
 }

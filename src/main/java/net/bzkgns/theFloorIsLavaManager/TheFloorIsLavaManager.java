@@ -7,6 +7,7 @@ import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.HealCampManager;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.InfiniteWool;
 import net.bzkgns.theFloorIsLavaManager.items.gui.GivelAllGUI;
 import net.bzkgns.theFloorIsLavaManager.items.items.*;
@@ -33,6 +34,9 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
+import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
+import net.megavex.scoreboardlibrary.api.exception.NoPacketAdapterAvailableException;
+import net.megavex.scoreboardlibrary.api.noop.NoopScoreboardLibrary;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -59,6 +63,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
     private StatisticsManager statisticsManager;
     private DatabaseManager databaseManager;
     private SidebarManager sidebarManager;
+    private ScoreboardLibrary scoreboardLibrary;
 
     public static boolean pvp;
 
@@ -69,6 +74,13 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        try {
+            scoreboardLibrary = ScoreboardLibrary.loadScoreboardLibrary(this);
+        } catch (NoPacketAdapterAvailableException e) {
+            // If server version is not yet supported, you can fallback to the no-op implementation:
+            scoreboardLibrary = new NoopScoreboardLibrary();
+            this.getLogger().warning("Server version unsupported, scoreboard functionality will not be visible!");
+        }
         sidebarManager = new SidebarManager();
 
         databaseManager = new DatabaseManager();
@@ -106,7 +118,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new FeatherFallingBootsItem(),
                 new FireBallCustomItem(),
                 new TntItem(),
-                new ParachuteItem()
+                new ParachuteItem(),
+                new HealCampItem()
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
@@ -137,6 +150,13 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new FireBallCustomListener(), this);
         getServer().getPluginManager().registerEvents(new TntListener(), this);
         getServer().getPluginManager().registerEvents(new ParachuteListener(), this);
+        getServer().getPluginManager().registerEvents(new SnowballListener(), this);
+        getServer().getPluginManager().registerEvents(new EggBridgeListener(), this);
+        getServer().getPluginManager().registerEvents(new TeamManagerListener(), this);
+        getServer().getPluginManager().registerEvents(new ShopListener(), this);
+        getServer().getPluginManager().registerEvents(new HealCampListener(), this);
+
+        HealCampManager.getInstance().registerHealCampTask();
 
         TeamManager.getInstance().clearTeams();
 
@@ -206,6 +226,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        scoreboardLibrary.close();
         if (gameManager != null) {
             gameManager.stopGame();
         }
@@ -248,6 +269,10 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
 
     public static boolean getDebugMode() {
         return true;
+    }
+
+    public ScoreboardLibrary getScoreboardLibrary() {
+        return scoreboardLibrary;
     }
 }
 

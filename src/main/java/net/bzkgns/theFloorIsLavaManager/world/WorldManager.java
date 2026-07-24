@@ -8,6 +8,7 @@ import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.*;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -88,7 +89,10 @@ public class WorldManager {
 
             players.stream()
                     .filter(p -> p.getWorld().equals(oldWorld))
-                    .forEach(p -> p.teleport(lobby.getSpawnLocation()));
+                    .forEach(p -> {
+                        p.teleport(lobby.getSpawnLocation());
+                        GameManager.initLobbyPlayer(p);
+                    });
 
             // On capture le dossier avant de décharger le monde pour être sûr du chemin
             File worldFolder = oldWorld.getWorldFolder();
@@ -482,7 +486,11 @@ public class WorldManager {
         World finalOldWorld = oldWorld;
         players.stream()
                 .filter(p -> p.getWorld().equals(finalOldWorld))
-                .forEach(p -> p.teleport(lobby.getSpawnLocation()));
+                .forEach(p -> {
+                    p.teleport(lobby.getSpawnLocation());
+
+                    GameManager.initLobbyPlayer(p);
+                });
 
         // On décharge le monde et on vide le VRAI dossier de dimension
         Bukkit.unloadWorld(oldWorld, false);

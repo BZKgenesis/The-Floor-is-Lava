@@ -1,6 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.sidebar;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
+import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -12,6 +14,8 @@ public class SidebarManager {
 
     private final Map<UUID, SidebarSession> sidebars = new HashMap<>();
 
+    private final static ScoreboardLibrary scoreboardLibrary = TheFloorIsLavaManager.getInstance().getScoreboardLibrary();
+
     private static int sidebarTask = -1;
 
     public SidebarManager(){
@@ -22,11 +26,11 @@ public class SidebarManager {
 
     public void show(Player player, SidebarProvider provider) {
 
-        Sidebar sidebar = new Sidebar(provider.getTitle());
+        Sidebar sidebar = scoreboardLibrary.createSidebar();
 
-        sidebar.setLines(provider.getLines(player));
+        provider.apply(sidebar);
 
-        player.setScoreboard(sidebar.getScoreboard());
+        sidebar.addPlayer(player);
 
         sidebars.put(
                 player.getUniqueId(),
@@ -36,7 +40,9 @@ public class SidebarManager {
 
     public void hide(Player player) {
 
-        sidebars.remove(player.getUniqueId());
+        SidebarSession session = sidebars.remove(player.getUniqueId());
+
+        session.getSidebar().removePlayer(player);
 
         player.setScoreboard(
                 player.getServer()
@@ -53,13 +59,7 @@ public class SidebarManager {
             return;
         }
 
-        session.getSidebar().setTitle(
-                session.getProvider().getTitle()
-        );
-
-        session.getSidebar().setLines(
-                session.getProvider().getLines(player)
-        );
+        session.getProvider().apply(session.getSidebar());
     }
 
     public void updateAll() {
@@ -69,24 +69,4 @@ public class SidebarManager {
         }
     }
 
-    public void setProvider(Player player, SidebarProvider provider) {
-
-        SidebarSession session = sidebars.get(player.getUniqueId());
-
-        if (session == null) {
-            show(player, provider);
-            return;
-        }
-
-        session.setProvider(provider);
-
-        update(player);
-    }
-
-    public Sidebar getSidebar(Player player) {
-
-        SidebarSession session = sidebars.get(player.getUniqueId());
-
-        return session == null ? null : session.getSidebar();
-    }
 }

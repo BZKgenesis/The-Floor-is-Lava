@@ -8,7 +8,7 @@ public enum GameState {
     /** Aucune partie en cours : la configuration est éditable, /tfl team fonctionne. */
     LOBBY,
     /** Compte a rebourd avant le début, tout est vérrouiller */
-    @SuppressWarnings("unused") STARTING,
+    STARTING,
     /** Une partie est en cours : la configuration est verrouillée, /tfl team est désactivé. */
     RUNNING,
     /** Partie finie, en attente de reset du monde. /tfl team est désactivé. */
