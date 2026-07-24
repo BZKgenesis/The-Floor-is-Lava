@@ -20,7 +20,7 @@ public class SidebarManager {
 
     public SidebarManager(){
         if (sidebarTask == -1){
-            sidebarTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(TheFloorIsLavaManager.getInstance(), this::updateAll, 1, 10);
+            sidebarTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(TheFloorIsLavaManager.getInstance(), this::updateAll, 1, 1);
         }
     }
 

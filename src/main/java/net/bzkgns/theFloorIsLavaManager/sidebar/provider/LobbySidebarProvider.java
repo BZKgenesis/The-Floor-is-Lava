@@ -8,11 +8,19 @@ import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
 import net.megavex.scoreboardlibrary.api.sidebar.component.ComponentSidebarLayout;
 import net.megavex.scoreboardlibrary.api.sidebar.component.SidebarComponent;
+import net.megavex.scoreboardlibrary.api.sidebar.component.animation.CollectionSidebarAnimation;
+import net.megavex.scoreboardlibrary.api.sidebar.component.animation.SidebarAnimation;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,17 +35,21 @@ public class LobbySidebarProvider extends SidebarProvider {
     private Integer teamOffset = 0;
     private Integer delay = 0;
     private final int MAX_DELAY = 10;
+    private SidebarAnimation<Component> titleAnimation;
 
     @Override
     protected ComponentSidebarLayout createLayout(Player player) {
 
+        titleAnimation = createGradientAnimation(Component.text("---- Lobby ----"));
+
         SidebarComponent lines = SidebarComponent.builder()
+                .addStaticLine(Component.text("Équipe: "))
                 .addDynamicLine(() -> {
                     TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
                     if (teamData == null) {
-                        return Component.text("Équipe: ").append(Component.text("Aucune équipe"));
+                        return Component.text("   Aucune équipe");
                     } else {
-                        return Component.text("Équipe: ").append(teamData.getName());
+                        return Component.text("   ").append(teamData.getName());
                     }
                 })
                 .addDynamicLine(() -> {
@@ -65,11 +77,11 @@ public class LobbySidebarProvider extends SidebarProvider {
                 .addStaticLine(Component.text("Kit :"))
                 .addDynamicLine(()-> {
                     KitData kitData = KitManager.getInstance().getPlayerKit(player);
-                    return kitData == null ? Component.text("Aucun") : kitData.getDisplayName();
+                    return kitData == null ? Component.text("   Aucun") : Component.text("   ").append(kitData.getDisplayName());
                 })
                 .build();
         return new ComponentSidebarLayout(
-                SidebarComponent.staticLine(Component.text("----- Lobby -----")),
+                SidebarComponent.animatedLine(this.titleAnimation),
                 lines
         );
     }
@@ -91,6 +103,27 @@ public class LobbySidebarProvider extends SidebarProvider {
             }
         }
         return Component.text(membersText.toString());
+    }
+
+    @Override
+    public void apply(Sidebar sidebar) {
+        titleAnimation.nextFrame();
+        super.apply(sidebar);
+    }
+
+    private @NotNull SidebarAnimation<Component> createGradientAnimation(@NotNull Component text) {
+        float step = 1f / 8f;
+
+        TagResolver.Single textPlaceholder = Placeholder.component("text", text);
+        List<Component> frames = new ArrayList<>((int) (2f / step));
+
+        float phase = -1f;
+        while (phase < 1) {
+            frames.add(MiniMessage.miniMessage().deserialize("<gradient:red:gold:" + phase + "><text>", textPlaceholder));
+            phase += step;
+        }
+
+        return new CollectionSidebarAnimation<>(frames);
     }
 }
 

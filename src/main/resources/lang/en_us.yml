@@ -260,6 +260,9 @@ items:
   parachute:
     display_name: "Parachute"
     lore: "Allows you to dodge deadly fall damage"
+  heal_camp:
+    display_name: "Heal Camp"
+    lore: "Allows you to place a camp that heals players in its area"
 
 config:
   game:

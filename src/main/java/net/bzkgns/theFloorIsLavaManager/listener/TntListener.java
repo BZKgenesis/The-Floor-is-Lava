@@ -61,14 +61,15 @@ public class TntListener implements Listener {
                 .normalize()
                 .multiply(TNT_KNOCKBACK_MULTIPLIER);
 
-        int knockbackLevel = player.getActiveItem().getEnchantmentLevel(Enchantment.KNOCKBACK);
-
-        knockback = knockback.multiply(1f + knockbackLevel * TNT_KNOCKBACK_ENCHANT_MULTIPLIER);
-
+        int knockbackLevel = player.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.KNOCKBACK);
+        System.out.println("Knockback level: " + knockbackLevel);
+        System.out.println("knockback length1: " + knockback.length());
+        knockback.multiply(1f + knockbackLevel * TNT_KNOCKBACK_ENCHANT_MULTIPLIER);
+        System.out.println("knockback length2: " + knockback.length());
         knockback.setY(Math.abs(knockback.getY()));
-
+        System.out.println("knockback length3: " + knockback.length());
         knockback = knockback.add(event.getPlayer().getVelocity());
-
+        System.out.println("knockback length4: " + knockback.length());
         tnt.setVelocity(tnt.getVelocity().add(knockback));
     }
 
@@ -77,20 +78,14 @@ public class TntListener implements Listener {
         ItemStack item = event.getItemInHand();
         Player player = event.getPlayer();
         if (new TntItem().isItem(item)){
+            item.setAmount(item.getAmount()-1);
             TNTPrimed tnt = event.getBlock().getWorld().spawn(event.getBlock().getLocation().add(0.5, 0.5, 0.5), TNTPrimed.class);
-
             tnt.setSource(player);
-
             BlockState blockState = tnt.getBlockData().createBlockState();
-
             blockState.setType(BlockUtils.getConcreteBlockByPlayer(player));
-
             tnt.setBlockData(blockState.getBlockData());
-
             tnt.setYield(TNT_POWER);
-
             tnt.setSource(player);
-
             tnt.getPersistentDataContainer().set(
                     new NamespacedKey(plugin, "tnt_source"),
                     PersistentDataType.STRING,
