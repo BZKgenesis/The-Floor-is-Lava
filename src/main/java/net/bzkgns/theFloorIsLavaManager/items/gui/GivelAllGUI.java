@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
@@ -83,11 +84,16 @@ public class GivelAllGUI implements Listener {
         if (!(e.getInventory().getHolder() instanceof MenuHolder holder)) return;
         if (holder.getType() != MenuHolder.MenuType.GIVE_ALL) return;
         e.setCancelled(true);
+        if (e.getAction() != InventoryAction.PICKUP_ALL ) return;
 
         Player p = (Player) e.getWhoClicked();
         ItemStack clickedItem = e.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
+        if (p.getInventory().firstEmpty() == -1) {
+            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+            return;
+        }
         p.getInventory().addItem(clickedItem.clone());
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
     }

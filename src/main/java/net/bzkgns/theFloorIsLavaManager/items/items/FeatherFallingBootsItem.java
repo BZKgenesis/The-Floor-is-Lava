@@ -11,10 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.CraftingRecipe;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.*;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIALS;
 
@@ -39,25 +36,28 @@ public class FeatherFallingBootsItem extends CustomItem {
             new AttributeModifier(
                     new NamespacedKey(TheFloorIsLavaManager.getInstance(), "feather_falling"),
                     -0.5,
-                    AttributeModifier.Operation.ADD_SCALAR));
+                    AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         itemAttribute.addModifier(
                         Attribute.JUMP_STRENGTH,
                         new AttributeModifier(
                                 new NamespacedKey(TheFloorIsLavaManager.getInstance(), "jump_boost"),
                                 0.25,
-                                AttributeModifier.Operation.ADD_SCALAR));
+                                AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         itemAttribute.addModifier(
                         Attribute.SAFE_FALL_DISTANCE,
                         new AttributeModifier(
                                 new NamespacedKey(TheFloorIsLavaManager.getInstance(), "fall_distance"),
                                 5.0,
-                                AttributeModifier.Operation.ADD_SCALAR));
+                                AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         item.setData(
                 DataComponentTypes.ATTRIBUTE_MODIFIERS,
                 itemAttribute.build());
         item.setData(
                 DataComponentTypes.ENCHANTMENTS,
                 ItemEnchantments.itemEnchantments().add(Enchantment.FEATHER_FALLING, 3));
+        item.setData(
+                DataComponentTypes.MAX_STACK_SIZE,
+                1);
         return item;
     }
 

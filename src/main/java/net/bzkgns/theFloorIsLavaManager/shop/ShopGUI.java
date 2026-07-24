@@ -152,41 +152,41 @@ public class ShopGUI implements Listener {
         r.runTaskTimer(plugin, 10L, 10L);
         //RUNNABLES.put(inv, r);
     }
-    private static IngredientDisplay buildDisplay(IngredientEntry ing) {
-        IngredientDisplay d = new IngredientDisplay();
-        d.amount = ing.amount;
-        d.options = new ArrayList<>();
+    private static IngredientDisplay buildDisplay(IngredientEntry ingredientEntry) {
+        IngredientDisplay ingredientDisplay = new IngredientDisplay();
+        ingredientDisplay.amount = ingredientEntry.amount;
+        ingredientDisplay.options = new ArrayList<>();
 
-        if (ing.choice instanceof RecipeChoice.MaterialChoice mat) {
-            for (Material m : mat.getChoices()) {
-                ItemStack it = new ItemStack(m);
-                it.setAmount(ing.amount);
-                d.options.add(it);
+        if (ingredientEntry.choice instanceof RecipeChoice.MaterialChoice materialChoice) {
+            for (Material m : materialChoice.getChoices()) {
+                ItemStack itemStack = new ItemStack(m);
+                itemStack.setAmount(ingredientEntry.amount);
+                ingredientDisplay.options.add(itemStack);
             }
         }
 
-        if (ing.choice instanceof RecipeChoice.ExactChoice exact) {
+        if (ingredientEntry.choice instanceof RecipeChoice.ExactChoice exact) {
             for (ItemStack it : exact.getChoices()) {
                 ItemStack clone = it.clone();
-                clone.setAmount(ing.amount);
-                d.options.add(clone);
+                clone.setAmount(ingredientEntry.amount);
+                ingredientDisplay.options.add(clone);
             }
         }
-        return d;
+        return ingredientDisplay;
     }
 
-    private static List<ItemStack> getOptions(IngredientEntry ing) {
+    private static List<ItemStack> getOptions(IngredientEntry ingredientEntry) {
         List<ItemStack> options = new ArrayList<>();
 
-        if (ing.choice instanceof RecipeChoice.MaterialChoice mat) {
-            for (Material m : mat.getChoices()) {
-                options.add(new ItemStack(m));
+        if (ingredientEntry.choice instanceof RecipeChoice.MaterialChoice mat) {
+            for (Material material : mat.getChoices()) {
+                options.add(new ItemStack(material));
             }
         }
 
-        if (ing.choice instanceof RecipeChoice.ExactChoice exact) {
-            for (ItemStack it : exact.getChoices()) {
-                options.add(it.clone());
+        if (ingredientEntry.choice instanceof RecipeChoice.ExactChoice exact) {
+            for (ItemStack itemStack : exact.getChoices()) {
+                options.add(itemStack.clone());
             }
         }
         return options;
@@ -213,8 +213,8 @@ public class ShopGUI implements Listener {
         return RECIPES.size()/ RESULT_SLOTS.length;
     }
 
-    private static int page(InventoryClickEvent e) {
-        String title = plainText(e.getView().title());
+    private static int page(InventoryClickEvent event) {
+        String title = plainText(event.getView().title());
 
         int start = title.indexOf("Page ") + 5;
         int end = title.indexOf(")", start);
@@ -235,58 +235,65 @@ public class ShopGUI implements Listener {
         return -1;
     }
 
-    private static BukkitRunnable animationRunnable(Inventory inv, Map<Integer, IngredientDisplay> map) {
+    private static BukkitRunnable animationRunnable(Inventory inventory, Map<Integer, IngredientDisplay> integerIngredientDisplayMap) {
         return new BukkitRunnable() {
             @Override
             public void run() {
-                if (inv.getViewers().isEmpty()) {
+                if (inventory.getViewers().isEmpty()) {
                     cancel();
                     return;
                 }
 
-                for (var e : map.entrySet()) {
-                    IngredientDisplay d = e.getValue();
+                for (var ingredientDisplayEntry : integerIngredientDisplayMap.entrySet()) {
+                    IngredientDisplay d = ingredientDisplayEntry.getValue();
                     if (d.options.size() <= 1) continue;
 
                     d.index = (d.index+1) % d.options.size();
                     ItemStack show = d.options.get(d.index).clone();
                     show.setAmount(d.amount);
-                    inv.setItem(e.getKey()+2, show);
+                    inventory.setItem(ingredientDisplayEntry.getKey()+2, show);
                 }
             }
         };
     }
     @EventHandler
-    public void onClick(InventoryClickEvent e) {
-        if (e.getClickedInventory() instanceof PlayerInventory) return;
-        if (!(e.getView().getTopInventory().getHolder() instanceof MenuHolder holder)) return;
+    public void onClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() instanceof PlayerInventory) return;
+        if (!(event.getView().getTopInventory().getHolder() instanceof MenuHolder holder)) return;
         if (holder.getType() != MenuHolder.MenuType.SHOP) return;
-        e.setCancelled(true);
+        event.setCancelled(true);
 
-        Player p = (Player) e.getWhoClicked();
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        if (e.getSlot() == 45) open(p, max(page(e)-1,0));
-        if (e.getSlot() == 53) open(p, min(getMaxPages(),page(e)+1));
+        if (event.getSlot() == 45) open(player, max(page(event)-1,0));
+        if (event.getSlot() == 53) open(player, min(getMaxPages(),page(event)+1));
 
-        int idx = indexFromSlot(e.getSlot(), page(e));
+        int idx = indexFromSlot(event.getSlot(), page(event));
         if (idx < 0 || idx >= RECIPES.size()) return;
 
         ShopRecipe recipe = RECIPES.get(idx);
 
-        if (e.getWhoClicked() instanceof Player player && player.getGameMode() != GameMode.CREATIVE){
-            if (!canPay(p, recipe)) {
-                Messages.send(p, "shop.not_enough_ingredients");
-                p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+
+        if (player.getInventory().firstEmpty() == -1) {
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+            return;
+        }
+
+        if (player.getGameMode() != GameMode.CREATIVE){
+            if (!canPay(player, recipe)) {
+                Messages.send(player, "shop.not_enough_ingredients");
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
                 return;
             }else{
-                pay(p, recipe);
+                pay(player, recipe);
             }
         }
 
-        p.getInventory().addItem(recipe.result().clone());
-        Messages.send(p, "shop.exchange_success");
-        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
+        player.getInventory().addItem(recipe.result().clone());
+        Messages.send(player, "shop.exchange_success");
+        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
     }
+
     private static boolean canPay(Player p, ShopRecipe r) {
         for (IngredientEntry ing : r.ingredients()) {
             boolean ok = false;
