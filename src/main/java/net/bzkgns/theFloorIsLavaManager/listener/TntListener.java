@@ -62,14 +62,9 @@ public class TntListener implements Listener {
                 .multiply(TNT_KNOCKBACK_MULTIPLIER);
 
         int knockbackLevel = player.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.KNOCKBACK);
-        System.out.println("Knockback level: " + knockbackLevel);
-        System.out.println("knockback length1: " + knockback.length());
         knockback.multiply(1f + knockbackLevel * TNT_KNOCKBACK_ENCHANT_MULTIPLIER);
-        System.out.println("knockback length2: " + knockback.length());
         knockback.setY(Math.abs(knockback.getY()));
-        System.out.println("knockback length3: " + knockback.length());
         knockback = knockback.add(event.getPlayer().getVelocity());
-        System.out.println("knockback length4: " + knockback.length());
         tnt.setVelocity(tnt.getVelocity().add(knockback));
     }
 

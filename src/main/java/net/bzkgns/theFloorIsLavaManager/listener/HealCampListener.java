@@ -30,7 +30,6 @@ public class HealCampListener implements Listener {
 
     @EventHandler
     public void onCampfireBroken(BlockBreakEvent event) {
-        System.out.println("Block broken at: " + event.getBlock().getLocation());
         Location location = event.getBlock().getLocation();
 
         HealCampManager.getInstance().removeHealCamp(location);

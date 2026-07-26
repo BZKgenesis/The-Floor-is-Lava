@@ -132,7 +132,6 @@ public class TeamRespawnManager {
             return;
         }
         Block respawnBlock = world.getBlockAt(respawnLocation.getBlockX(), respawnLocation.getBlockY(), respawnLocation.getBlockZ());
-        System.out.println(respawnBlock);
         if(respawnBlock.getType() == respawnAnchorMaterial){
             respawnBlock.setType(Material.AIR);
         }

@@ -148,7 +148,6 @@ public class ConfigGUI implements Listener {
             Player player,
             InventoryClickEvent event
     ) {
-        System.out.println("Clicked on config key: " + key.getKey() + " with value: " + key.get(config));
         if (key.get(config) instanceof Number number) {
             double current = number.doubleValue();
 

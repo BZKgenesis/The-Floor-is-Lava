@@ -222,8 +222,7 @@ items:
     lore: "Allows you to place a tower that can be used to reach high places"
   team_respawn_anchor:
     display_name: "Team Respawn Anchor"
-    lore1: "Allows you to set a respawn point for your team"
-    lore2: "The respawn point will be set at the location of the anchor"
+    lore: "Allows you to set a respawn point for your team. The respawn point will be set at the location of the anchor"
   batte:
     display_name: "Baseball bat"
     lore: "Allows you to hit players and knock them back"
@@ -263,6 +262,9 @@ items:
   heal_camp:
     display_name: "Heal Camp"
     lore: "Allows you to place a camp that heals players in its area"
+  throwable_iron_golem:
+    display_name: "Throwable Iron Golem"
+    lore: "Allows you to throw an iron golem which protects your team and attacks enemies"
 
 config:
   game:

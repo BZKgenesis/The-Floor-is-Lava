@@ -5,7 +5,10 @@ import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.apache.commons.lang3.text.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -21,7 +24,7 @@ import java.util.List;
 public abstract class CustomItem {
     protected final NamespacedKey key;
     protected final String display_name_translation_key;
-    protected final List<String> description_translation_keys;
+    protected final String description_translation_key;
     protected final Rarity rarity;
     protected final Material material;
     protected final boolean glint;
@@ -34,14 +37,11 @@ public abstract class CustomItem {
         EPIC,
         LEGENDARY
     }
-    protected CustomItem(String key, String display_name_translation_key, String description_translation_key, Rarity rarity, Material material, boolean glint){
-        this(key, display_name_translation_key, List.of(description_translation_key), rarity, material, glint);
-    }
 
-    protected CustomItem(String key, String display_name_translation_key, List<String> description_translation_keys, Rarity rarity, Material material, boolean glint) {
+    protected CustomItem(String key, String display_name_translation_key, String description_translation_key, Rarity rarity, Material material, boolean glint) {
         this.key = new NamespacedKey(plugin,key);
         this.display_name_translation_key = display_name_translation_key;
-        this.description_translation_keys = description_translation_keys;
+        this.description_translation_key = description_translation_key;
         this.rarity = rarity;
         this.material = material;
         this.glint = glint;
@@ -58,7 +58,8 @@ public abstract class CustomItem {
             case LEGENDARY -> TextColor.fromHexString("#FF8000");
         };
         meta.displayName(Messages.component(audience, display_name_translation_key).color(colorName));
-        List<Component> lore_text = description_translation_keys.stream().map(line -> Messages.component(audience,line).color(TextColor.fromHexString("#AAAAAA"))).toList();
+        List<String> strs =  List.of(WordUtils.wrap(Messages.string(audience, description_translation_key), 40).split("\\r?\\n"));
+        List<TextComponent> lore_text = strs.stream().map(l -> Component.text(l, NamedTextColor.GRAY)).toList();
         meta.lore(lore_text);
         meta.getPersistentDataContainer().set(new NamespacedKey(TheFloorIsLavaManager.getInstance(), "key"), PersistentDataType.STRING, key.getKey());
         itemStack.setItemMeta(meta);

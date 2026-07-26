@@ -222,8 +222,7 @@ items:
     lore: "Permet de créer une tour qui se déploie automatiquement"
   team_respawn_anchor:
     display_name: "Ancre de réapparition d'équipe"
-    lore1: "Permet de réapparaître à l'endroit où l'ancre est posée"
-    lore2: "au lieu du spawn du monde de jeu."
+    lore: "Permet de réapparaître à l'endroit où l'ancre est posée au lieu du spawn du monde de jeu."
   batte:
     display_name: "Batte"
     lore: "Une batte de baseball pour repousser les autres joueurs"
@@ -260,6 +259,12 @@ items:
   parachute:
     display_name: "Parachute"
     lore: "Permet de prévenir de chutes mortelles"
+  heal_camp:
+    display_name: "Camp de soin"
+    lore: "Permet de créer un camp de soin qui soigne les joueurs alliés à proximité"
+  throwable_iron_golem:
+    display_name: "Golem de fer jetable"
+    lore: "Permet de lancer un golem de fer qui protègera les joueurs alliés et attaquera les ennemis"
 
 config:
   game:

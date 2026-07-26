@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.items.abilities;
+package net.bzkgns.theFloorIsLavaManager.listener;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.items.items.InfiniteWoolItem;
@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-public class InfiniteWool implements Listener {
+public class InfiniteWoolListener implements Listener {
 
     @EventHandler
     public void onWoolPlaced(BlockPlaceEvent event) {

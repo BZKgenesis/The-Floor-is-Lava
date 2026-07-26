@@ -44,6 +44,11 @@ public class TeamManager {
         return teams.keySet().stream().toList();
     }
 
+
+    public List<String> getTeamsNames(){
+        return teams.values().stream().map(TeamData::getNameText).toList();
+    }
+
     public InviteManager getInviteManager(){
         return this.inviteManager;
     }

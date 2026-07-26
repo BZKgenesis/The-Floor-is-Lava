@@ -45,7 +45,6 @@ public class KitChoiceGUI implements Listener {
 
     @EventHandler
     void handleRecolorDialog(PlayerCustomClickEvent event) {
-        System.out.println("PlayerCustomClickEvent: " + event.getIdentifier().asString());
         if (!event.getIdentifier().asString().startsWith("tfl:user_input/choose_kit/")) {
             return;
         }

@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static net.bzkgns.theFloorIsLavaManager.utils.TeamNameGenerator.generate;
+
 
 public class TeamData {
-
 
     private final String id;
     private String name;
@@ -28,7 +29,7 @@ public class TeamData {
 
     public TeamData(String id, NamedTextColor color, Team team, UUID owner) {
         this.id = id;
-        this.name = id;
+        this.name = generate(TeamManager.getInstance().getTeamsNames());
         this.color = color;
         this.vanillaTeam = team;
         this.owner = owner;

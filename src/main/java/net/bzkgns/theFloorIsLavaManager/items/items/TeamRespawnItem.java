@@ -7,13 +7,11 @@ import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ShapedRecipe;
 
-import java.util.List;
-
 public class TeamRespawnItem extends CustomItem {
     public TeamRespawnItem() {
         super("team_respawn",
                 "items.team_respawn_anchor.display_name",
-                List.of("items.team_respawn_anchor.lore1", "items.team_respawn_anchor.lore2"),
+                "items.team_respawn_anchor.lore",
                 Rarity.RARE,
                 TeamRespawnManager.respawnAnchorMaterial,
                 true

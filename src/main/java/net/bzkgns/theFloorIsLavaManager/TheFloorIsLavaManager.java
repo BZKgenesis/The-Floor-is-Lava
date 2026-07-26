@@ -8,7 +8,7 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.HealCampManager;
-import net.bzkgns.theFloorIsLavaManager.items.abilities.InfiniteWool;
+import net.bzkgns.theFloorIsLavaManager.listener.InfiniteWoolListener;
 import net.bzkgns.theFloorIsLavaManager.items.gui.GivelAllGUI;
 import net.bzkgns.theFloorIsLavaManager.items.items.*;
 import net.bzkgns.theFloorIsLavaManager.listener.*;
@@ -24,6 +24,7 @@ import net.bzkgns.theFloorIsLavaManager.items.items.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamRespawnItem;
 import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
 import net.bzkgns.theFloorIsLavaManager.sidebar.SidebarManager;
+import net.bzkgns.theFloorIsLavaManager.tasks.ThrowableIronGolemTask;
 import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.DatabaseManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticsManager;
@@ -140,7 +141,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new TeamRespawnListener(), this);
         Bukkit.getPluginManager().registerEvents(new TeamInventoryListener(), this);
         Bukkit.getPluginManager().registerEvents(new GivelAllGUI(), this);
-        Bukkit.getPluginManager().registerEvents(new InfiniteWool(), this);
+        Bukkit.getPluginManager().registerEvents(new InfiniteWoolListener(), this);
         pvp = true;
 
         getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
@@ -155,6 +156,9 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TeamManagerListener(), this);
         getServer().getPluginManager().registerEvents(new ShopListener(), this);
         getServer().getPluginManager().registerEvents(new HealCampListener(), this);
+        getServer().getPluginManager().registerEvents(new ThrowableIronGolemListener(), this);
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new ThrowableIronGolemTask(), 0L, 1L);
 
         HealCampManager.getInstance().registerHealCampTask();
 

@@ -41,7 +41,7 @@ public class FeatherFallingBootsItem extends CustomItem {
                         Attribute.JUMP_STRENGTH,
                         new AttributeModifier(
                                 new NamespacedKey(TheFloorIsLavaManager.getInstance(), "jump_boost"),
-                                0.25,
+                                0.3,
                                 AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         itemAttribute.addModifier(
                         Attribute.SAFE_FALL_DISTANCE,

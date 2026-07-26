@@ -283,7 +283,7 @@ public class WorldManager {
                 if (loc.distanceSquared(spawn) < spawnRadius * spawnRadius)
                     continue;
 
-                loc.setY(world.getHighestBlockYAt(loc));
+                loc.setY(world.getHighestBlockYAt(loc)+1);
 
                 candidates.add(loc);
             }
@@ -311,7 +311,7 @@ public class WorldManager {
         }
 
         List<Structure> bigCubeStructures = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 3; i++) {
             try (InputStream structFile = plugin.getResource("structures/big/cube_" + i + ".nbt")) {
                 if (structFile != null) {
                     bigCubeStructures.add(manager.loadStructure(structFile));
