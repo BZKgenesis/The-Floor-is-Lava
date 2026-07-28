@@ -85,7 +85,6 @@ public class GameManager {
             TheFloorIsLavaManager.getInstance().getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + player.getName());
             return;
         }
-        TheFloorIsLavaManager.getInstance().getSidebarManager().hide(player);
         player.setHealth(healthAttribute.getValue());
         player.setFoodLevel(20);
         player.setSaturation(20);
@@ -95,6 +94,8 @@ public class GameManager {
         player.setGameMode(GameMode.SURVIVAL);
         player.setAllowFlight(false);
         player.removePotionEffect(PotionEffectType.SATURATION);
+        plugin.getGameManager().getMoneyManager().setBalance(player.getUniqueId(), 0, 0, 0);
+
     }
 
     public static void initLobbyPlayer(Player player) {
@@ -114,6 +115,8 @@ public class GameManager {
         player.getInventory().clear();
         player.setAllowFlight(true);
         player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, -1, 1, false, false, false));
+
+        plugin.getGameManager().getMoneyManager().setBalance(player.getUniqueId(), 99999999, 99999999, 99999999);
     }
 
 

@@ -6,6 +6,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Nullable;
 
+import static net.bzkgns.theFloorIsLavaManager.lang.LangManager.getLocale;
+
 public class PlayerBalance {
     private Integer material;
     private Integer resource;
@@ -73,10 +75,40 @@ public class PlayerBalance {
     }
 
     public TextComponent displayResource(Audience audience) {
-        return Component.text("Resource: ", NamedTextColor.GRAY).append(Component.text(resource, NamedTextColor.WHITE)).append(Component.text(" $", NamedTextColor.DARK_BLUE));
+        return displayResource(audience, true);
+    }
+
+    public TextComponent prefixDisplayResource(Audience audience) {
+        return Component.text("Resource: ", NamedTextColor.GRAY);
+    }
+
+    public TextComponent displayResource(Audience audience, boolean prefix) {
+        if (prefix) {
+            return prefixDisplayResource(audience)
+                    .append(Component.text(String.format(getLocale(audience),"%,d",resource), NamedTextColor.WHITE))
+                    .append(Component.text(" $", NamedTextColor.DARK_BLUE));
+        } else {
+            return Component.text(String.format(getLocale(audience),"%,d",resource), NamedTextColor.WHITE)
+                    .append(Component.text(" $", NamedTextColor.DARK_BLUE));
+        }
     }
 
     public TextComponent displayMaterial(Audience audience) {
-        return Component.text("Material: ", NamedTextColor.GRAY).append(Component.text(material, NamedTextColor.WHITE)).append(Component.text(" $", NamedTextColor.DARK_GREEN));
+        return displayMaterial(audience, true);
+    }
+
+    public TextComponent prefixDisplayMaterial(Audience audience) {
+        return Component.text("Material: ", NamedTextColor.GRAY);
+    }
+
+    public TextComponent displayMaterial(Audience audience, boolean prefix) {
+        if (prefix) {
+            return prefixDisplayMaterial(audience)
+                    .append(Component.text(String.format(getLocale(audience) ,"%,d",material), NamedTextColor.WHITE))
+                    .append(Component.text(" $", NamedTextColor.DARK_GREEN));
+        } else {
+            return Component.text(String.format(getLocale(audience) ,"%,d",material), NamedTextColor.WHITE)
+                    .append(Component.text(" $", NamedTextColor.DARK_GREEN));
+        }
     }
 }

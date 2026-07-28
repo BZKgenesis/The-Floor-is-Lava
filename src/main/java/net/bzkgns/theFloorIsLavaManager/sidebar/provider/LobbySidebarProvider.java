@@ -83,8 +83,10 @@ public class LobbySidebarProvider extends SidebarProvider {
                     KitData kitData = KitManager.getInstance().getPlayerKit(player);
                     return kitData == null ? Component.text("   Aucun") : Component.text("   ").append(kitData.getDisplayName());
                 })
-                .addDynamicLine(() -> playerBalance.displayMaterial(player))
-                .addDynamicLine(() -> playerBalance.displayResource(player))
+                .addStaticLine(playerBalance.prefixDisplayMaterial(player))
+                .addDynamicLine(() -> Component.text("    ").append(playerBalance.displayMaterial(player, false)))
+                .addStaticLine(playerBalance.prefixDisplayResource(player))
+                .addDynamicLine(() -> Component.text("    ").append(playerBalance.displayResource(player,false)))
                 .build();
         return new ComponentSidebarLayout(
                 SidebarComponent.animatedLine(this.titleAnimation),
@@ -94,21 +96,25 @@ public class LobbySidebarProvider extends SidebarProvider {
 
     private TextComponent getTeamMemberTextOfPlayer(Player player, int NMember) {
         TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
-        StringBuilder membersText = new StringBuilder();
         if (teamData != null) {
             List<UUID> members = teamData.getMembers();
             if (members.size() > NMember){
                 UUID memberUUID = members.get(NMember);
                 Player memberPlayer = Bukkit.getPlayer(memberUUID);
+                String memberNameStr = memberPlayer==null?"":TextUtils.plainText(memberPlayer.displayName());
                 if (teamData.getOwner().equals(memberPlayer)){
-                    membersText.append("- ").append("\uD83D\uDC51").append(TextUtils.plainText(memberPlayer.displayName()));
+                    return Component.text("\uD83D\uDC51")
+                            .append(MiniMessage.miniMessage().deserialize(String.format("<head:%s:false>", memberNameStr)))
+                            .append(memberPlayer.displayName());
                 }else{
                     if (memberPlayer != null)
-                        membersText.append("- ").append(TextUtils.plainText(memberPlayer.displayName()));
+                        return Component.text("-")
+                                .append(MiniMessage.miniMessage().deserialize(String.format("<head:%s:false>", memberNameStr)))
+                                .append(memberPlayer.displayName());
                 }
             }
         }
-        return Component.text(membersText.toString());
+        return Component.text("");
     }
 
     @Override

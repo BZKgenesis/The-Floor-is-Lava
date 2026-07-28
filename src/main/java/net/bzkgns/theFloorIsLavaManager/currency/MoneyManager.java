@@ -28,7 +28,7 @@ public class MoneyManager {
         if (playerBalances.containsKey(playerUUID)){
             playerBalances.get(playerUUID).set(material, resource, money);
         } else {
-            playerBalances.put(playerUUID, new PlayerBalance(0, 0, 0));
+            playerBalances.put(playerUUID, new PlayerBalance(material, resource, money));
         }
     }
 

@@ -43,12 +43,6 @@ public class SidebarManager {
         SidebarSession session = sidebars.remove(player.getUniqueId());
 
         session.getSidebar().removePlayer(player);
-
-        player.setScoreboard(
-                player.getServer()
-                        .getScoreboardManager()
-                        .getMainScoreboard()
-        );
     }
 
     public void update(Player player) {

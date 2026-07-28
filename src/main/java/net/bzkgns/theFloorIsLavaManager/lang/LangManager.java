@@ -59,6 +59,19 @@ public class LangManager {
         } catch (Exception ignored) {}
     }
 
+    public static Locale getLocale(Audience audience) {
+        String locale = ConfigRegistry.getConfigManager("game")
+                .getString(GameConfigKeys.DEFAULT_LANG.getKey());
+
+        if (audience instanceof Player player) {
+            locale = player.locale()
+                    .toString()
+                    .toLowerCase(Locale.ROOT);
+        }
+
+        return Locale.forLanguageTag(locale.replace('_', '-'));
+    }
+
     public Component get(Audience audience, String key, TagResolver... placeholders) {
 
         String locale = ConfigRegistry.getConfigManager("game")
