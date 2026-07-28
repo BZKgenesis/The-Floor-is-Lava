@@ -5,7 +5,8 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
-import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.PageMenuHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.*;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.*;
+import static net.bzkgns.theFloorIsLavaManager.utils.SoundUtils.*;
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -53,10 +55,7 @@ public class ShopGUI implements Listener {
                     choices.addAll(recipeShaped.getChoiceList());
                 }
                 recipes.put(result,choices);
-
-
             }
-
         }
         return recipes;
     }
@@ -108,7 +107,7 @@ public class ShopGUI implements Listener {
         plugin.getLogger().info("recipe loaded "+RECIPES.size());
     }
     public static void open(Player p, int page) {
-        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.SHOP, page);
+        PageMenuHolder holder = new PageMenuHolder(MenuHolder.MenuType.SHOP, page);
         Inventory inv = Bukkit.createInventory(holder, SIZE, Messages.component(p,"gui.shop.title", Placeholder.unparsed("page", String.valueOf(page+1))));
         holder.setInventory(inv);
         Map<Integer, IngredientDisplay> animated = new HashMap<>();
@@ -275,14 +274,14 @@ public class ShopGUI implements Listener {
 
 
         if (player.getInventory().firstEmpty() == -1) {
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+            playError(player);
             return;
         }
 
         if (player.getGameMode() != GameMode.CREATIVE){
             if (!canPay(player, recipe)) {
                 Messages.send(player, "shop.not_enough_ingredients");
-                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+                playError(player);
                 return;
             }else{
                 pay(player, recipe);

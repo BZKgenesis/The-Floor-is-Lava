@@ -3,6 +3,7 @@ package net.bzkgns.theFloorIsLavaManager.items.items;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
@@ -12,6 +13,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.*;
+import org.jetbrains.annotations.Nullable;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIALS;
 
@@ -68,5 +70,10 @@ public class FeatherFallingBootsItem extends CustomItem {
         eggBridgeRecipe.setIngredient('A', new RecipeChoice.MaterialChoice(Material.IRON_INGOT));
         eggBridgeRecipe.setIngredient('B', new RecipeChoice.MaterialChoice(RESOURCE_MATERIALS));
         return eggBridgeRecipe;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(10,35,0);
     }
 }

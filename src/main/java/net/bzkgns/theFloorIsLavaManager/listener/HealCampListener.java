@@ -18,6 +18,7 @@ public class HealCampListener implements Listener {
 
     @EventHandler
     public void onCampfirePlaced(BlockPlaceEvent event) {
+        if (event.isCancelled()) return;
         ItemStack itemInHand = event.getItemInHand();
         if (!new HealCampItem().isItem(itemInHand)) return;
         Location location = event.getBlockPlaced().getLocation();

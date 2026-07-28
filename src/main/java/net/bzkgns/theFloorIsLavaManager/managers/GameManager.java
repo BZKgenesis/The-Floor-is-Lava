@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
+import net.bzkgns.theFloorIsLavaManager.currency.MoneyManager;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigLoader;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigManager;
@@ -12,6 +13,7 @@ import net.bzkgns.theFloorIsLavaManager.items.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.sidebar.provider.GameSidebarProvider;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticType;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
@@ -36,8 +38,12 @@ public class GameManager {
 
     private GameState state = GameState.LOBBY;
 
+    private static final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
+
 
     private final DangerManager dangerManager;
+
+    private final MoneyManager moneyManager;
 
     private BossBar bossbar;
 
@@ -51,8 +57,7 @@ public class GameManager {
     private final List<Player> playerInGame;
 
     public GameManager() {
-
-
+        moneyManager = new MoneyManager();
 
         gameConfigManager = ConfigLoader.load(
                 new GameConfig()
@@ -72,6 +77,9 @@ public class GameManager {
     }
 
     public static void initGamePlayer(Player player) {
+
+        plugin.getSidebarManager().hide(player);
+        plugin.getSidebarManager().show(player, new GameSidebarProvider(player));
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
         if (healthAttribute == null) {
             TheFloorIsLavaManager.getInstance().getLogger().warning("Impossible de récupérer l'attribut MAX_HEALTH pour le joueur " + player.getName());
@@ -231,7 +239,7 @@ public class GameManager {
         if (startingCountdown > 0) {
             plugin.getServer().getOnlinePlayers().forEach(
                     p->Messages.send(p,
-                            "info.starting_countdown", Placeholder.unparsed("time", formatTime(p,startingCountdown, TextUtils.TimeFormat.SHORTEST))));
+                            "info.starting_countdown", Placeholder.unparsed("time", formatTime(p,startingCountdown*20, TextUtils.TimeFormat.SHORTEST))));
         }
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> startRunningPhase(plugin, positions), startingCountdown*20L);
         return true;
@@ -440,6 +448,10 @@ public class GameManager {
         dangerManager.reset();
         playerInGame.clear();
         noRespawn = false;
+    }
+
+    public MoneyManager getMoneyManager() {
+        return moneyManager;
     }
 
 }

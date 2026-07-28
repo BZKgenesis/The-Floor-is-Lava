@@ -1,9 +1,11 @@
 package net.bzkgns.theFloorIsLavaManager.items.items;
 
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
+import org.jetbrains.annotations.Nullable;
 
 public class InfiniteWoolItem extends CustomItem {
     public InfiniteWoolItem() {
@@ -19,5 +21,10 @@ public class InfiniteWoolItem extends CustomItem {
     @Override
     public CraftingRecipe getRecipe(Audience audience) {
         return null;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(60,20,0);
     }
 }

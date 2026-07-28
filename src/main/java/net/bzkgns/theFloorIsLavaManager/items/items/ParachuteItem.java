@@ -1,11 +1,13 @@
 package net.bzkgns.theFloorIsLavaManager.items.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ParachuteItem extends CustomItem {
@@ -31,5 +33,10 @@ public class ParachuteItem extends CustomItem {
     @Override
     public CraftingRecipe getRecipe(Audience audience) {
         return null;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(12,18,0);
     }
 }

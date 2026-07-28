@@ -8,6 +8,7 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.exception.WorldGenerationException;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.HealCampManager;
+import net.bzkgns.theFloorIsLavaManager.items.gui.NewShopGUI;
 import net.bzkgns.theFloorIsLavaManager.listener.InfiniteWoolListener;
 import net.bzkgns.theFloorIsLavaManager.items.gui.GivelAllGUI;
 import net.bzkgns.theFloorIsLavaManager.items.items.*;
@@ -25,6 +26,7 @@ import net.bzkgns.theFloorIsLavaManager.items.items.TeamRespawnItem;
 import net.bzkgns.theFloorIsLavaManager.managers.ResourcePackManager;
 import net.bzkgns.theFloorIsLavaManager.sidebar.SidebarManager;
 import net.bzkgns.theFloorIsLavaManager.tasks.ThrowableIronGolemTask;
+import net.bzkgns.theFloorIsLavaManager.vein_miner.VeinMinerListener;
 import net.bzkgns.theFloorIsLavaManager.world.WorldManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.DatabaseManager;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticsManager;
@@ -120,7 +122,10 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new FireBallCustomItem(),
                 new TntItem(),
                 new ParachuteItem(),
-                new HealCampItem()
+                new HealCampItem(),
+                new NewShopItem(),
+                new WoolItem(),
+                new FoodItem()
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
@@ -141,6 +146,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new TeamRespawnListener(), this);
         Bukkit.getPluginManager().registerEvents(new TeamInventoryListener(), this);
         Bukkit.getPluginManager().registerEvents(new GivelAllGUI(), this);
+        getServer().getPluginManager().registerEvents(new NewShopGUI(), this);
         Bukkit.getPluginManager().registerEvents(new InfiniteWoolListener(), this);
         pvp = true;
 
@@ -157,6 +163,11 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ShopListener(), this);
         getServer().getPluginManager().registerEvents(new HealCampListener(), this);
         getServer().getPluginManager().registerEvents(new ThrowableIronGolemListener(), this);
+        getServer().getPluginManager().registerEvents(new NewShopListener(), this);
+
+
+
+        getServer().getPluginManager().registerEvents(new VeinMinerListener(), this);
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new ThrowableIronGolemTask(), 0L, 1L);
 

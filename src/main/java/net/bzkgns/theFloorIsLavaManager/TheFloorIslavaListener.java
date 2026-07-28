@@ -7,14 +7,17 @@ import net.bzkgns.theFloorIsLavaManager.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.items.*;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
+import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameManager;
 import net.bzkgns.theFloorIsLavaManager.managers.GameState;
+import net.bzkgns.theFloorIsLavaManager.sidebar.provider.GameSidebarProvider;
 import net.bzkgns.theFloorIsLavaManager.sidebar.provider.LobbySidebarProvider;
 import net.bzkgns.theFloorIsLavaManager.statistics.StatisticType;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
@@ -27,6 +30,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 
@@ -78,12 +82,20 @@ public class TheFloorIslavaListener implements Listener {
             p.setPlayerWeather(w.hasStorm() ? WeatherType.DOWNFALL : WeatherType.CLEAR);
         }, 2L);
 
-        player.setResourcePack(
-                plugin.getResourcePackManager().getUrl(),
-                plugin.getResourcePackManager().getSha1(),
-                true,
-                Messages.component(player, "resourcepack.required")
-        );
+        String url = plugin.getResourcePackManager().getUrl();
+        String sha1 = plugin.getResourcePackManager().getSha1();
+        if (url == null || url.isEmpty() || sha1 == null || sha1.isEmpty()) {
+            plugin.getLogger().warning("Resource pack URL or SHA-1 is not set. Players will not receive the resource pack.");
+        } else {
+            plugin.getLogger().info("Resource pack URL: " + url);
+            plugin.getLogger().info("Resource pack SHA-1: " + sha1);
+            player.setResourcePack(
+                    url,
+                    sha1,
+                    true,
+                    Messages.component(player, "resourcepack.required")
+            );
+        }
         plugin.getLogger().info("Player " + player.getName() + " joined. Total world time: " + event.getPlayer().getStatistic(Statistic.TOTAL_WORLD_TIME));
         plugin.getGameManager().addPlayerToBossBar(player);
 
@@ -95,6 +107,7 @@ public class TheFloorIslavaListener implements Listener {
                 plugin.getSidebarManager().show(player, new LobbySidebarProvider(player));
             }
             case RUNNING -> {
+                plugin.getSidebarManager().show(player, new GameSidebarProvider(player));
                 event.getPlayer().setAllowFlight(false);
                 if (plugin.getGameManager().isPlayerInGame(event.getPlayer())){
                     event.getPlayer().setGameMode(GameMode.SURVIVAL);
@@ -120,6 +133,17 @@ public class TheFloorIslavaListener implements Listener {
     private void discoverRecipes(Player player){
         for (String recipe_key : TheFloorIsLavaManager.RECIPES_KEY){
             player.discoverRecipe(new NamespacedKey(plugin,recipe_key));
+        }
+    }
+
+    @EventHandler
+    public void onDragItem(InventoryDragEvent event){
+        if (event.getInventory().getHolder() instanceof MenuHolder){
+            for (int slot : event.getRawSlots()){
+                if (slot > 0 && slot < event.getInventory().getSize()){
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 
@@ -331,18 +355,34 @@ public class TheFloorIslavaListener implements Listener {
                     });
                     return;
                 }
-                if (deathLocation != null){
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        player.teleport(deathLocation);
+                switch (TheFloorIsLavaManager.getInstance().getGameManager().getDangerManager().getState()){
+                    case DangerManager.DangerState.PREPARATION -> Bukkit.getScheduler().runTask(plugin, () -> {
+                        Location respawnLocation = player.getRespawnLocation();
+                        if (respawnLocation != null){
+                            player.teleport(respawnLocation);
+                        }else{
+                            player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getDefaultSpawnLocation());
+                        }
+                        player.setGameMode(GameMode.SURVIVAL);
+                    });
+                    case DangerManager.DangerState.RISING -> Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (deathLocation != null){
+                            player.teleport(deathLocation);
+                        }else{
+                            player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getDefaultSpawnLocation());
+                        }
                         player.setGameMode(GameMode.SPECTATOR);
                     });
-                    return;
                 }
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getPreGameSpawnLocation());
-                    player.setGameMode(GameMode.SPECTATOR);
-                });
             }
+            case ENDING -> Bukkit.getScheduler().runTask(plugin, () -> {
+                if (deathLocation != null) {
+                    player.teleport(deathLocation);
+                } else {
+                    player.teleport(TheFloorIsLavaManager.getInstance().getWorldManager().getDefaultSpawnLocation());
+                }
+                player.setGameMode(GameMode.SPECTATOR);
+            });
         }
     }
 

@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.items.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
@@ -9,6 +10,7 @@ import org.bukkit.Registry;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ThrowableIronGolemItem extends CustomItem {
@@ -35,5 +37,10 @@ public class ThrowableIronGolemItem extends CustomItem {
     @Override
     public CraftingRecipe getRecipe(Audience audience) {
         return null;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(50,50,0);
     }
 }

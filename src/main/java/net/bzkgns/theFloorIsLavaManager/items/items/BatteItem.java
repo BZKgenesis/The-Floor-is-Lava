@@ -3,6 +3,7 @@ package net.bzkgns.theFloorIsLavaManager.items.items;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.Weapon;
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
@@ -11,6 +12,7 @@ import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.Nullable;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIALS;
 
@@ -44,5 +46,10 @@ public class BatteItem extends CustomItem {
         batteRecipe.setIngredient('B', Material.IRON_INGOT);
         batteRecipe.setIngredient('C', Material.STICK);
         return batteRecipe;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(0,45,0);
     }
 }

@@ -14,9 +14,8 @@ import net.bzkgns.theFloorIsLavaManager.managers.GameState;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.datacomponent.item.ItemLore;
-import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,22 +23,19 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static net.bzkgns.theFloorIsLavaManager.utils.GuiUtils.*;
 import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -184,7 +180,7 @@ public class TeamGUI implements Listener {
         for (String teamName : teamManager.getTeams()) {
             TeamData team = teamManager.getTeam(teamName);
             if (team != null) {
-                ItemStack item = createItem(BlockUtils.getWoolBlockByNamedTextColor(team.getColor()), team.getNameText(), "join_team_request");
+                ItemStack item = createItem(BlockUtils.getWoolBlockByNamedTextColor(team.getColor()), team.getNameText(), "join_team_request", team.getId());
                 ItemLore.Builder lore = ItemLore.lore();
                 if (teamManager.getInviteManager().hasInvite(p.getUniqueId(), team.getId())) {
                     lore.addLine(Messages.component(p, "item_lore.cancel_request"));
@@ -266,78 +262,6 @@ public class TeamGUI implements Listener {
         }
     }
 
-    private static ItemStack createItem(Material mat, String name) {
-        return createItem(mat, name, null, "");
-    }
-
-    private static ItemStack createItem(Material mat, String name, String customModelData) {
-        return createItem(mat, name, null, customModelData);
-    }
-
-    private static ItemStack createItem(Material mat, String name, @SuppressWarnings("SameParameterValue") String id, String customModelData) {
-        ItemStack it = new ItemStack(mat);
-        if (!customModelData.isBlank()) {
-            it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(customModelData).build());
-        }
-        ItemMeta m = it.getItemMeta();
-        m.displayName(Component.text(name).color(TextColor.fromHexString("#FFFF55")));
-        if (id != null)
-            m.getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "buttonId"), PersistentDataType.STRING, id);
-        it.setItemMeta(m);
-        return it;
-    }
-
-    // Variantes acceptant un Component (utilisées pour les libellés traduits via LangManager/Messages)
-    private static ItemStack createItem(Material mat, Component name) {
-        return createItem(mat, name, null, "");
-    }
-
-    private static ItemStack createItem(Material mat, Component name, String customModelData) {
-        return createItem(mat, name, null, customModelData);
-    }
-
-    private static ItemStack createItem(Material mat, Component name, String id, String customModelData) {
-        ItemStack it = new ItemStack(mat);
-        if (customModelData != null && !customModelData.isBlank()) {
-            it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(customModelData).build());
-        }
-        ItemMeta m = it.getItemMeta();
-        m.displayName(name.color(TextColor.fromHexString("#FFFF55")));
-        if (id != null)
-            m.getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TheFloorIsLavaManager.class), "buttonId"), PersistentDataType.STRING, id);
-        it.setItemMeta(m);
-        return it;
-    }
-
-    private static ItemStack createBackItem(Player p) {
-        ItemStack it = new ItemStack(Material.ARROW);
-        it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("back").build());
-        ItemMeta m = it.getItemMeta();
-        m.displayName(Messages.component(p, "button.back").color(TextColor.fromHexString("#FF5555")));
-        it.setItemMeta(m);
-        return it;
-    }
-
-    /**
-     * Récupère l'identifiant du bouton stocké dans le CustomModelData de l'item.
-     * On utilise cet identifiant (fixe, non traduit) pour router les clics,
-     * plutôt que le texte affiché qui change selon la langue du joueur.
-     */
-    private static String getButtonId(ItemStack stack) {
-        if (stack == null) return null;
-        ItemMeta meta = stack.getItemMeta();
-        if (meta != null && meta.hasCustomModelDataComponent()) {
-            List<String> strings = meta.getCustomModelDataComponent().getStrings();
-            if (!strings.isEmpty())
-                return strings.getFirst();
-        }
-        return null;
-    }
-
-    private static boolean isBackItem(ItemStack stack) {
-        return "back".equals(getButtonId(stack));
-    }
-
     @EventHandler
     void handleRenameDialog(PlayerCustomClickEvent event) {
         if (!event.getIdentifier().equals(Key.key("tfl:user_input/confirm"))) {
@@ -408,18 +332,20 @@ public class TeamGUI implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
 
-        event.setCancelled(true);
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null) return;
 
-        String buttonId = getButtonId(clicked);
+        String buttonId = getButtonCustomModelData(clicked);
+        boolean eventCancelled = event.isCancelled();
+        event.setCancelled(true);
 
         switch (holder.getType()) {
             case TEAM_MAIN -> handleMainMenuClick(player, buttonId);
             case TEAM_CONFIRM_LEAVE -> handleConfirmLeaveClick(player, buttonId);
             case TEAM_REQUESTS -> handleRequestsClick(player, clicked, buttonId, event.isRightClick());
             case TEAM_MANAGE -> handleManageClick(player, clicked, buttonId);
-            case TEAM_JOIN -> handleJoinClick(player, clicked, buttonId);
+            case TEAM_JOIN -> handleJoinClick(player, clicked);
+            default -> event.setCancelled(eventCancelled); // Allow other inventories to be clicked
         }
     }
 
@@ -496,23 +422,24 @@ public class TeamGUI implements Listener {
         openRequestsMenu(player);
     }
 
-    private void handleJoinClick(Player player, ItemStack clicked, String buttonId) {
+    private void handleJoinClick(Player player, ItemStack clicked) {
         plugin.getLogger().info("Demander à rejoindre une équipe");
 
         if (isBackItem(clicked)) {
             openMainMenu(player);
             return;
         }
-        if (!"join_team_request".equals(buttonId)) return;
-        if (clicked.getItemMeta() == null || clicked.getItemMeta().displayName() == null) return;
+        String teamId = getButtonCustomModelData(clicked);
+        String buttonIdFromItem = getButtonId(clicked);
+        if (!"join_team_request".equals(buttonIdFromItem)) return;
+        if (clicked.getItemMeta() == null || teamId == null) return;
 
-        String targetName = plainText(clicked.getItemMeta().displayName());
-        plugin.getLogger().info("currentItem " + targetName);
+        plugin.getLogger().info("currentItem " + teamId);
 
-        TeamData teamAsked = TeamManager.getInstance().getTeam(targetName);
+        TeamData teamAsked = TeamManager.getInstance().getTeam(teamId);
 
         if (teamAsked == null) {
-            plugin.getLogger().info("teamAsked is null pour " + targetName);
+            plugin.getLogger().info("teamAsked is null pour " + teamId);
             return;
         }
 

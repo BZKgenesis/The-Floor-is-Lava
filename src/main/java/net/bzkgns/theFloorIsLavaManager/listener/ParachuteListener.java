@@ -30,6 +30,7 @@ public class ParachuteListener implements Listener {
         if (!new ParachuteItem().isItem(itemStack)) return;
         Player player = event.getPlayer();
         if (player.hasCooldown(itemStack)) return;
+        if (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_AIR && event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
 
         ItemDisplay itemDisplay = player.getWorld().spawn(player.getLocation(), ItemDisplay.class);
         ItemStack itemStackDisplay = new ItemStack(Material.FEATHER);

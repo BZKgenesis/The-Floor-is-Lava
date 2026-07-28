@@ -6,7 +6,8 @@ import net.bzkgns.theFloorIsLavaManager.items.items.PopupTowerItem;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamInventoryItem;
 import net.bzkgns.theFloorIsLavaManager.items.items.TeamRespawnItem;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
-import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
+import net.bzkgns.theFloorIsLavaManager.utils.GuiUtils;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,10 +15,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
+
+import static net.bzkgns.theFloorIsLavaManager.utils.SoundUtils.*;
 
 
 public class GivelAllGUI implements Listener {
@@ -81,18 +83,15 @@ public class GivelAllGUI implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-        if (e.getClickedInventory() instanceof PlayerInventory) return;
-        if (!(e.getInventory().getHolder() instanceof MenuHolder holder)) return;
-        if (holder.getType() != MenuHolder.MenuType.GIVE_ALL) return;
+        if (!GuiUtils.isValidInteractMenu(e, MenuHolder.MenuType.GIVE_ALL)) return;
         e.setCancelled(true);
-        if (e.getAction() != InventoryAction.PICKUP_ALL ) return;
 
         Player p = (Player) e.getWhoClicked();
         ItemStack clickedItem = e.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
         if (p.getInventory().firstEmpty() == -1) {
-            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1f);
+            playError(p);
             return;
         }
         p.getInventory().addItem(clickedItem.clone());

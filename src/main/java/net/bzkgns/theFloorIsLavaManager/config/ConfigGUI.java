@@ -5,10 +5,10 @@ import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
-import net.bzkgns.theFloorIsLavaManager.utils.MenuHolder;
+import net.bzkgns.theFloorIsLavaManager.utils.GuiUtils;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.ConfigMenuHolder;
+import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,7 +18,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class ConfigGUI implements Listener {
     }
 
     public static <T extends ConfigSection<T>> void open(Player player, T config) {
-        MenuHolder holder = new MenuHolder(MenuHolder.MenuType.CONFIG, config.getName());
+        ConfigMenuHolder holder = new ConfigMenuHolder(MenuHolder.MenuType.CONFIG, config.getName());
         Inventory inv = Bukkit.createInventory(holder, 54,
                 LangManager.getInstance().get(player, "gui.config_title", Placeholder.parsed("config_section_name", config.getName())) );
         holder.setInventory(inv);
@@ -86,17 +85,12 @@ public class ConfigGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
 
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-        if (event.getClickedInventory() instanceof PlayerInventory) return;
-        if(!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
-        if(holder.getType() != MenuHolder.MenuType.CONFIG) return;
-        Component title = event.getView().title();
+        if (!GuiUtils.isValidInteractMenu(event, MenuHolder.MenuType.CONFIG)) return;
+        ConfigMenuHolder holder = (ConfigMenuHolder) event.getInventory().getHolder();
+        if (holder == null) return;
 
-        if (!(title instanceof TextComponent)) {
-            return;
-        }
+        Player player = (Player) event.getWhoClicked();
+
         event.setCancelled(true);
 
         DangerManager dangerManager = plugin.getGameManager().getDangerManager();

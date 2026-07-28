@@ -1,5 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.sidebar.provider;
 
+import net.bzkgns.theFloorIsLavaManager.currency.PlayerBalance;
+import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitData;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.sidebar.SidebarProvider;
@@ -42,6 +44,8 @@ public class LobbySidebarProvider extends SidebarProvider {
 
         titleAnimation = createGradientAnimation(Component.text("---- Lobby ----"));
 
+        PlayerBalance playerBalance = TheFloorIsLavaManager.getInstance().getGameManager().getMoneyManager().getBalance(player.getUniqueId());
+
         SidebarComponent lines = SidebarComponent.builder()
                 .addStaticLine(Component.text("Équipe: "))
                 .addDynamicLine(() -> {
@@ -79,6 +83,8 @@ public class LobbySidebarProvider extends SidebarProvider {
                     KitData kitData = KitManager.getInstance().getPlayerKit(player);
                     return kitData == null ? Component.text("   Aucun") : Component.text("   ").append(kitData.getDisplayName());
                 })
+                .addDynamicLine(() -> playerBalance.displayMaterial(player))
+                .addDynamicLine(() -> playerBalance.displayResource(player))
                 .build();
         return new ComponentSidebarLayout(
                 SidebarComponent.animatedLine(this.titleAnimation),

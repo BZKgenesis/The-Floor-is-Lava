@@ -1,10 +1,13 @@
 package net.bzkgns.theFloorIsLavaManager.items.items;
 
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.Nullable;
+
 public class TeamInventoryItem extends CustomItem {
     public TeamInventoryItem() {
         super("team_inv",
@@ -25,5 +28,10 @@ public class TeamInventoryItem extends CustomItem {
         teamInvRecipe.setIngredient('B', Material.IRON_INGOT);
         teamInvRecipe.setIngredient('C', Material.CHEST);
         return teamInvRecipe;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(80,70,0);
     }
 }

@@ -1,6 +1,5 @@
 package net.bzkgns.theFloorIsLavaManager.lang;
 
-import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -11,6 +10,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+
+import static net.bzkgns.theFloorIsLavaManager.utils.SoundUtils.*;
 
 public final class Messages {
 
@@ -30,20 +31,6 @@ public final class Messages {
 
         return TextUtils.plainText(LangManager.getInstance().get(audience, key, placeholders));
 
-    }
-
-    public static void playPing(Player player){
-        player.playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5f, 1.0f);
-    }
-    public static void playAlert(Player player){
-        player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f);
-        Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
-                () -> player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f), 2L);
-        Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
-                () -> player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f), 4L);
-    }
-    public static void playError(Player player){
-        player.playSound(player.getLocation(), "minecraft:block.note_block.bass", 0.5f, 1.0f);
     }
 
     public static void send(Audience audience,

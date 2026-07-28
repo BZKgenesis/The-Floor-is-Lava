@@ -5,17 +5,13 @@ import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class TeamManagerItem extends CustomItem {
-    public TeamManagerItem() {
-        super("team_manager",
-                "items.team_manager.display_name",
-                "items.team_manager.lore",
-                Rarity.EPIC,
-                Material.PAPER,
-                true
-        );
+public class FoodItem extends CustomItem {
+    public FoodItem() {
+        super("food",
+                new ItemStack(Material.BAKED_POTATO, 1));
     }
 
     @Override
@@ -25,7 +21,6 @@ public class TeamManagerItem extends CustomItem {
 
     @Override
     public @Nullable Price getPrice() {
-        return new Price(50,50,0);
+        return new Price(0,5,0);
     }
-
 }

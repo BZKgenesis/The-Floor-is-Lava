@@ -2,6 +2,7 @@ package net.bzkgns.theFloorIsLavaManager.items.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
@@ -9,6 +10,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CiseauxItem extends CustomItem {
@@ -34,5 +36,10 @@ public class CiseauxItem extends CustomItem {
         ciseauxRecipe.shape(" A","A ");
         ciseauxRecipe.setIngredient('A', Material.IRON_INGOT);
         return ciseauxRecipe;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(10,20,0);
     }
 }

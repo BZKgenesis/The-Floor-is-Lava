@@ -212,7 +212,7 @@ public class DangerManager {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay", Placeholder.parsed("time", "3")), round(diff) - 40);
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay", Placeholder.parsed("time", "2")), round(diff) - 60);
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay", Placeholder.parsed("time", "1")), round(diff) - 20);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising_delay"), round(diff));
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> Messages.broadcastActionBar("action_bar.lava_rising"), round(diff));
         }
 
         World world = plugin.getWorldManager().getGameWorld();

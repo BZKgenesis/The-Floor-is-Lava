@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -122,10 +123,12 @@ public class ResourcePackManager {
 
     }
 
+    @Nullable
     public String getUrl() {
         return downloadUrl;
     }
 
+    @Nullable
     public String getSha1() {
         return sha1;
     }

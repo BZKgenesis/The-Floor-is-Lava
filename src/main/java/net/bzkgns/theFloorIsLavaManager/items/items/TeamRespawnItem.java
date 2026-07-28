@@ -1,11 +1,13 @@
 package net.bzkgns.theFloorIsLavaManager.items.items;
 
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.Nullable;
 
 public class TeamRespawnItem extends CustomItem {
     public TeamRespawnItem() {
@@ -27,5 +29,10 @@ public class TeamRespawnItem extends CustomItem {
         teamRespawnAnchorRecipe.setIngredient('B', Material.OBSIDIAN);
         teamRespawnAnchorRecipe.setIngredient('C', Material.ENDER_PEARL);
         return teamRespawnAnchorRecipe;
+    }
+
+    @Override
+    public @Nullable Price getPrice() {
+        return new Price(100,150,0);
     }
 }

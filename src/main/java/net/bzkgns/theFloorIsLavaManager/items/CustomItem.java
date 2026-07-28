@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.kyori.adventure.audience.Audience;
@@ -17,17 +18,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class CustomItem {
+    protected ItemStack itemStack = null;
     protected final NamespacedKey key;
     protected final String display_name_translation_key;
     protected final String description_translation_key;
     protected final Rarity rarity;
     protected final Material material;
-    protected final boolean glint;
+    protected final Boolean glint;
     protected final TheFloorIsLavaManager plugin = JavaPlugin.getPlugin(TheFloorIsLavaManager.class);
 
     public enum Rarity {
@@ -47,7 +50,21 @@ public abstract class CustomItem {
         this.glint = glint;
     }
 
+
+    protected CustomItem(String key, ItemStack itemStack) {
+        this.key = new NamespacedKey(plugin,key);
+        this.display_name_translation_key = null;
+        this.description_translation_key = null;
+        this.rarity = null;
+        this.material = null;
+        this.glint = null;
+        this.itemStack = itemStack.clone();
+    }
+
     protected ItemStack createBaseItemStack(Audience audience){
+        if (itemStack != null) {
+            return itemStack.clone();
+        }
         ItemStack itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
         TextColor colorName = switch (rarity) {
@@ -74,6 +91,7 @@ public abstract class CustomItem {
     public ItemStack giveItem(Audience audience){
         return createBaseItemStack(audience);
     }
+
     public boolean isItem(ItemStack stack){
         ItemMeta meta = stack.getItemMeta();
         if (meta == null || !meta.getPersistentDataContainer().has(new NamespacedKey(plugin, "key"), PersistentDataType.STRING)) {
@@ -87,5 +105,10 @@ public abstract class CustomItem {
 
     public String getKey(){
         return key.getKey();
+    }
+
+    @Nullable
+    public Price getPrice(){
+        return null;
     }
 }
