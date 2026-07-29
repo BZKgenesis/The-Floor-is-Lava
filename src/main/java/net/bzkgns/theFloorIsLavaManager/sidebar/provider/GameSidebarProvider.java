@@ -3,6 +3,7 @@ package net.bzkgns.theFloorIsLavaManager.sidebar.provider;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.sidebar.SidebarProvider;
 import net.kyori.adventure.text.Component;
@@ -34,13 +35,13 @@ public class GameSidebarProvider extends SidebarProvider {
     protected ComponentSidebarLayout createLayout(Player player) {
         boolean USE_CHAR = true;
 
-        titleAnimation = createGradientAnimation(Component.text("---- Game ----"));
+        titleAnimation = createGradientAnimation(Messages.component(player, "sidebar.game_title"));
 
         PlayerBalance playerBalance = TheFloorIsLavaManager.getInstance().getGameManager().getMoneyManager().getBalance(player.getUniqueId());
 
 
         SidebarComponent lines = SidebarComponent.builder()
-                .addStaticLine(Component.text("Centre:"))
+                .addStaticLine(Messages.component(player, "sidebar.center"))
                 .addDynamicLine(() -> {
 
                     Integer relative_x = player.getLocation().getBlock().getX() - ConfigRegistry.getConfigManager("map").getInt(MapConfigKeys.CENTER_X.getKey());
@@ -54,10 +55,10 @@ public class GameSidebarProvider extends SidebarProvider {
                     int distance = (int) Math.round(Math.sqrt(relative_x * relative_x + relative_z * relative_z));
                     if (USE_CHAR){
                         return MiniMessage.miniMessage().deserialize(String.format("  %s",compassChars[compassIndex / 4]))
-                                .append(Component.text("( "+distance + " blocs )"));
+                                .append(Messages.component(player, "sidebar.distance", Placeholder.component("distance", Component.text(distance))));
                     }
                     return MiniMessage.miniMessage().deserialize(String.format("  <sprite:\"minecraft:items\":item/compass_%02d>",compassIndex))
-                            .append(Component.text("( "+distance + " blocs )"));
+                            .append(Messages.component(player, "sidebar.distance", Placeholder.component("distance", Component.text(distance))));
                 })
                 .addBlankLine()
                 .addStaticLine(playerBalance.prefixDisplayMaterial(player))

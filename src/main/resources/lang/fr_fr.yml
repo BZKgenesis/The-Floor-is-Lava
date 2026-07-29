@@ -94,9 +94,16 @@ gui:
   give_all_menu_title: "<gold>Menu des items disponibles"
   shop:
     title: "<gold>Menu de la boutique <gray>(Page <page>)"
+    main_title: "<gold>Menu de la boutique"
+    buy_title: "<gold>Menu d'achat d'items <gray>(Page <page>)"
+    sell_title: "<gold>Menu de vente d'items <gray>(Page <page>)"
     click_to_exchange: "<green>Cliquer pour échanger"
     next_page: "<yellow>Suivant →"
     previous_page: "<yellow>← Précédent"
+    show_unavailable_items: "<yellow>Afficher tous les items"
+    hide_unavailable_items: "<yellow>Afficher uniquement les items disponibles"
+    buy: "<yellow>Acheter"
+    sell: "<yellow>Vendre"
   kit:
     click_to_choose: "Cliquer pour choisir le kit <kit_name>"
     menu_title: "Choisir un kit"
@@ -136,6 +143,14 @@ dialog:
   open_shop_title: "Ouvrir la boutique"
   open_team_management_title: "Gérer l'équipe"
   quick_actions_title: "Actions rapides"
+  gamble:
+    title: "Parier"
+    description: "Parier vos ressources pour tenter de gagner plus !"
+    bet_label_resource: "Ressource"
+    bet_label_material: "Matériau"
+    bet_button: "Parier"
+    bet_button_desc: "Cliquer pour parier vos ressources."
+    cancel_bet_desc: "Cliquer pour annuler le pari."
 
 button:
   create_team: "Créer une équipe"
@@ -265,6 +280,12 @@ items:
   throwable_iron_golem:
     display_name: "Golem de fer jetable"
     lore: "Permet de lancer un golem de fer qui protègera les joueurs alliés et attaquera les ennemis"
+  new_shop:
+    display_name: "Boutique"
+    lore: "Permet d'acheter des items avec des ingrédients"
+  gambling:
+    display_name: "Pari"
+    lore: "Permet de parier vos ressources pour tenter de gagner plus !"
 
 config:
   game:
@@ -294,3 +315,23 @@ config:
     spawn-spawn-structure: "Si la structure de spawn doit être générée au spawn"
     center-x: "Coordonnée X du centre de la map"
     center-z: "Coordonnée Z du centre de la map"
+
+money:
+  resource: "<gray>Ressources:"
+  material: "<gray>Matériaux:"
+
+sidebar:
+  game_title: "--- Jeu ---"
+  center: "<gray>Centre: "
+  distance: "( <distance> blocs )"
+  lobby_title: "--- Lobby ---"
+  team: "<gray>Équipe:"
+  no_team: "<red>Aucune"
+  kit: "<gray>Kit:"
+  no_kit: "<red>Aucun"
+
+gambling:
+  jackpot: "<prefix><gold>Jackpot ! Vous avez gagné le jackpot et multiplié vos ressources et matériaux par <multiplier> !"
+  broadcast_jackpot: "<prefix><player><gold> a gagné le jackpot et multiplié ses ressources et matériaux par <multiplier> !"
+  two_symbols: "<prefix><green>Félicitations ! Vous avez obtenu deux symboles identiques, vos ressources et matériaux ont été multipliés par <multiplier> !"
+  loose: "<prefix><red>Dommage ! Vous n'avez pas obtenu de symboles identiques, vous avez perdu vos ressources et matériaux."

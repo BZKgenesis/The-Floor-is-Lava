@@ -2,7 +2,6 @@ package net.bzkgns.theFloorIsLavaManager.items.abilities;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
@@ -16,8 +15,6 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.bzkgns.theFloorIsLavaManager.utils.SoundUtils.playPing;
-
 public class GamblingColumn {
 
     private static final int NB_TEXTS = 6;
@@ -30,7 +27,6 @@ public class GamblingColumn {
 
     private static final float SYMBOL_HEIGHT = 0.25f;
 
-    private static final float TOP = 0.625f;
     private static final float BOTTOM = -0.625f;
 
     // Durée (en ticks) pour parcourir UNE case. Plus la valeur est petite,
@@ -108,6 +104,7 @@ public class GamblingColumn {
             display.setInterpolationDuration(stepTicks);
             display.setTransformation(createTransformation(y));
         }
+        player.playSound(player, "entity.chicken_picky.step", 1f, 0.5f);
 
         // Une fois le glissement terminé, on recycle le symbole du bas
         taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(
@@ -124,7 +121,7 @@ public class GamblingColumn {
      * est invisible à cet instant (évite l'effet de "flash"/saccade).
      */
     private void finishStep() {
-        TextDisplay recycled = textDisplays.remove(0);
+        TextDisplay recycled = textDisplays.removeFirst();
         recycled.setVisibleByDefault(false);
 
         currentIndex = modulo(currentIndex + 1);
@@ -158,7 +155,13 @@ public class GamblingColumn {
 
     private void stop() {
         stopped = true;
-        playPing(player);
+        float pitch = switch (minLoops) {
+            case 1 -> 0.8f;
+            case 2 -> 0.95f;
+            case 3 -> 1.2f;
+            default -> 1.0f;
+        };
+        player.playSound(player, "minecraft:block.note_block.pling", 1f, pitch);
 
         // Tout est déjà exactement aligné grâce au système par pas,
         // on force juste une interpolation propre / instantanée.

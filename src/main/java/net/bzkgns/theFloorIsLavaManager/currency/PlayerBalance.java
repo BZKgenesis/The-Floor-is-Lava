@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.currency;
 
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,10 +25,6 @@ public class PlayerBalance {
 
     public Integer resource() {
         return resource;
-    }
-
-    public Integer money() {
-        return money;
     }
 
     public boolean hasEnough(@Nullable Price price) {
@@ -74,15 +70,15 @@ public class PlayerBalance {
         this.money = money;
     }
 
-    public TextComponent displayResource(Audience audience) {
+    public Component displayResource(Audience audience) {
         return displayResource(audience, true);
     }
 
-    public TextComponent prefixDisplayResource(Audience audience) {
-        return Component.text("Resource: ", NamedTextColor.GRAY);
+    public Component prefixDisplayResource(Audience audience) {
+        return Messages.component(audience, "money.resource");
     }
 
-    public TextComponent displayResource(Audience audience, boolean prefix) {
+    public Component displayResource(Audience audience, boolean prefix) {
         if (prefix) {
             return prefixDisplayResource(audience)
                     .append(Component.text(String.format(getLocale(audience),"%,d",resource), NamedTextColor.WHITE))
@@ -93,15 +89,15 @@ public class PlayerBalance {
         }
     }
 
-    public TextComponent displayMaterial(Audience audience) {
+    public Component displayMaterial(Audience audience) {
         return displayMaterial(audience, true);
     }
 
-    public TextComponent prefixDisplayMaterial(Audience audience) {
-        return Component.text("Material: ", NamedTextColor.GRAY);
+    public Component prefixDisplayMaterial(Audience audience) {
+        return Messages.component(audience, "money.material");
     }
 
-    public TextComponent displayMaterial(Audience audience, boolean prefix) {
+    public Component displayMaterial(Audience audience, boolean prefix) {
         if (prefix) {
             return prefixDisplayMaterial(audience)
                     .append(Component.text(String.format(getLocale(audience) ,"%,d",material), NamedTextColor.WHITE))

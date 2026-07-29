@@ -1,14 +1,11 @@
 package net.bzkgns.theFloorIsLavaManager.items.gui;
 
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.bzkgns.theFloorIsLavaManager.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
 import net.bzkgns.theFloorIsLavaManager.items.ItemManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
-import net.bzkgns.theFloorIsLavaManager.shop.*;
 import net.bzkgns.theFloorIsLavaManager.utils.GuiUtils;
 import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
 import net.bzkgns.theFloorIsLavaManager.utils.menu.PageMenuHolder;
@@ -29,7 +26,6 @@ import java.util.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static net.bzkgns.theFloorIsLavaManager.utils.SoundUtils.*;
-import static net.bzkgns.theFloorIsLavaManager.utils.TextUtils.plainText;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.GuiUtils.*;
 @SuppressWarnings("UnstableApiUsage")
@@ -37,44 +33,53 @@ public class NewShopGUI implements Listener {
 
     private static final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
-    private static final int SIZE_BUY_MENU = 54;
-    private static final int SIZE_SELL_MENU = 54;
-    private static final int SIZE_MAIN_MENU = 27;
-    private static final int USABLE_SIZE_BUY_MENU = 54-9;
+    private static final int ROW_SIZE = 9;
+    private static final int SIZE_BUY_MENU = ROW_SIZE*2;
+    private static final int SIZE_SELL_MENU = ROW_SIZE*3;
+    private static final int SIZE_MAIN_MENU = ROW_SIZE*3;
+    private static final int USABLE_SIZE_BUY_MENU = SIZE_BUY_MENU-ROW_SIZE;
+    private static final int USABLE_SIZE_SELL_MENU = SIZE_SELL_MENU-ROW_SIZE;
 
 
     public static void openMainMenu(Player p) {
         MenuHolder holder = new MenuHolder(MenuHolder.MenuType.NEW_SHOP_MAIN_MENU);
-        Inventory inv = Bukkit.createInventory(holder, SIZE_MAIN_MENU, Messages.component(p,"gui.shop.title"));
+        Inventory inv = Bukkit.createInventory(holder, SIZE_MAIN_MENU, Messages.component(p,"gui.shop.main_title"));
         holder.setInventory(inv);
 
         PlayerBalance balance = plugin.getGameManager().getMoneyManager().getBalance(p.getUniqueId());
 
-        inv.setItem(11, createItem(Material.EMERALD, "BUY", "buy_button", ""));
+        inv.setItem(11, createItem(Material.EMERALD, Messages.string(p, "gui.shop.buy"), "buy_button", ""));
 
-        inv.setItem(15, createItem(Material.EMERALD, "SELL", "sell_button", ""));
+        inv.setItem(15, createItem(Material.EMERALD, Messages.string(p, "gui.shop.sell"), "sell_button", ""));
 
         p.openInventory(inv);
     }
 
 
-    public static void openSellMenu(Player p, Boolean isShowingAllItems) {
-        ShopSellMenuHolder holder = new ShopSellMenuHolder(MenuHolder.MenuType.NEW_SHOP_SELL_MENU, isShowingAllItems);
-        Inventory inv = Bukkit.createInventory(holder, SIZE_SELL_MENU, Messages.component(p,"gui.shop.title"));
+    public static void openSellMenu(Player p, Boolean isShowingAllItems, int page) {
+        ShopSellMenuHolder holder = new ShopSellMenuHolder(MenuHolder.MenuType.NEW_SHOP_SELL_MENU, page, isShowingAllItems);
+        Inventory inv = Bukkit.createInventory(holder, SIZE_SELL_MENU, Messages.component(p,"gui.shop.sell_title", Placeholder.unparsed("page", String.valueOf(page+1))));
         holder.setInventory(inv);
 
         Map<Material, Price> sellableItems = ItemManager.getAllSellableMap();
 
         PlayerBalance balance = plugin.getGameManager().getMoneyManager().getBalance(p.getUniqueId());
 
+        int nbItems = min(sellableItems.size(), USABLE_SIZE_SELL_MENU);
+        int startIndex = page * USABLE_SIZE_SELL_MENU;
+        List<Map.Entry<Material, Price>> entries = new ArrayList<>(sellableItems.entrySet());
+
+
+
         if (isShowingAllItems) {
-            int i = 0;
-            for (Map.Entry<Material, Price> entry : sellableItems.entrySet())
+            for (int i = startIndex; i < startIndex + nbItems; i++)
             {
+                if (i >= entries.size()) break;
+                Map.Entry<Material, Price> entry = entries.get(i);
                 if (entry == null) continue;
                 Price price = entry.getValue();
                 if (price == null) continue;
-                if (i >= USABLE_SIZE_BUY_MENU) break;
+                if (i-startIndex >= USABLE_SIZE_SELL_MENU) break;
                 Material mat = entry.getKey();
 
                 ItemStack displayStack = new ItemStack(mat);
@@ -87,8 +92,7 @@ public class NewShopGUI implements Listener {
                 meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "buttonId"), PersistentDataType.STRING, "sellable_item");
                 displayStack.setItemMeta(meta);
 
-                inv.setItem(i, displayStack);
-                i++;
+                inv.setItem(i-startIndex, displayStack);
             }
         }else{
             int i = 0;
@@ -115,10 +119,18 @@ public class NewShopGUI implements Listener {
             }
         }
 
-        inv.setItem(45, createBackItem(p));
+        inv.setItem(USABLE_SIZE_SELL_MENU, createBackItem(p));
+        if (page > 0)
+            inv.setItem(USABLE_SIZE_SELL_MENU+1, navItem(Messages.component(p, "gui.shop.previous_page"), ArrowDirection.LEFT));
+        if (page < getMaxSellPages(isShowingAllItems))
+            inv.setItem(USABLE_SIZE_SELL_MENU+8, navItem(Messages.component(p, "gui.shop.next_page"), ArrowDirection.RIGHT));
 
 
-        inv.setItem(49, createItem(Material.NAME_TAG, (isShowingAllItems ? "Show only items in inventory" : "Show all sellable items"), "toggle_show_all", ""));
+        inv.setItem(USABLE_SIZE_SELL_MENU+4, createItem(Material.NAME_TAG,
+                (isShowingAllItems ?
+                        Messages.string(p, "gui.shop.hide_unavailable_items") :
+                        Messages.string(p, "gui.shop.show_unavailable_items")),
+                "toggle_show_all", ""));
 
         p.openInventory(inv);
     }
@@ -127,9 +139,8 @@ public class NewShopGUI implements Listener {
     public static void openBuyMenu(Player p, int page) {
         List<CustomItem> buyableItems = ItemManager.getAllBuyableItemStacks(p);
         PageMenuHolder holder = new PageMenuHolder(MenuHolder.MenuType.NEW_SHOP_BUY_MENU, page);
-        Inventory inv = Bukkit.createInventory(holder, SIZE_BUY_MENU, Messages.component(p,"gui.shop.title", Placeholder.unparsed("page", String.valueOf(page+1))));
+        Inventory inv = Bukkit.createInventory(holder, SIZE_BUY_MENU, Messages.component(p,"gui.shop.buy_title", Placeholder.unparsed("page", String.valueOf(page+1))));
         holder.setInventory(inv);
-        Map<Integer, IngredientDisplay> animated = new HashMap<>();
 
         PlayerBalance balance = plugin.getGameManager().getMoneyManager().getBalance(p.getUniqueId());
 
@@ -156,50 +167,33 @@ public class NewShopGUI implements Listener {
 
         // boutons
         if (page > 0)
-            inv.setItem(46, navItem(Messages.component(p, "gui.shop.previous_page"), ArrowDirection.LEFT));
+            inv.setItem(USABLE_SIZE_BUY_MENU+1, navItem(Messages.component(p, "gui.shop.previous_page"), ArrowDirection.LEFT));
 
-        inv.setItem(45, createBackItem(p));
+        inv.setItem(USABLE_SIZE_BUY_MENU, createBackItem(p));
 
-        if (page < getMaxPages())
-            inv.setItem(53, navItem(Messages.component(p, "gui.shop.next_page"), ArrowDirection.RIGHT));
+        if (page < getMaxBuyPages())
+            inv.setItem(USABLE_SIZE_BUY_MENU+8, navItem(Messages.component(p, "gui.shop.next_page"), ArrowDirection.RIGHT));
 
         p.openInventory(inv);
 
     }
 
 
-    enum ArrowDirection {
-        LEFT, RIGHT
-    }
-
-    private static ItemStack navItem(Component name, ArrowDirection direction) {
-        ItemStack it = new ItemStack(Material.ARROW);
-        switch (direction){
-            case LEFT -> it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("left"));
-            case RIGHT -> it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("right"));
-        }
-
-        ItemMeta meta = it.getItemMeta();
-        meta.displayName(name);
-        it.setItemMeta(meta);
-        return it;
-    }
-
-    private static int getMaxPages(){
+    private static int getMaxBuyPages(){
         return ItemManager.getAllBuyableItemStacks(Bukkit.getServer()).size()/ USABLE_SIZE_BUY_MENU;
+    }
+    private static int getMaxSellPages(boolean isShowingAllItems){
+        if (!isShowingAllItems) return 0;
+        return ItemManager.getAllSellableMap().size()/ USABLE_SIZE_SELL_MENU;
     }
 
     private static int page(InventoryClickEvent event) {
-        String title = plainText(event.getView().title());
-
-        int start = title.indexOf("Page ") + 5;
-        int end = title.indexOf(")", start);
-
-        try {
-            return max(0, Integer.parseInt(title.substring(start, end)) - 1);
-        } catch (Exception ex) {
-            return 0;
+        if (event.getInventory().getHolder() instanceof PageMenuHolder holder) {
+            return holder.getPage();
+        }else{
+            System.out.println("Inventory is not a PageMenuHolder");
         }
+        return 0;
     }
 
 
@@ -223,10 +217,15 @@ public class NewShopGUI implements Listener {
             return;
         }
 
-        if (event.getSlot() == 46) openBuyMenu(player, max(page(event)-1,0));
-        if (event.getSlot() == 53) openBuyMenu(player, min(getMaxPages(),page(event)+1));
-
+        if (isNavItem(event.getCurrentItem(), ArrowDirection.LEFT)){
+            openBuyMenu(player, max(page(event)-1,0));
+        }
+        if (isNavItem(event.getCurrentItem(), ArrowDirection.RIGHT)){
+            openBuyMenu(player, min(getMaxBuyPages(),page(event)+1));
+        }
+        if (event.getSlot() >= USABLE_SIZE_BUY_MENU) return;
         int idx = event.getSlot() + page(event)* USABLE_SIZE_BUY_MENU;
+        System.out.println(idx + " page: " + page(event) + " slot: " + event.getSlot() + " size: " + ItemManager.getAllBuyableItemStacks(player).size());
         if (idx >= ItemManager.getAllBuyableItemStacks(player).size()) return;
 
         CustomItem item = ItemManager.getAllBuyableItemStacks(player).get(idx);
@@ -253,6 +252,15 @@ public class NewShopGUI implements Listener {
         }
         ShopSellMenuHolder holder = (ShopSellMenuHolder)event.getView().getTopInventory().getHolder();
         if (holder == null) return;
+
+        if (isNavItem(event.getCurrentItem(), ArrowDirection.LEFT)){
+            openSellMenu(player, holder.isShowingAllItems(), max(page(event)-1,0));
+            return;
+        }
+        if (isNavItem(event.getCurrentItem(), ArrowDirection.RIGHT)){
+            openSellMenu(player, holder.isShowingAllItems(), min(getMaxSellPages(holder.isShowingAllItems()),page(event)+1));
+            return;
+        }
 
         if (Objects.equals(getButtonId(event.getCurrentItem()), "sellable_item")){
             Price price = ItemManager.getAllSellableMap().get(event.getCurrentItem().getType());
@@ -282,7 +290,7 @@ public class NewShopGUI implements Listener {
         }
 
         if (Objects.equals(getButtonId(event.getCurrentItem()), "toggle_show_all")){
-            openSellMenu(player, !(holder).isShowingAllItems());
+            openSellMenu(player, !(holder).isShowingAllItems(), page(event));
         }
     }
 
@@ -294,7 +302,7 @@ public class NewShopGUI implements Listener {
             return;
         }
         if (Objects.equals(getButtonId(event.getCurrentItem()), "sell_button")){
-            openSellMenu(player, false);
+            openSellMenu(player, false, 0);
             return;
         }
     }

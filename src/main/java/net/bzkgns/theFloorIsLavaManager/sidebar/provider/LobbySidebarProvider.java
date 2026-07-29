@@ -4,6 +4,7 @@ import net.bzkgns.theFloorIsLavaManager.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitData;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
+import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.sidebar.SidebarProvider;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
@@ -42,16 +43,16 @@ public class LobbySidebarProvider extends SidebarProvider {
     @Override
     protected ComponentSidebarLayout createLayout(Player player) {
 
-        titleAnimation = createGradientAnimation(Component.text("---- Lobby ----"));
+        titleAnimation = createGradientAnimation(Messages.component(player, "sidebar.lobby_title"));
 
         PlayerBalance playerBalance = TheFloorIsLavaManager.getInstance().getGameManager().getMoneyManager().getBalance(player.getUniqueId());
 
         SidebarComponent lines = SidebarComponent.builder()
-                .addStaticLine(Component.text("Équipe: "))
+                .addStaticLine(Messages.component(player, "sidebar.team"))
                 .addDynamicLine(() -> {
                     TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
                     if (teamData == null) {
-                        return Component.text("   Aucune équipe");
+                        return Component.text("   ").append(Messages.component(player, "sidebar.no_team"));
                     } else {
                         return Component.text("   ").append(teamData.getName());
                     }
@@ -78,10 +79,12 @@ public class LobbySidebarProvider extends SidebarProvider {
                 .addDynamicLine(() -> getTeamMemberTextOfPlayer(player, teamOffset+1))
                 .addDynamicLine(() -> getTeamMemberTextOfPlayer(player, teamOffset+2))
                 .addDynamicLine(() -> getTeamMemberTextOfPlayer(player, teamOffset+3))
-                .addStaticLine(Component.text("Kit :"))
+                .addStaticLine(Messages.component(player, "sidebar.kit"))
                 .addDynamicLine(()-> {
                     KitData kitData = KitManager.getInstance().getPlayerKit(player);
-                    return kitData == null ? Component.text("   Aucun") : Component.text("   ").append(kitData.getDisplayName());
+                    return kitData == null ? Component.text("   ")
+                            .append(Messages.component(player, "sidebar.no_kit")) :
+                            Component.text("   ").append(kitData.getDisplayName());
                 })
                 .addStaticLine(playerBalance.prefixDisplayMaterial(player))
                 .addDynamicLine(() -> Component.text("    ").append(playerBalance.displayMaterial(player, false)))

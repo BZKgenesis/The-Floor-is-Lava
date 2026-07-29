@@ -20,10 +20,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
+@SuppressWarnings("UnstableApiUsage")
 public class GuiUtils {
-    public static ItemStack createItem(Material mat, String name) {
-        return createItem(mat, name, null, "");
-    }
 
     public static ItemStack createItem(Material mat, String name, String customModelData) {
         return createItem(mat, name, null, customModelData);
@@ -41,6 +39,55 @@ public class GuiUtils {
         it.setItemMeta(m);
         return it;
     }
+
+
+
+    public enum ArrowDirection {
+        LEFT, RIGHT
+    }
+
+    public static ItemStack navItem(Component name, ArrowDirection direction) {
+        ItemStack it = new ItemStack(Material.ARROW);
+        switch (direction){
+            case LEFT -> {
+                it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("left"));
+                ItemMeta meta = it.getItemMeta();
+                meta.getPersistentDataContainer().set(new NamespacedKey(TheFloorIsLavaManager.getInstance(), "buttonId"), PersistentDataType.STRING, "left");
+                it.setItemMeta(meta);
+            }
+            case RIGHT -> {
+                it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("right"));
+                ItemMeta meta = it.getItemMeta();
+                meta.getPersistentDataContainer().set(new NamespacedKey(TheFloorIsLavaManager.getInstance(), "buttonId"), PersistentDataType.STRING, "right");
+                it.setItemMeta(meta);
+            }
+        }
+
+        ItemMeta meta = it.getItemMeta();
+        meta.displayName(name);
+        it.setItemMeta(meta);
+        return it;
+    }
+
+    public static boolean isNavItem(ItemStack stack, ArrowDirection direction) {
+        if (stack == null) return false;
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null) return false;
+        String buttonId = meta.getPersistentDataContainer().get(new NamespacedKey(TheFloorIsLavaManager.getInstance(), "buttonId"), PersistentDataType.STRING);
+        if (buttonId==null) return false;
+        if (buttonId.isEmpty()) return false;
+        switch (direction){
+            case LEFT -> {
+                return "left".equals(buttonId);
+            }
+            case RIGHT -> {
+                return "right".equals(buttonId);
+            }
+        }
+        return false;
+    }
+
+
 
     // Variantes acceptant un Component (utilisées pour les libellés traduits via LangManager/Messages)
     public static ItemStack createItem(Material mat, Component name) {
@@ -133,7 +180,6 @@ public class GuiUtils {
             }
             return false;
         }
-        if (!(event.getClickedInventory() instanceof CraftInventoryCustom)) return false;
-        return true;
+        return event.getClickedInventory() instanceof CraftInventoryCustom;
     }
 }

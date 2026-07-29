@@ -49,6 +49,8 @@ PATTERNS = [
     r'\s*Messages\.send[^\(]*\([^"]*"([^"]*)"',
     r'\s*Messages\.broadcast[^\(]*\(\s*"([^"]*)"',
     r'\s*Messages\.string\([^"]*"([^"]*)"',
+    r'\s*Messages\.component\([^"]*"([^"]*)"',
+    r'\s*super\("[^"]*",\n\s*"([^\.]*\.[^"]*)",',
     
 ]
 

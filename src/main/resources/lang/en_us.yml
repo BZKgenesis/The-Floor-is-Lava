@@ -94,9 +94,16 @@ gui:
   give_all_menu_title: "<gold>Give all available items"
   shop:
     title: "<gold>SHop menu <gray>(Page <page>)"
+    main_title: "<gold>Shop menu"
+    buy_title: "<gold>Buy menu <gray>(Page <page>)"
+    sell_title: "<gold>Sell menu <gray>(Page <page>)"
     click_to_exchange: "<green>Click to exchange"
     next_page: "<yellow>Next →"
     previous_page: "<yellow>← Previous"
+    show_unavailable_items: "<yellow>Show all items"
+    hide_unavailable_items: "<yellow>Hide unavailable items"
+    buy: "<yellow>Buy"
+    sell: "<yellow>Sell"
   kit:
     click_to_choose: "Click to choose the kit <kit_name>"
     menu_title: "Choose a kit"
@@ -136,6 +143,14 @@ dialog:
   open_shop_title: "Open the shop"
   open_team_management_title: "Manage the team"
   quick_actions_title: "Quick actions"
+  gamble:
+    title: "Gamble"
+    description: "Click to gamble with your resources and materials to get more or less of them"
+    bet_label_resource: "Resource to bet"
+    bet_label_material: "Material to bet"
+    bet_button: "Place bet"
+    bet_button_desc: "Click to place your bet"
+    cancel_bet_desc: "Click to cancel your bet"
 
 button:
   create_team: "Create a team"
@@ -265,6 +280,12 @@ items:
   throwable_iron_golem:
     display_name: "Throwable Iron Golem"
     lore: "Allows you to throw an iron golem which protects your team and attacks enemies"
+  new_shop:
+    display_name: "Shop"
+    lore: "Allows you to access the shop"
+  gambling:
+    display_name: "Gambling"
+    lore: "Allows you to gamble with your resources and materials to get more or less of them"
 
 config:
   game:
@@ -294,3 +315,23 @@ config:
     spawn-spawn-structure: "Whether the spawn structure should be generated at spawn"
     center-x: "X coordinate of the map's center"
     center-z: "Z coordinate of the map's center"
+
+money:
+  resource: "<gray>Resources:"
+  material: "<gray>Materials:"
+
+sidebar:
+  game_title: "--- Game ---"
+  center: "<gray>Center: "
+  distance: "( <distance> blocks )"
+  lobby_title: "--- Lobby ---"
+  team: "<gray>Team:"
+  no_team: "<red>None"
+  kit: "<gray>Kit:"
+  no_kit: "<red>None"
+
+gambling:
+  jackpot: "<prefix><gold>Jackpot! You multiplied your resources and materials by <multiplier>!"
+  broadcast_jackpot: "<prefix><player><gold> multiplied their resources and materials by <multiplier>!"
+  two_symbols: "<prefix><green>You got two symbols! You multiplied your resources and materials by <multiplier>!"
+  loose: "<prefix><red>You lost your bet, you have lost your resources and materials."

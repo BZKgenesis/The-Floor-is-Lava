@@ -116,7 +116,7 @@ public class GameManager {
         player.setAllowFlight(true);
         player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, -1, 1, false, false, false));
 
-        plugin.getGameManager().getMoneyManager().setBalance(player.getUniqueId(), 99999999, 99999999, 99999999);
+        plugin.getGameManager().getMoneyManager().setBalance(player.getUniqueId(), 10000, 10000, 0);
     }
 
 

@@ -1,9 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.utils.menu;
 
-public class ShopSellMenuHolder extends MenuHolder {
+public class ShopSellMenuHolder extends PageMenuHolder {
     private final Boolean isShowingAllItems;
-    public ShopSellMenuHolder(MenuType type, Boolean isShowingAllItems) {
-        super(type);
+    public ShopSellMenuHolder(MenuType type, int page, Boolean isShowingAllItems) {
+        super(type,page);
         this.isShowingAllItems = isShowingAllItems;
     }
 

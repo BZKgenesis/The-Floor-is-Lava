@@ -14,15 +14,9 @@ import net.bzkgns.theFloorIsLavaManager.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.GamblingInstance;
 import net.bzkgns.theFloorIsLavaManager.items.items.GamblingItem;
-import net.bzkgns.theFloorIsLavaManager.items.items.ShopItem;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
-import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
-import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
-import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,7 +26,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Optional;
 
+@SuppressWarnings("UnstableApiUsage")
 public class GamblingListener implements Listener {
 
     @EventHandler
@@ -62,27 +58,27 @@ public class GamblingListener implements Listener {
     public static void openGambleMenu(Player p) {
         PlayerBalance balance = TheFloorIsLavaManager.getInstance().getGameManager().getMoneyManager().getBalance(p.getUniqueId());
         Dialog dialog = Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Messages.component(p, "dialog.gamble_title"))
+                .base(DialogBase.builder(Messages.component(p, "dialog.gamble.title"))
                         .inputs(List.of(
-                                DialogInput.numberRange("bet_resource", Messages.component(p, "dialog.bet_label"), 0, balance.resource())
-                                        .initial(0f)
+                                DialogInput.numberRange("bet_resource", Messages.component(p, "dialog.gamble.bet_label_resource"), 0, balance.resource())
+                                        .initial(0f).step(1f)
                                         .build(),
-                                DialogInput.numberRange("bet_material", Messages.component(p, "dialog.bet_label"), 0, balance.material())
-                                        .initial(0f)
+                                DialogInput.numberRange("bet_material", Messages.component(p, "dialog.gamble.bet_label_material"), 0, balance.material())
+                                        .initial(0f).step(1f)
                                         .build()
                         ))
                         .build()
                 )
                 .type(DialogType.confirmation(
                         ActionButton.create(
-                                Messages.component(p, "dialog.bet_button").color(TextColor.color(0xAEFFC1)),
-                                Messages.component(p, "dialog.bet_button_desc"),
+                                Messages.component(p, "dialog.gamble.bet_button").color(TextColor.color(0xAEFFC1)),
+                                Messages.component(p, "dialog.gamble.bet_button_desc"),
                                 100,
                                 DialogAction.customClick(Key.key("tfl:bet/confirm"), null)
                         ),
                         ActionButton.create(
                                 Messages.component(p, "dialog.cancel_button").color(TextColor.color(0xFFA0B1)),
-                                Messages.component(p, "dialog.cancel_bet_desc"),
+                                Messages.component(p, "dialog.gamble.cancel_bet_desc"),
                                 100,
                                 null // If we set the action to null, it doesn't do anything and closes the dialog
                         )
@@ -107,8 +103,16 @@ public class GamblingListener implements Listener {
         }
         Player player = conn.getPlayer();
 
-        int betResource = Math.round(view.getFloat("bet_resource"));
-        int betMaterial = Math.round(view.getFloat("bet_material"));
+        Float betResourceFloat = view.getFloat("bet_resource");
+        if (betResourceFloat == null) {
+            betResourceFloat = 0f;
+        }
+        Float betMaterialFloat = view.getFloat("bet_material");
+        if (betMaterialFloat == null) {
+            betMaterialFloat = 0f;
+        }
+        int betResource = Math.round(betResourceFloat);
+        int betMaterial = Math.round(betMaterialFloat);
 
         Price betPrice = new Price(betResource, betMaterial, 0);
 
