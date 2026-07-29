@@ -146,8 +146,8 @@ dialog:
   gamble:
     title: "Gamble"
     description: "Click to gamble with your resources and materials to get more or less of them"
-    bet_label_resource: "Resource to bet"
-    bet_label_material: "Material to bet"
+    bet_label_resource: "Resource to bet <blue> $"
+    bet_label_material: "Material to bet <green> $"
     bet_button: "Place bet"
     bet_button_desc: "Click to place your bet"
     cancel_bet_desc: "Click to cancel your bet"

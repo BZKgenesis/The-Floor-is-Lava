@@ -12,7 +12,7 @@ import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLavaManager.currency.Price;
-import net.bzkgns.theFloorIsLavaManager.items.abilities.GamblingInstance;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.gambling.GamblingInstance;
 import net.bzkgns.theFloorIsLavaManager.items.items.GamblingItem;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.kyori.adventure.key.Key;
@@ -26,7 +26,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
-import java.util.Optional;
 
 @SuppressWarnings("UnstableApiUsage")
 public class GamblingListener implements Listener {
@@ -60,10 +59,10 @@ public class GamblingListener implements Listener {
         Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(Messages.component(p, "dialog.gamble.title"))
                         .inputs(List.of(
-                                DialogInput.numberRange("bet_resource", Messages.component(p, "dialog.gamble.bet_label_resource"), 0, balance.resource())
+                                DialogInput.numberRange("bet_material", Messages.component(p, "dialog.gamble.bet_label_material"), 0, balance.material())
                                         .initial(0f).step(1f)
                                         .build(),
-                                DialogInput.numberRange("bet_material", Messages.component(p, "dialog.gamble.bet_label_material"), 0, balance.material())
+                                DialogInput.numberRange("bet_resource", Messages.component(p, "dialog.gamble.bet_label_resource"), 0, balance.resource())
                                         .initial(0f).step(1f)
                                         .build()
                         ))
@@ -114,7 +113,7 @@ public class GamblingListener implements Listener {
         int betResource = Math.round(betResourceFloat);
         int betMaterial = Math.round(betMaterialFloat);
 
-        Price betPrice = new Price(betResource, betMaterial, 0);
+        Price betPrice = new Price(betMaterial, betResource, 0);
 
         if (TheFloorIsLavaManager.getInstance().getGameManager().getMoneyManager().subtractBalance(player.getUniqueId(),betPrice)){
             new GamblingInstance(player, betPrice);

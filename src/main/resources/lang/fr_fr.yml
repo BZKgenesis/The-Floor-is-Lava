@@ -146,8 +146,8 @@ dialog:
   gamble:
     title: "Parier"
     description: "Parier vos ressources pour tenter de gagner plus !"
-    bet_label_resource: "Ressource"
-    bet_label_material: "Matériau"
+    bet_label_resource: "Ressource <blue> $"
+    bet_label_material: "Matériau <green> $"
     bet_button: "Parier"
     bet_button_desc: "Cliquer pour parier vos ressources."
     cancel_bet_desc: "Cliquer pour annuler le pari."

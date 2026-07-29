@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.items.abilities.gambling.GamblingEngine;
 import net.bzkgns.theFloorIsLavaManager.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLavaManager.kits.KitData;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
@@ -143,7 +144,16 @@ public class DebugCommands {
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 })
-                ));
+                )).then(Commands.literal("gamble")
+                        .then(Commands.literal("computeRtp")
+                                .executes(context -> {
+                                    if (context.getSource().getExecutor() instanceof Player player) {
+                                        double rtp = GamblingEngine.computeRTP();
+                                        player.sendMessage(Component.text(rtp));
+                                    }
+                                    return Command.SINGLE_SUCCESS;
+                                }))
+                        );
     }
 
     public static void countOres(CommandSender sender, World world, int radiusChunks) {

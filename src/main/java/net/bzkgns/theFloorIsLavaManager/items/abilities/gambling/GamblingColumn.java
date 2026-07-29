@@ -1,4 +1,4 @@
-package net.bzkgns.theFloorIsLavaManager.items.abilities;
+package net.bzkgns.theFloorIsLavaManager.items.abilities.gambling;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.kyori.adventure.text.Component;
@@ -18,35 +18,42 @@ import java.util.List;
 public class GamblingColumn {
 
     private static final int NB_TEXTS = 6;
-
-    // Index du slot (0 = bas ... NB_TEXTS-1 = haut) qui correspond à la ligne
-    // de résultat visible par le joueur (là où se trouve le "repère"/la vitre).
-    // Si visuellement le symbole gagnant n'est pas sur la bonne ligne dans le
-    // monde, c'est CETTE valeur qu'il faut ajuster (0..NB_TEXTS-1).
     private static final int REVEAL_INDEX = 2;
 
     private static final float SYMBOL_HEIGHT = 0.25f;
-
     private static final float BOTTOM = -0.625f;
 
-    // Durée (en ticks) pour parcourir UNE case. Plus la valeur est petite,
-    // plus ça va vite. On part rapide et on ralentit case par case.
-    private static final int START_STEP_TICKS = 2;
-    private static final int MAX_STEP_TICKS = 10;
-    private static final int STEP_TICKS_INCREMENT = 1;
+    // Rotation appliquée par case parcourue (45°). Augmente pour un effet
+    // de "roue" plus prononcé, diminue pour un tilt plus subtil.
+    private static final float ROTATION_PER_STEP = (float) (Math.PI / 4f);
 
+    // Décalage entre l'origine locale du TextDisplay (généralement en bas
+    // du texte) et son centre visuel. C'est CETTE valeur qui pilote le
+    // pivot : si le texte semble encore pivoter par le bas, augmente-la ;
+    // si le pivot dépasse le centre, réduis-la. À ajuster visuellement,
+    // 0.15f est un bon point de départ pour une échelle de texte par défaut.
+    private static final float PIVOT_OFFSET = 0.15f;
+    private static final float PIVOT_OFFSET_Z = 0.35f;
+
+    private static final int START_STEP_TICKS = 2;
+    private static final int MAX_STEP_TICKS = 12;
+    private static final float STEP_TICKS_INCREMENT = 0.25f;
+
+    // On garde la position "logique" de chaque display à part de la
+    // Transformation elle-même : la Transformation contient une position
+    // Y déjà compensée par le pivot, donc plus utilisable comme source de
+    // vérité pour le prochain calcul (sinon on accumule l'erreur / la
+    // rotation devient incohérente, cf. bug initial).
     private final List<TextDisplay> textDisplays = new ArrayList<>();
+    private final List<Float> logicalYs = new ArrayList<>();
+
     private final Player player;
 
-    // Symbole affiché dans le slot 0 (le plus bas)
     private int currentIndex;
     private final int resultIndex;
-
-    // Nombre minimum de tours complets (sur tous les symboles) avant de
-    // pouvoir s'arrêter sur le résultat. Sert à décaler l'arrêt entre les
-    // colonnes (ex: 1, 2, 3) comme sur une vraie machine à sous.
     private final int minLoops;
 
+    private float stepTicksFloat = START_STEP_TICKS;
     private int stepTicks = START_STEP_TICKS;
     private int stepsDone = 0;
 
@@ -67,7 +74,7 @@ public class GamblingColumn {
                     player.getEyeLocation(),
                     TextDisplay.class,
                     td -> {
-                        td.setBillboard(Display.Billboard.CENTER);
+                        td.setBillboard(Display.Billboard.FIXED);
                         td.setBackgroundColor(Color.fromARGB(0));
                         td.text(getSymbol(symbolIndex));
                         td.setInterpolationDelay(0);
@@ -75,6 +82,7 @@ public class GamblingColumn {
                     }
             );
             textDisplays.add(display);
+            logicalYs.add(y);
         }
     }
 
@@ -82,7 +90,7 @@ public class GamblingColumn {
         scheduleNextStep(0L);
     }
 
-    private void scheduleNextStep(long delay) {
+    private void scheduleNextStep(@SuppressWarnings("SameParameterValue") long delay) {
         taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(
                 TheFloorIsLavaManager.getInstance(),
                 this::performStep,
@@ -90,15 +98,13 @@ public class GamblingColumn {
         );
     }
 
-    /**
-     * Fait glisser chaque texte d'une case (SYMBOL_HEIGHT) vers le bas,
-     * de façon fluide, sur "stepTicks" ticks.
-     */
     private void performStep() {
-        for (TextDisplay display : textDisplays) {
+        for (int i = 0; i < textDisplays.size(); i++) {
+            TextDisplay display = textDisplays.get(i);
             display.setVisibleByDefault(true);
-            Transformation current = display.getTransformation();
-            float y = current.getTranslation().y() - SYMBOL_HEIGHT;
+
+            float y = logicalYs.get(i) - SYMBOL_HEIGHT;
+            logicalYs.set(i, y);
 
             display.setInterpolationDelay(0);
             display.setInterpolationDuration(stepTicks);
@@ -106,7 +112,6 @@ public class GamblingColumn {
         }
         player.playSound(player, "entity.chicken_picky.step", 1f, 0.5f);
 
-        // Une fois le glissement terminé, on recycle le symbole du bas
         taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(
                 TheFloorIsLavaManager.getInstance(),
                 this::finishStep,
@@ -114,31 +119,29 @@ public class GamblingColumn {
         );
     }
 
-    /**
-     * Le texte qui était en bas est maintenant hors écran (il a parcouru
-     * exactement une case de plus que sa position visible). On le replace
-     * tout en haut avec le symbole suivant, SANS interpolation puisqu'il
-     * est invisible à cet instant (évite l'effet de "flash"/saccade).
-     */
     private void finishStep() {
         TextDisplay recycled = textDisplays.removeFirst();
+        logicalYs.removeFirst();
         recycled.setVisibleByDefault(false);
 
         currentIndex = modulo(currentIndex + 1);
         stepsDone++;
 
         int newTopSymbolIndex = modulo(currentIndex + NB_TEXTS - 1);
+        float topY = slotY(NB_TEXTS - 1);
+
         recycled.text(getSymbol(newTopSymbolIndex));
         recycled.setInterpolationDelay(0);
         recycled.setInterpolationDuration(0); // snap instantané, hors écran
-        recycled.setTransformation(createTransformation(slotY(NB_TEXTS - 1)));
+        recycled.setTransformation(createTransformation(topY));
 
         textDisplays.add(recycled);
+        logicalYs.add(topY);
 
         int revealSymbolIndex = modulo(currentIndex + REVEAL_INDEX);
         boolean onResult = revealSymbolIndex == resultIndex;
 
-        int symbolCount = GamblingInstance.GamblingSymbol.values().length;
+        int symbolCount = GamblingSymbol.values().length;
         int loopsCompleted = stepsDone / symbolCount;
 
         if (onResult && loopsCompleted >= minLoops) {
@@ -147,7 +150,8 @@ public class GamblingColumn {
         }
 
         if (stepTicks < MAX_STEP_TICKS) {
-            stepTicks += STEP_TICKS_INCREMENT;
+            stepTicksFloat += STEP_TICKS_INCREMENT;
+            stepTicks = Math.round(stepTicksFloat);
         }
 
         scheduleNextStep(0L);
@@ -163,36 +167,59 @@ public class GamblingColumn {
         };
         player.playSound(player, "minecraft:block.note_block.pling", 1f, pitch);
 
-        // Tout est déjà exactement aligné grâce au système par pas,
-        // on force juste une interpolation propre / instantanée.
-        for (TextDisplay display : textDisplays) {
-            display.setInterpolationDelay(0);
-            display.setInterpolationDuration(0);
-        }
+//        for (int i = 0; i < textDisplays.size(); i++) {
+//            TextDisplay display = textDisplays.get(i);
+//            display.setInterpolationDelay(0);
+//            display.setInterpolationDuration(5);
+//            display.setTransformation(createTransformation(logicalYs.get(i))); // <- rotation réellement appliquée
+//        }
     }
 
     private float slotY(int slotIndex) {
         return BOTTOM + slotIndex * SYMBOL_HEIGHT;
     }
 
+    /**
+     * Angle purement déterministe en fonction de la position Y logique.
+     * Fini de relire l'état de la Transformation précédente : ça évite
+     * toute dérive/incohérence liée à la normalisation interne du quaternion.
+     */
+    private float rotationForY(float y) {
+        float raw = (float) ((-((y - BOTTOM) / SYMBOL_HEIGHT) * ROTATION_PER_STEP) + Math.PI/2.0); // signe inversé
+        float twoPi = (float) (2 * Math.PI);
+        raw = raw % twoPi;
+        return raw < 0 ? raw + twoPi : raw;
+    }
+
     private Transformation createTransformation(float y) {
+        float angle = rotationForY(y);
+        return buildTransformation(y, angle);
+    }
+
+    private Transformation buildTransformation(float y, float angle) {
+        float cos = (float) Math.cos(angle);
+        float sin = (float) Math.sin(angle);
+
+        // Compensation du pivot : sans ça, la rotation se ferait autour du
+        // bas du texte au lieu de son centre visuel.
+        float compensatedY = y + PIVOT_OFFSET * (1 - cos);
+        float compensatedZ = -PIVOT_OFFSET * sin + PIVOT_OFFSET_Z * cos - 0.25f; // <- c'est ce terme qui fait bouger Z
+
         return new Transformation(
-                new Vector3f(0, y, 0),
-                new AxisAngle4f(),
+                new Vector3f(0, compensatedY, compensatedZ),
+                new AxisAngle4f(angle, 1, 0, 0),
                 new Vector3f(1, 1, 1),
                 new AxisAngle4f()
         );
     }
 
     private int modulo(int value) {
-        int size = GamblingInstance.GamblingSymbol.values().length;
+        int size = GamblingSymbol.values().length;
         return ((value % size) + size) % size;
     }
 
     private Component getSymbol(int index) {
-        return GamblingInstance.GamblingSymbol
-                .values()[index]
-                .getSymbol();
+        return GamblingSymbol.values()[index].getSymbol();
     }
 
     public List<TextDisplay> getTextDisplays() {
@@ -210,4 +237,3 @@ public class GamblingColumn {
         return stopped;
     }
 }
-
