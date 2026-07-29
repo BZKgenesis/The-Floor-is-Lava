@@ -32,4 +32,7 @@ public record Price(Integer material, Integer resource, Integer money) {
     public Price mul(int multiplier) {
         return new Price(this.material * multiplier, this.resource * multiplier, this.money * multiplier);
     }
+    public Price mul(float multiplier) {
+        return new Price(Math.round(this.material * multiplier),Math.round( this.resource * multiplier),Math.round( this.money * multiplier));
+    }
 }

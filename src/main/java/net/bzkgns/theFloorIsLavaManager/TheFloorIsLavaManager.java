@@ -125,7 +125,8 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new HealCampItem(),
                 new NewShopItem(),
                 new WoolItem(),
-                new FoodItem()
+                new FoodItem(),
+                new GamblingItem()
         );
         if (Bukkit.getWorld(GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
@@ -164,6 +165,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new HealCampListener(), this);
         getServer().getPluginManager().registerEvents(new ThrowableIronGolemListener(), this);
         getServer().getPluginManager().registerEvents(new NewShopListener(), this);
+        getServer().getPluginManager().registerEvents(new GamblingListener(), this);
 
 
 
