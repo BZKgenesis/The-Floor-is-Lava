@@ -271,7 +271,8 @@ public class TheFloorIslavaListener implements Listener {
                 for (int slotId = 0; slotId < 36; slotId++){
                     ItemStack stack = player.getInventory().getItem(slotId);
                     if (stack!=null && shouldGiveItem(stack)){
-                        assassin.give(stack);
+                        assassin.give(stack.clone());
+                        stack.setAmount(0);
                     }
                 }
                 event.setKeepInventory(true);

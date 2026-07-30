@@ -111,11 +111,13 @@ public class LangManager {
         }
 
         String prefix = lang.getString("prefix", "");
+        String prefixOp = lang.getString("prefix_op", "");
 
         return mm.deserialize(
                 text,
                 TagResolver.resolver(
                         Placeholder.parsed("prefix", prefix),
+                        Placeholder.parsed("prefix_op", prefixOp),
                         TagResolver.resolver(placeholders)
                 )
         );

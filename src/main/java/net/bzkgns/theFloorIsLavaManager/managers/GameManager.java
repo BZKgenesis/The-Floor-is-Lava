@@ -51,6 +51,7 @@ public class GameManager {
     private final ConfigManager<GameConfig> gameConfigManager;
 
     private int phaseRisingTask = -1;
+    private final List<Integer> alertTasks = new ArrayList<>();
     private int bossBarTask = -1;
 
     private boolean noRespawn = false;
@@ -287,13 +288,14 @@ public class GameManager {
                         Placeholder.unparsed("time", formatTime(p,lavaRisingDelay, TextUtils.TimeFormat.SHORTEST))));
         //             5min  3min  1min  30s  10s   5s  4s  3s  2s  1s
         int[] delay = {6000, 3600, 1200, 600, 200, 100, 80, 60, 40, 20};
+        alertTasks.clear();
         for (int d : delay) {
             if (lavaRisingDelay > d) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
+                alertTasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
                         () -> plugin.getServer().getOnlinePlayers().forEach(
                                 p->Messages.actionBar(p,
                                         "info.lava_rising_delay",
-                                        Placeholder.unparsed("time", formatTime(p,lavaRisingDelay, TextUtils.TimeFormat.SHORTEST)))), lavaRisingDelay - d);
+                                        Placeholder.unparsed("time", formatTime(p,lavaRisingDelay, TextUtils.TimeFormat.SHORTEST)))), lavaRisingDelay - d));
             }
         }
         if (!dangerManager.startPreparation()){
@@ -317,6 +319,21 @@ public class GameManager {
                 this::startRisingPhase,
                 gameConfigManager.getInt(GameConfigKeys.LAVA_RISING_DELAY)
         );
+    }
+
+    public boolean earlyStartRisingPhase() {
+        if (state != GameState.RUNNING) {
+            return false;
+        }
+        if (dangerManager.getState() != DangerManager.DangerState.PREPARATION) return false;
+        cancelBossBarTask();
+        startRisingPhase();
+        Bukkit.getScheduler().cancelTask(phaseRisingTask);
+        for (int taskId : alertTasks) {
+            if (Bukkit.getScheduler().isQueued(taskId))
+                Bukkit.getScheduler().cancelTask(taskId);
+        }
+        return true;
     }
 
     public boolean isGameWinning() {
@@ -383,6 +400,10 @@ public class GameManager {
         state = GameState.LOBBY;
         playerInGame.clear();
         noRespawn = false;
+        for (Player p : plugin.getServer().getOnlinePlayers()) {
+            initLobbyPlayer(p);
+        }
+        Messages.broadcastOp("info.game_stopped");
     }
 
     public GameState getState() {
@@ -447,7 +468,7 @@ public class GameManager {
         if (state != GameState.RUNNING) {
             return;
         }
-        state = GameState.LOBBY;
+        state = GameState.ENDING;
         cancelBossBarTask();
         if (bossbar != null) {
             bossbar.removeAll();
@@ -456,6 +477,7 @@ public class GameManager {
         dangerManager.reset();
         playerInGame.clear();
         noRespawn = false;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this::stopGame, 20L * 5); // Attendre 5 secondes avant de revenir au lobby
     }
 
     public MoneyManager getMoneyManager() {

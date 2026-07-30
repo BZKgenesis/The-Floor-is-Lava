@@ -97,6 +97,16 @@ public class TheFloorIsLavaCommands {
         root.then(Commands.literal("start")
                 .requires(sender -> sender.getSender().isOp())
                 .executes(ctx -> start(ctx,gameManager)));
+        root.then(Commands.literal("earlyRise")
+                .requires(sender -> sender.getSender().isOp())
+                .executes(ctx -> {
+                    if (gameManager.earlyStartRisingPhase()){
+                        Messages.sendPing(ctx.getSource().getSender(), "command.early_rise_success");
+                    }else{
+                        Messages.sendError(ctx.getSource().getSender(), "command.early_rise_fail");
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }));
         root.then(Commands.literal("stop")
                 .requires(sender -> sender.getSender().isOp())
                 .executes(TheFloorIsLavaCommands::stop));
