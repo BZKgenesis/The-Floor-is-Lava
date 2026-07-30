@@ -11,7 +11,7 @@ from itertools import groupby
 
 JAVA_ROOT = "./src"
 LANG_ROOT = "./src/main/resources/lang"
-OUTPUT_FILE = "translation_candidates.txt"
+OUTPUT_FILE = "./scripts/translation_candidates.txt"
 
 # -------------------------------------------------------
 # Chargement des traductions existantes
@@ -51,6 +51,7 @@ PATTERNS = [
     r'\s*Messages\.string\([^"]*"([^"]*)"',
     r'\s*Messages\.component\([^"]*"([^"]*)"',
     r'\s*super\("[^"]*",\n\s*"([^\.]*\.[^"]*)",',
+    r'\s*new ConfigKey<>\(\n\s*"[^"]*",\n\s*"([^"]*)",',
     
 ]
 

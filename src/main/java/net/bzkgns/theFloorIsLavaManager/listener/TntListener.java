@@ -1,7 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.listener;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLavaManager.items.items.TntItem;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
@@ -23,13 +25,7 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 public class TntListener implements Listener {
-    private static final float TNT_KNOCKBACK_ENCHANT_MULTIPLIER = 0.2f;
-    private static final float TNT_KNOCKBACK_MULTIPLIER = 1.2f;
-    private static final float TNT_DAMAGE_REDUCTION = 0.25f;
-    private static final float TNT_RAYCAST_DISTANCE = 4.5f;
-    private static final int TNT_IMMUNE_DELAY_TICK = 5;
-    private static final float TNT_SPAWN_Y_VELOCITY = 0.5f;
-    private static final float TNT_POWER = 4.0f;
+    private final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
 
     private final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
@@ -41,7 +37,7 @@ public class TntListener implements Listener {
         RayTraceResult result = player.getWorld().rayTraceEntities(
                 player.getEyeLocation(),
                 player.getLocation().getDirection(),
-                TNT_RAYCAST_DISTANCE,
+                itemsConfig.getTntRaycastDistance(),
                 entity -> entity instanceof TNTPrimed
         );
 
@@ -53,16 +49,16 @@ public class TntListener implements Listener {
         if (tnt == null) {
             return;
         }
-        if (tnt.getTicksLived() < TNT_IMMUNE_DELAY_TICK) {
+        if (tnt.getTicksLived() < itemsConfig.getTntImmuneDelayTick()) {
             return;
         }
 
         Vector knockback = player.getLocation().getDirection()
                 .normalize()
-                .multiply(TNT_KNOCKBACK_MULTIPLIER);
+                .multiply(itemsConfig.getTntKnockbackMultiplier());
 
         int knockbackLevel = player.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.KNOCKBACK);
-        knockback.multiply(1f + knockbackLevel * TNT_KNOCKBACK_ENCHANT_MULTIPLIER);
+        knockback.multiply(1f + knockbackLevel * itemsConfig.getTntKnockbackEnchantmentMultiplier());
         knockback.setY(Math.abs(knockback.getY()));
         knockback = knockback.add(event.getPlayer().getVelocity());
         tnt.setVelocity(tnt.getVelocity().add(knockback));
@@ -79,7 +75,7 @@ public class TntListener implements Listener {
             BlockState blockState = tnt.getBlockData().createBlockState();
             blockState.setType(BlockUtils.getConcreteBlockByPlayer(player));
             tnt.setBlockData(blockState.getBlockData());
-            tnt.setYield(TNT_POWER);
+            tnt.setYield((float) itemsConfig.getTntPower());
             tnt.setSource(player);
             tnt.getPersistentDataContainer().set(
                     new NamespacedKey(plugin, "tnt_source"),
@@ -87,7 +83,7 @@ public class TntListener implements Listener {
                     player.getUniqueId().toString());
 
             tnt.setCustomNameVisible(true);
-            tnt.setVelocity( new Vector(0,TNT_SPAWN_Y_VELOCITY,0) );
+            tnt.setVelocity( new Vector(0,itemsConfig.getTntSpawnYVelocity(),0) );
 
             TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
             if (teamData != null) {
@@ -119,6 +115,6 @@ public class TntListener implements Listener {
             return;
 
 
-        event.setDamage(event.getDamage() * TNT_DAMAGE_REDUCTION);
+        event.setDamage(event.getDamage() * itemsConfig.getTntDamageReduction());
     }
 }

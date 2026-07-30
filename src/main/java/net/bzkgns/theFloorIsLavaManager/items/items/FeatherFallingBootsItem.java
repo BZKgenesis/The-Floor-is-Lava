@@ -3,9 +3,11 @@ package net.bzkgns.theFloorIsLavaManager.items.items;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLavaManager.currency.Price;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.items.CustomItem;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -19,6 +21,7 @@ import static net.bzkgns.theFloorIsLavaManager.utils.BlockUtils.RESOURCE_MATERIA
 
 @SuppressWarnings("UnstableApiUsage")
 public class FeatherFallingBootsItem extends CustomItem {
+    private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
     public FeatherFallingBootsItem() {
         super("feather_falling_boots",
                 "items.feather_falling_boots.display_name",
@@ -37,26 +40,26 @@ public class FeatherFallingBootsItem extends CustomItem {
             Attribute.GRAVITY,
             new AttributeModifier(
                     new NamespacedKey(TheFloorIsLavaManager.getInstance(), "feather_falling"),
-                    -0.5,
+                    itemsConfig.getFeatherFallingBootsGravity(),
                     AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         itemAttribute.addModifier(
                         Attribute.JUMP_STRENGTH,
                         new AttributeModifier(
                                 new NamespacedKey(TheFloorIsLavaManager.getInstance(), "jump_boost"),
-                                0.3,
+                                itemsConfig.getFeatherFallingBootsJumpStrength(),
                                 AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         itemAttribute.addModifier(
                         Attribute.SAFE_FALL_DISTANCE,
                         new AttributeModifier(
                                 new NamespacedKey(TheFloorIsLavaManager.getInstance(), "fall_distance"),
-                                5.0,
+                                itemsConfig.getFeatherFallingBootsSafeFallDistance(),
                                 AttributeModifier.Operation.ADD_SCALAR), EquipmentSlotGroup.FEET);
         item.setData(
                 DataComponentTypes.ATTRIBUTE_MODIFIERS,
                 itemAttribute.build());
         item.setData(
                 DataComponentTypes.ENCHANTMENTS,
-                ItemEnchantments.itemEnchantments().add(Enchantment.FEATHER_FALLING, 3));
+                ItemEnchantments.itemEnchantments().add(Enchantment.FEATHER_FALLING, itemsConfig.getFeatherFallingBootsEnchantmentLevel()));
         item.setData(
                 DataComponentTypes.MAX_STACK_SIZE,
                 1);

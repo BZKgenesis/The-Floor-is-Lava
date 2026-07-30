@@ -336,6 +336,45 @@ config:
     spawn-spawn-structure: "Si la structure de spawn doit être générée au spawn"
     center-x: "Coordonnée X du centre de la map"
     center-z: "Coordonnée Z du centre de la map"
+  items:
+    fireball:
+      cooldown: "Durée (ticks) de recharge de la boule de feu"
+      power: "Puissance de la boule de feu"
+      speed: "Vitesse de la boule de feu"
+      damage_reduction: "Réduction des dégâts de la boule de feu alliés"
+      place_fire: "Si la boule de feu doit mettre le feu aux blocs"
+    tnt:
+      damage_reduction: "Réduction des dégâts du TnT alliés"
+      raycast_distance: "Distance (blocs) du rayon d'explosion du TnT"
+      immune_delay_tick: "Durée (ticks) d'immunité après l'explosion du TnT"
+      spawn_y_velocity: "Vitesse verticale (blocs/tick) de l'entité TnT"
+      knockback_enchantment_multiplier: "Multiplicateur de recul de la TnT avec l'enchantement de recul"
+      knockback_multiplier: "Multiplicateur de base de la TnT"
+      power: "Puissance de l'explosion de la TnT"
+    parachute:
+      cooldown: "Durée (ticks) de recharge du parachute"
+      effect_duration: "Durée (ticks) de l'effet du parachute"
+    heal_camp:
+      max_alive_ticks: "Durée (ticks) de vie du camp de soin"
+      application_delay: "Durée (ticks) entre chaque application de soin"
+    throwable_iron_golem:
+      damage_per_tick: "Dégâts par tick infligé au golem de fer jetable"
+      max_distance: "Distance maximale (blocs) de detection des ennemies du golem de fer jetable"
+      attack_distance: "Distance (blocs) à laquelle le golem de fer jetable attaque"
+      attack_cooldown: "Durée (ticks) de recharge entre les attaques du golem de fer jetable"
+    team_inventory:
+      row_count: "Nombre de lignes de l'inventaire d'équipe"
+    snow_ball_plate:
+      fill_radius: "Rayon (blocs) de remplissage de la plaque de neige"
+    batte:
+      knockback_level: "Niveau de recul de la batte"
+    shears:
+      efficiency_level: "Niveau d'efficacité des ciseaux"
+    feather_falling_boots:
+      gravity: "Modificateur de gravité des bottes de chute. ADD_SCALAR"
+      jump_strength: "Modificateur de force de saut des bottes de chute. ADD_SCALAR"
+      safe_fall_distance: "Modificateur de distance de chute sécurisée des bottes de chute. ADD_SCALAR"
+      enchantment_level: "Niveau d'enchantement chute amortie des bottes de chute"
 
 money:
   resource: "<gray>Ressources:"

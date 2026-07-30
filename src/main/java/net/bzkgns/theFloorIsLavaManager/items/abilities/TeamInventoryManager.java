@@ -1,6 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.items.abilities;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
@@ -11,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TeamInventoryManager {
+
+    private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
 
     private static TeamInventoryManager instance = null;
     private final Plugin plugin;
@@ -28,7 +32,7 @@ public class TeamInventoryManager {
     }
     public TeamInventory getTeamInventory(String teamName) {
         return teamInventories.computeIfAbsent(teamName,
-                _ -> new TeamInventory(plugin,27));
+                _ -> new TeamInventory(plugin,9*itemsConfig.getTeamInventoryRowCount()));
     }
 
     public static class TeamInventory implements InventoryHolder {

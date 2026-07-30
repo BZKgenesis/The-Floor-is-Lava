@@ -3,7 +3,9 @@ package net.bzkgns.theFloorIsLavaManager.listener;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLavaManager.items.items.ParachuteItem;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -20,8 +22,7 @@ import java.awt.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ParachuteListener implements Listener {
-    private static final int PARACHUTE_COOLDOWN = 60;
-    private static final int PARACHUTE_EFFECT_DURATION = 60;
+    private final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
 
     @EventHandler
     public void onParachuteUsed(PlayerInteractEvent event){
@@ -46,10 +47,10 @@ public class ParachuteListener implements Listener {
                     itemDisplay.remove();
                     player.playSound(player, Sound.ITEM_LEAD_BREAK, 1, 1);
                     Bukkit.getScheduler().cancelTask(taskID);
-                }, PARACHUTE_EFFECT_DURATION);
+                }, itemsConfig.getParachuteEffectDuration());
         player.playSound(player, Sound.ITEM_ARMOR_EQUIP_LEATHER, 1, 1);
-        player.setCooldown(itemStack, PARACHUTE_EFFECT_DURATION);
+        player.setCooldown(itemStack, itemsConfig.getFireballCooldown());
         player.setVelocity(player.getVelocity().setY(0));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, PARACHUTE_COOLDOWN, 1, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, itemsConfig.getParachuteEffectDuration(), 1, false, false, false));
     }
 }

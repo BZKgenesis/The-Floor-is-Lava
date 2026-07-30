@@ -81,12 +81,14 @@ public class TheFloorIsLavaCommands {
 
     public static LiteralCommandNode<CommandSourceStack> registerTflCommands(GameManager gameManager, TheFloorIsLavaManager plugin){
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("tfl");
-        root.then(Commands.literal("config")
-                .requires(sender -> sender.getSender().isOp())
-                .then(registerConfigNode(ConfigRegistry.getConfigManager("danger")))
-                .then(registerConfigNode(ConfigRegistry.getConfigManager("game")))
-                .then(registerConfigNode(ConfigRegistry.getConfigManager("gambling")))
-                .then(registerConfigNode(ConfigRegistry.getConfigManager("map"))));
+
+        LiteralArgumentBuilder<CommandSourceStack> configNode = Commands.literal("config")
+                .requires(sender -> sender.getSender().isOp());
+        for (String configName : ConfigRegistry.getConfigManagers().keySet()) {
+            configNode.then(registerConfigNode(ConfigRegistry.getConfigManager(configName)));
+        }
+
+        root.then(configNode);
         root.then(Commands.literal("getLevel")
                 .requires(sender -> sender.getSender().isOp())
                 .executes( ctx -> getLevel(ctx,gameManager.getDangerManager())));

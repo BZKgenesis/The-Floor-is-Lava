@@ -1,6 +1,8 @@
 package net.bzkgns.theFloorIsLavaManager.listener;
 
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLavaManager.items.items.FireBallCustomItem;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import org.bukkit.Bukkit;
@@ -18,11 +20,7 @@ import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
 public class FireBallCustomListener implements Listener {
-    private static final int FIREBALL_COOLDOWN = 20;
-    private static final float FIREBALL_POWER = 2.0f;
-    private static final float FIREBALL_SPEED = 1.0f;
-    private static final float FIREBALL_DAMAGE_REDUCTION = 0.25f;
-    private static final boolean FIREBALL_PLACE_FIRE = false;
+    private final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
     @EventHandler
     public void onFireBallUse(PlayerInteractEvent event) {
         if (event.getItem() == null) return;
@@ -41,17 +39,17 @@ public class FireBallCustomListener implements Listener {
                 event.getItem().setAmount(event.getItem().getAmount() - 1);
             }
             // Active le cooldown
-            player.setCooldown(event.getItem().getType(), FIREBALL_COOLDOWN);
+            player.setCooldown(event.getItem().getType(), itemsConfig.getFireballCooldown());
         }
 
         Fireball fireball =  player.getWorld().spawn(
                 player.getEyeLocation().add(player.getLocation().getDirection().multiply(1)),
                 org.bukkit.entity.Fireball.class, f -> {
                     f.setShooter(player);
-                    f.setDirection(player.getLocation().getDirection().multiply(FIREBALL_SPEED));
-                    f.setYield(FIREBALL_POWER); // Explosion power
+                    f.setDirection(player.getLocation().getDirection().multiply(itemsConfig.getFireballSpeed()));
+                    f.setYield((float) itemsConfig.getFireballPower()); // Explosion power
                     f.setGlowing(true);
-                    f.setIsIncendiary(FIREBALL_PLACE_FIRE);
+                    f.setIsIncendiary(itemsConfig.isFireballPlaceFire());
                 }
         );
 
@@ -81,7 +79,7 @@ public class FireBallCustomListener implements Listener {
 
 
         // Réduit les dégâts à 25 %
-        event.setDamage(event.getDamage() * FIREBALL_DAMAGE_REDUCTION);
+        event.setDamage(event.getDamage() * itemsConfig.getFireballDamageReduction());
     }
 
     @EventHandler

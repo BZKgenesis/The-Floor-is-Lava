@@ -20,4 +20,8 @@ public final class ConfigRegistry {
     public static <T extends ConfigSection<T>> ConfigManager<T> getConfigManager(String configName) {
         return (ConfigManager<T>) configManagers.get(configName);
     }
+
+    public static Map<String, ConfigManager<?>> getConfigManagers() {
+        return configManagers;
+    }
 }

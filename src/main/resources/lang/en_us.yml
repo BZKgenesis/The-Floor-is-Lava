@@ -336,6 +336,45 @@ config:
     spawn-spawn-structure: "Whether the spawn structure should be generated at spawn"
     center-x: "X coordinate of the map's center"
     center-z: "Z coordinate of the map's center"
+  items:
+    fireball:
+      cooldown: "Cooldown (ticks) before the fireball can be used again"
+      power: "Power of the fireball"
+      speed: "Start speed of the fireball"
+      damage_reduction: "Damage reduction when hit by a friendly fireball"
+      place_fire: "Whether the fireball should set fire to blocks"
+    tnt:
+      damage_reduction: "Damage reduction when hit by a friendly TNT"
+      raycast_distance: "Distance (blocks) for the raycast to find a block to place the TNT on"
+      immune_delay_tick: "Delay (ticks) before the player can be damaged by their own TNT"
+      spawn_y_velocity: "Initial Y velocity of the TNT when placed"
+      knockback_enchantment_multiplier: "Multiplier for the knockback enchantment on the TNT"
+      knockback_multiplier: "Multiplier for the knockback effect on the TNT"
+      power: "Power of the TNT explosion"
+    parachute:
+      cooldown: "Cooldown (ticks) before the parachute can be used again"
+      effect_duration: "Duration (ticks) of the parachute effect"
+    heal_camp:
+      max_alive_ticks: "Maximum duration (ticks) the heal camp can stay alive"
+      application_delay: "Duration (ticks) of the delay between each healing application"
+    throwable_iron_golem:
+      damage_per_tick: "Damage dealt to the iron golem per tick"
+      max_distance: "Maximum distance (blocks) the iron golem can detect enemies"
+      attack_distance: "Maximum distance (blocks) the iron golem can attack enemies"
+      attack_cooldown: "Cooldown (ticks) between each attack of the iron golem"
+    team_inventory:
+      row_count: "Number of rows in the team inventory"
+    snow_ball_plate:
+      fill_radius: "Radius (blocks) of the snow plate created by the snowball"
+    batte:
+      knockback_level: "Level of knockback enchantment on the baseball bat"
+    shears:
+      efficiency_level: "Level of efficiency enchantment on the shears"
+    feather_falling_boots:
+      gravity: "Modifier for gravity when falling with feather falling boots. ADD_SCALAR"
+      jump_strength: "Modifier for jump strength when jumping with feather falling boots. ADD_SCALAR"
+      safe_fall_distance: "Maximum distance (blocks) that can be fallen without taking damage when wearing feather falling boots"
+      enchantment_level: "Level of feather falling enchantment on the boots"
 
 money:
   resource: "<gray>Resources:"
