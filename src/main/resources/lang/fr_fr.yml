@@ -33,7 +33,7 @@ validation:
   request_sent: "<prefix><green>La demande a été envoyée."
   config_saved: "<prefix_op><green>Configuration sauvegardée."
   value_set: "<prefix_op><green>Valeur définie pour <param> : <value>"
-  world_reset_success: "<prefix_op><green>Réinitialisation du monde terminée avec succès. Pour paramétrer le centre de jeu, ainsi que la taille de la zone, vous pouvez prévisualiser la map avec la commande <yellow>/tfl map preview<green>, et définir le centre de la map avec <yellow>/tfl map setcenter<green>."
+  world_reset_success: "<prefix_op><green>Réinitialisation du monde terminée avec succès. Pour paramétrer le centre de jeu, ainsi que la taille de la zone de jeu, vous pouvez prévisualiser la map avec la commande <u><yellow><click:suggest_command:'/tfl map preview'>/tfl map preview</click></u><green>, et définir le centre de la map avec <yellow><u><click:suggest_command:'/tfl map setcenter'>/tfl map setcenter</click></u><green>."
   world_reset_map_success: "<prefix_op><green>Réinitialisation du monde avec la map <map_name> terminée avec succès."
   anchor_placed: "<prefix><green>L'ancre de réapparition d'équipe a été placé."
   anchor_removed: "<prefix><green>L'ancre de réapparition d'équipe a été supprimé."

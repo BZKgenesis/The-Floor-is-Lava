@@ -18,10 +18,14 @@ import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.title.Title;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,6 +37,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.*;
 
@@ -294,17 +299,28 @@ public class TheFloorIslavaListener implements Listener {
             }
         }
         if (plugin.getGameManager().isGameWinning()){
+            WorldBorder worldBorder = TheFloorIsLavaManager.getInstance().getWorldManager().getGameWorld().getWorldBorder();
+            worldBorder.setSize(worldBorder.getSize()); //freeze the world border
+            TheFloorIsLavaManager.getInstance().getGameManager().getDangerManager().pause();
             TeamData winningTeam = TeamManager.getInstance().getTeamAlive().getFirst();
-            // NOTE i18n : TextUtils.broadcastMessage(Component) envoie un unique Component déjà construit à tous
-            // les joueurs connectés : la langue est donc figée (résolue ici via Bukkit.getServer(), donc en_us
-            // par défaut) pour tout le monde, quelle que soit la locale de chaque joueur. Pour une vraie
-            // localisation par joueur, il faudrait adapter TextUtils.broadcastMessage() pour qu'elle construise
-            // un Component par joueur via Messages.component(player, ...).
             if (winningTeam != null) {
                 winningTeam.getMembers().forEach(uuid ->{
+
                         Player player = Bukkit.getPlayer(uuid);
-                        if (player != null)
+                        if (player != null){
                             plugin.getStatisticsManager().increment(player, StatisticType.GAMES_WON);
+                            player.showTitle(Title.title(Component.text("Victoire !", NamedTextColor.GOLD), Component.text("")));
+                            player.getWorld().spawn(player.getLocation(), Firework.class, firework -> {
+                                FireworkMeta meta = firework.getFireworkMeta();
+                                meta.addEffect(FireworkEffect.builder()
+                                        .withColor(Color.fromRGB(winningTeam.getColor().value()))
+                                        .with(FireworkEffect.Type.BALL)
+                                        .build());
+                                meta.setPower(1);
+                                firework.setFireworkMeta(meta);
+                            });
+
+                        }
                 });
                 Messages.broadcast( "game.end_team_won",
                                 Placeholder.component("team_name", winningTeam.getName())

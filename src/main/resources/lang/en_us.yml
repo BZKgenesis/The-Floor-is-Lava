@@ -33,7 +33,7 @@ validation:
   request_sent: "<prefix><green>Request sent."
   config_saved: "<prefix_op><green>Configuration saved."
   value_set: "<prefix_op><green>Value set for <param>: <value>"
-  world_reset_success: "<prefix_op><green>World reset completed successfully."
+  world_reset_success: "<prefix_op><green>World reset completed successfully. In order to setup the center and the size of the game area, you can preview the map game with the command <u><yellow><click:suggest_command:'/tfl map preview'>/tfl map preview</click></u><green>, and set the center with <yellow><u><click:suggest_command:'/tfl map setcenter'>/tfl map setcenter</click></u><green>."
   world_reset_map_success: "<prefix_op><green>World reset with map <map_name> completed successfully."
   anchor_placed: "<prefix><green>The respawn team anchor has been placed."
   anchor_removed: "<prefix_op><green>The respawn team anchor has been removed."

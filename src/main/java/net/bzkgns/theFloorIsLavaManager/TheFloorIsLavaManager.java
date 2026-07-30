@@ -111,7 +111,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
                 new CiseauxItem(),
                 new EggBridgeItem(),
                 new PopupTowerItem(),
-                new ShopItem(),
                 new SnowballPlateItem(),
                 new TeamInventoryItem(),
                 new TeamRespawnItem(),
@@ -188,7 +187,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         LiteralCommandNode<CommandSourceStack> ShopBuildCommand = Commands.literal("shop")
                 .executes(ctx ->{
                     if (ctx.getSource().getExecutor() instanceof Player p){
-                        ShopGUI.open(p,0);
+                        NewShopGUI.openMainMenu(p);
                     }
                     return Command.SINGLE_SUCCESS;
                 } ).build();
@@ -203,7 +202,6 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
             healthObjective = getServer().getScoreboardManager().getMainScoreboard().registerNewObjective("tfl.health", Criteria.HEALTH, Component.text(""), RenderType.HEARTS);
         }
         healthObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-        ShopGUI.loadRecipes();
 
         NamespacedKey key = new NamespacedKey(this, "game_bar");
 

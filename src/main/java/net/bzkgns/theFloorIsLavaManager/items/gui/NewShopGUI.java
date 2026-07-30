@@ -28,14 +28,13 @@ import static java.lang.Math.min;
 import static net.bzkgns.theFloorIsLavaManager.utils.SoundUtils.*;
 
 import static net.bzkgns.theFloorIsLavaManager.utils.GuiUtils.*;
-@SuppressWarnings("UnstableApiUsage")
-public class NewShopGUI implements Listener {
 
+public class NewShopGUI implements Listener {
     private static final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
     private static final int ROW_SIZE = 9;
-    private static final int SIZE_BUY_MENU = ROW_SIZE*2;
-    private static final int SIZE_SELL_MENU = ROW_SIZE*3;
+    private static final int SIZE_BUY_MENU = ROW_SIZE*4;
+    private static final int SIZE_SELL_MENU = ROW_SIZE*6;
     private static final int SIZE_MAIN_MENU = ROW_SIZE*3;
     private static final int USABLE_SIZE_BUY_MENU = SIZE_BUY_MENU-ROW_SIZE;
     private static final int USABLE_SIZE_SELL_MENU = SIZE_SELL_MENU-ROW_SIZE;
@@ -303,7 +302,6 @@ public class NewShopGUI implements Listener {
         }
         if (Objects.equals(getButtonId(event.getCurrentItem()), "sell_button")){
             openSellMenu(player, false, 0);
-            return;
         }
     }
 }

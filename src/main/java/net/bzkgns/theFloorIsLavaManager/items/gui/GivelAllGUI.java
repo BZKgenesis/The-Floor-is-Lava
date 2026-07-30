@@ -27,7 +27,6 @@ public class GivelAllGUI implements Listener {
     private static final int SIZE = 54;
 
     private static final CustomItem[] AVAILABLE_ITEMS = new CustomItem[]{
-            new ShopItem(),
             new BatteItem(),
             new CiseauxItem(),
             new EggBridgeItem(),

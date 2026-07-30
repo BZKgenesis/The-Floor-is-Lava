@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.listener;
 
-import net.bzkgns.theFloorIsLavaManager.items.items.ShopItem;
-import net.bzkgns.theFloorIsLavaManager.shop.ShopGUI;
+import net.bzkgns.theFloorIsLavaManager.items.gui.NewShopGUI;
+import net.bzkgns.theFloorIsLavaManager.items.items.NewShopItem;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -27,10 +27,10 @@ public class ShopListener implements Listener {
 
         ItemStack item = event.getItem();
         if (item == null) return;
-        if (!new ShopItem().isItem(item)) return;
+        if (!new NewShopItem().isItem(item)) return;
 
         event.setCancelled(true);
 
-        ShopGUI.open(event.getPlayer(),0);
+        NewShopGUI.openMainMenu(event.getPlayer());
     }
 }

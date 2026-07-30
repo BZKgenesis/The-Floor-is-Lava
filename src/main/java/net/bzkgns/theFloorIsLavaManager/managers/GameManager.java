@@ -10,7 +10,7 @@ import net.bzkgns.theFloorIsLavaManager.config.game.GameConfig;
 import net.bzkgns.theFloorIsLavaManager.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfig;
 import net.bzkgns.theFloorIsLavaManager.config.map.MapConfigKeys;
-import net.bzkgns.theFloorIsLavaManager.items.items.ShopItem;
+import net.bzkgns.theFloorIsLavaManager.items.items.NewShopItem;
 import net.bzkgns.theFloorIsLavaManager.kits.KitManager;
 import net.bzkgns.theFloorIsLavaManager.lang.LangManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
@@ -186,7 +186,7 @@ public class GameManager {
                 Messages.send(p, "info.spectator_mode_not_in_team");
             }else{
                 initGamePlayer(p);
-                p.give(new ShopItem().giveItem(p));
+                p.give(new NewShopItem().giveItem(p));
             }
         }
         if (gameConfigManager.getBoolean(GameConfigKeys.KEEP_INVENTORY_DURING_PREPARATION))
