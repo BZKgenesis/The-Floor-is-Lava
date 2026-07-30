@@ -166,8 +166,7 @@ public final class TheFloorIsLavaManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new NewShopListener(), this);
         getServer().getPluginManager().registerEvents(new GamblingListener(), this);
 
-
-
+        getServer().getPluginManager().registerEvents(new AutoSmelt(), this);
         getServer().getPluginManager().registerEvents(new VeinMinerListener(), this);
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new ThrowableIronGolemTask(), 0L, 1L);

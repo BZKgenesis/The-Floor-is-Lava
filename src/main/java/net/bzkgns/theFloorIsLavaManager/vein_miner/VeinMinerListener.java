@@ -1,9 +1,10 @@
 package net.bzkgns.theFloorIsLavaManager.vein_miner;
 
 import io.papermc.paper.entity.PlayerGiveResult;
+import net.bzkgns.theFloorIsLavaManager.listener.AutoSmelt;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,7 +51,7 @@ public class VeinMinerListener implements Listener {
         if (player.getGameMode() == org.bukkit.GameMode.CREATIVE) {
             return;
         }
-        PlayerGiveResult giveResult = player.give( breakVein(block, player, tool, block.getType().asBlockType(), 10));
+        PlayerGiveResult giveResult = player.give(AutoSmelt.autoSmeltOre(breakVein(block, player, tool, block.getType().asBlockType(), 10)));
 //        for (ItemStack stack : giveResult.leftovers()) {
 //            player.getWorld().dropItemNaturally(
 //                    player.getLocation(),
@@ -89,15 +90,35 @@ public class VeinMinerListener implements Listener {
         if (!block.isPreferredTool(tool)) return List.of();
 
         Collection<ItemStack> items = block.getDrops(tool, player);
+        player.spawnParticle(Particle.BLOCK, block.getLocation().add(0.5, 0.5, 0.5), 30, 0.3, 0.3, 0.3, block.getBlockData());
+        player.playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1f, 1f);
         block.setType(Material.AIR);
 
-        items.addAll(breakVein(block.getRelative(BlockFace.DOWN), player, tool, type, depth - 1));
-        items.addAll(breakVein(block.getRelative(BlockFace.UP), player, tool, type, depth - 1));
-        items.addAll(breakVein(block.getRelative(BlockFace.NORTH), player, tool, type, depth - 1));
-        items.addAll(breakVein(block.getRelative(BlockFace.SOUTH), player, tool, type, depth - 1));
-        items.addAll(breakVein(block.getRelative(BlockFace.EAST), player, tool, type, depth - 1));
-        items.addAll(breakVein(block.getRelative(BlockFace.WEST), player, tool, type, depth - 1));
+        //direct
+        items.addAll(breakVein(block.getRelative( 1, 0, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative(-1, 0, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0, 1, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0,-1, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0, 0, 1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0, 0,-1), player, tool, type, depth - 1));
 
+        //diagonal
+        items.addAll(breakVein(block.getRelative( 1, 1, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( -1, 1, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 1, -1, 0), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( -1, -1, 0), player, tool, type, depth - 1));
+
+        items.addAll(breakVein(block.getRelative(1, 0, 1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative(-1, 0, 1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative(1, 0, -1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative(-1, 0, -1), player, tool, type, depth - 1));
+
+        items.addAll(breakVein(block.getRelative( 0,1, 1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0,-1, 1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0,1, -1), player, tool, type, depth - 1));
+        items.addAll(breakVein(block.getRelative( 0,-1, -1), player, tool, type, depth - 1));
+
+        //3D diagonal
         items.addAll(breakVein(block.getRelative( 1, 1, 1), player, tool, type, depth - 1));
         items.addAll(breakVein(block.getRelative(-1, 1, 1), player, tool, type, depth - 1));
         items.addAll(breakVein(block.getRelative( 1,-1, 1), player, tool, type, depth - 1));
