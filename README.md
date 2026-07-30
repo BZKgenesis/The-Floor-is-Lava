@@ -198,3 +198,12 @@ Le jar compilé se trouve ensuite dans `build/libs/`.
 
 - `1087643283499148055` : que de l'eau (test erreur de spread)
 - `1784476098874` : plaine sympathique avec quelques collines
+
+### Outils
+```bash
+python -m scripts.lang_scan
+```
+
+```bash
+python -m scripts.gambling_main
+```
