@@ -1,4 +1,5 @@
 import numpy as np
+import yaml
 ################################################################################
 #                                CONFIGURATION                                 #
 ################################################################################
@@ -25,27 +26,77 @@ SYMBOLS = [
     "Seven",
 ]
 
-PROBABILITIES = [
-    0.30,
-    0.24,
-    0.18,
-    0.12,
-    0.09,
-    0.05,
-    0.02,
-]
+# Mapping entre le nom d'affichage dans SYMBOLS et le préfixe dans le YAML
+SYMBOL_MAPPING = {
+    "Cerise": "cerise",
+    "Citron": "citron",
+    "Raisin": "raisin",
+    "Cloche": "cloche",
+    "Étoile": "etoile",
+    "Diamant": "diamond",
+    "Seven": "seven",
+}
+import os
 
-JACKPOT_MULTIPLIERS = [
-    3, 6, 10, 15, 25, 50, 100
-]
+def load(filepath: str = "config.yaml"):
+    """Charge les paramètres depuis un fichier YAML.
 
-TWO_KIND_MULTIPLIERS = [
-    0.5, 0.75, 1.25, 1.5, 5, 10, 20
-]
+    Retourne:
+        PROBABILITIES, JACKPOT_MULTIPLIERS, TWO_KIND_MULTIPLIERS, ONE_KIND_MULTIPLIERS
+    """
+    print("📁 Python cherche dans le dossier :", os.getcwd())
+    with open(filepath, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
 
-ONE_KIND_MULTIPLIERS = [
-    0, 0, 0.1, 0.15, 0.2, 0.25, 0.5
-]
+    gambling_data = data.get("gambling", {})
+
+    probabilities = []
+    jackpot_multipliers = []
+    two_kind_multipliers = []
+    one_kind_multipliers = []
+
+    for symbol in SYMBOLS:
+        key = SYMBOL_MAPPING[symbol]
+
+        probabilities.append(float(gambling_data[f"{key}-probability"]))
+        jackpot_multipliers.append(float(gambling_data[f"{key}-jackpot"]))
+        two_kind_multipliers.append(float(gambling_data[f"{key}-two-kind"]))
+        one_kind_multipliers.append(float(gambling_data[f"{key}-one-kind"]))
+
+    return probabilities, jackpot_multipliers, two_kind_multipliers, one_kind_multipliers
+
+
+def save(
+    filepath: str,
+    probabilities: list,
+    jackpot_multipliers: list,
+    two_kind_multipliers: list,
+    one_kind_multipliers: list,
+):
+    """Sauvegarde les variables dans un fichier YAML au format structuré."""
+    gambling_data = {}
+
+    for i, symbol in enumerate(SYMBOLS):
+        key = SYMBOL_MAPPING[symbol]
+        gambling_data[f"{key}-probability"] = float(probabilities[i])
+        gambling_data[f"{key}-jackpot"] = float(jackpot_multipliers[i])
+        gambling_data[f"{key}-two-kind"] = float(two_kind_multipliers[i])
+        gambling_data[f"{key}-one-kind"] = float(one_kind_multipliers[i])
+
+    full_data = {"gambling": gambling_data}
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        yaml.dump(full_data, f, sort_keys=False, allow_unicode=True)
+
+
+# ==============================================================================
+# EXECUTION / CHARGEMENT DES DONNÉES
+# ==============================================================================
+
+# Charger les données depuis le fichier YAML
+PROBABILITIES, JACKPOT_MULTIPLIERS, TWO_KIND_MULTIPLIERS, ONE_KIND_MULTIPLIERS = (
+    load("scripts/gambling/default-gambling.yml")
+)
 
 if len({
     len(SYMBOLS),

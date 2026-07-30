@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.managers;
 
+import net.bzkgns.theFloorIsLavaManager.config.gambling.GamblingConfig;
 import net.bzkgns.theFloorIsLavaManager.currency.MoneyManager;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.config.ConfigLoader;
@@ -66,9 +67,13 @@ public class GameManager {
         ConfigManager<DangerConfig> dangerConfigManager = ConfigLoader.load(
                 new DangerConfig()
         );
+        ConfigManager<GamblingConfig> gamblingConfigManager = ConfigLoader.load(
+                new GamblingConfig()
+        );
 
         ConfigRegistry.addConfig(gameConfigManager);
         ConfigRegistry.addConfig(dangerConfigManager);
+        ConfigRegistry.addConfig(gamblingConfigManager);
         this.dangerManager = new DangerManager(dangerConfigManager);
         playerInGame = new ArrayList<>();
     }

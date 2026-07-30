@@ -85,6 +85,7 @@ public class TheFloorIsLavaCommands {
                 .requires(sender -> sender.getSender().isOp())
                 .then(registerConfigNode(ConfigRegistry.getConfigManager("danger")))
                 .then(registerConfigNode(ConfigRegistry.getConfigManager("game")))
+                .then(registerConfigNode(ConfigRegistry.getConfigManager("gambling")))
                 .then(registerConfigNode(ConfigRegistry.getConfigManager("map"))));
         root.then(Commands.literal("getLevel")
                 .requires(sender -> sender.getSender().isOp())

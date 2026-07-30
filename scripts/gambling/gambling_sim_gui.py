@@ -8,6 +8,7 @@ from .config import (
     JACKPOT_MULTIPLIERS,
     TWO_KIND_MULTIPLIERS,
     ONE_KIND_MULTIPLIERS,
+    save
 )
 ################################################################################
 #                              GUI SIMULATION                                  #
@@ -202,6 +203,32 @@ def print_config():
     print("==================================\n")
 
 
+def get_proba():
+    liste =[]
+    for i, name in enumerate(SYMBOLS):
+        value = dpg.get_value(f"prob_{i}")
+        liste.append(value)
+    return liste
+def get_jackpot():
+    liste =[]
+    for i, name in enumerate(SYMBOLS):
+        value = dpg.get_value(f"jackpot_{i}")
+        liste.append(value)
+    return liste
+def get_two_kind():
+    liste =[]
+    for i, name in enumerate(SYMBOLS):
+        value = dpg.get_value(f"two_{i}")
+        liste.append(value)
+    return liste
+def get_one_kind():
+    liste =[]
+    for i, name in enumerate(SYMBOLS):
+        value = dpg.get_value(f"one_{i}")
+        liste.append(value)
+    return liste
+    
+
 def launch_gui(_):
 
     dpg.create_context()
@@ -277,6 +304,11 @@ def launch_gui(_):
         dpg.add_button(
             label="Lancer simulation",
             callback=lambda: simulate_gui()
+        )
+        
+        dpg.add_button(
+            label="Save",
+            callback=lambda: save("gambling.yaml", get_proba(), get_jackpot(), get_two_kind(), get_one_kind())
         )
 
 
