@@ -1,67 +1,70 @@
 package net.bzkgns.theFloorIsLavaManager.items.abilities.gambling;
 
+import net.bzkgns.theFloorIsLavaManager.config.gambling.GamblingConfigKeys;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
+
 import java.util.Map;
 
 public class GamblingEngine {
     private static final Map<GamblingSymbol, Double> SYMBOL_PROBABILITIES = Map.of(
-            GamblingSymbol.CERISE, 0.30,
-            GamblingSymbol.CITRON, 0.24,
-            GamblingSymbol.RAISIN, 0.18,
-            GamblingSymbol.CLOCHE, 0.12,
-            GamblingSymbol.ETOILE, 0.09,
-            GamblingSymbol.DIAMANT, 0.05,
-            GamblingSymbol.SEVEN, 0.02
+            GamblingSymbol.CERISE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CERISE_PROBABILITY.getKey()),
+            GamblingSymbol.CITRON, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CITRON_PROBABILITY.getKey()),
+            GamblingSymbol.RAISIN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.RAISIN_PROBABILITY.getKey()),
+            GamblingSymbol.CLOCHE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CLOCHE_PROBABILITY.getKey()),
+            GamblingSymbol.ETOILE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.ETOILE_PROBABILITY.getKey()),
+            GamblingSymbol.DIAMOND, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.DIAMOND_PROBABILITY.getKey()),
+            GamblingSymbol.SEVEN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.SEVEN_PROBABILITY.getKey())
     );
-    private static final Map<GamblingSymbol, Float> SYMBOL_JACKPOT_MULTIPLIERS = Map.of(
-            GamblingSymbol.CERISE, 3.0f,
-            GamblingSymbol.CITRON, 6.0f,
-            GamblingSymbol.RAISIN, 10.0f,
-            GamblingSymbol.CLOCHE, 15.0f,
-            GamblingSymbol.ETOILE, 25.0f,
-            GamblingSymbol.DIAMANT, 50.0f,
-            GamblingSymbol.SEVEN, 100.0f
+    private static final Map<GamblingSymbol, Double> SYMBOL_JACKPOT_MULTIPLIERS = Map.of(
+            GamblingSymbol.CERISE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CERISE_JACKPOT.getKey()),
+            GamblingSymbol.CITRON, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CITRON_JACKPOT.getKey()),
+            GamblingSymbol.RAISIN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.RAISIN_JACKPOT.getKey()),
+            GamblingSymbol.CLOCHE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CLOCHE_JACKPOT.getKey()),
+            GamblingSymbol.ETOILE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.ETOILE_JACKPOT.getKey()),
+            GamblingSymbol.DIAMOND, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.DIAMOND_JACKPOT.getKey()),
+            GamblingSymbol.SEVEN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.SEVEN_JACKPOT.getKey())
     );
-    private static final Map<GamblingSymbol, Float> SYMBOL_TWO_OF_KIND_MULTIPLIERS = Map.of(
-            GamblingSymbol.CERISE, 0.5f,
-            GamblingSymbol.CITRON, 0.75f,
-            GamblingSymbol.RAISIN, 1.25f,
-            GamblingSymbol.CLOCHE, 1.5f,
-            GamblingSymbol.ETOILE, 5.0f,
-            GamblingSymbol.DIAMANT, 10.0f,
-            GamblingSymbol.SEVEN, 20.0f
+    private static final Map<GamblingSymbol, Double> SYMBOL_TWO_OF_KIND_MULTIPLIERS = Map.of(
+            GamblingSymbol.CERISE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CERISE_TWO_KIND.getKey()),
+            GamblingSymbol.CITRON, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CITRON_TWO_KIND.getKey()),
+            GamblingSymbol.RAISIN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.RAISIN_TWO_KIND.getKey()),
+            GamblingSymbol.CLOCHE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CLOCHE_TWO_KIND.getKey()),
+            GamblingSymbol.ETOILE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.ETOILE_TWO_KIND.getKey()),
+            GamblingSymbol.DIAMOND, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.DIAMOND_TWO_KIND.getKey()),
+            GamblingSymbol.SEVEN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.SEVEN_TWO_KIND.getKey())
     );
-    private static final Map<GamblingSymbol, Float> SYMBOL_ONE_OF_KIND_MULTIPLIERS = Map.of(
-            GamblingSymbol.CERISE, 0.0f,
-            GamblingSymbol.CITRON, 0.0f,
-            GamblingSymbol.RAISIN, 0.1f,
-            GamblingSymbol.CLOCHE, 0.15f,
-            GamblingSymbol.ETOILE, 0.2f,
-            GamblingSymbol.DIAMANT, 0.25f,
-            GamblingSymbol.SEVEN, 0.5f
+    private static final Map<GamblingSymbol, Double> SYMBOL_ONE_OF_KIND_MULTIPLIERS = Map.of(
+            GamblingSymbol.CERISE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CERISE_ONE_KIND.getKey()),
+            GamblingSymbol.CITRON, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CITRON_ONE_KIND.getKey()),
+            GamblingSymbol.RAISIN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.RAISIN_ONE_KIND.getKey()),
+            GamblingSymbol.CLOCHE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.CLOCHE_ONE_KIND.getKey()),
+            GamblingSymbol.ETOILE, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.ETOILE_ONE_KIND.getKey()),
+            GamblingSymbol.DIAMOND, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.DIAMOND_ONE_KIND.getKey()),
+            GamblingSymbol.SEVEN, ConfigRegistry.getConfigManager("gambling").getDouble(GamblingConfigKeys.SEVEN_ONE_KIND.getKey())
     );
 
-    public static float calculateGain(GamblingSymbol[] symbols) {
+    public static double calculateGain(GamblingSymbol[] symbols) {
         if (symbols == null || symbols.length != 3)
             return 0;
 
         if (symbols[0] == symbols[1] && symbols[1] == symbols[2]) {
-            return SYMBOL_JACKPOT_MULTIPLIERS.getOrDefault(symbols[0], 0f);
+            return SYMBOL_JACKPOT_MULTIPLIERS.getOrDefault(symbols[0], 0.0);
         }
 
         if (symbols[0] == symbols[1]) {
-            return  SYMBOL_TWO_OF_KIND_MULTIPLIERS.getOrDefault(symbols[0], 0f);
+            return  SYMBOL_TWO_OF_KIND_MULTIPLIERS.getOrDefault(symbols[0], 0.0);
         }
         if (symbols[0] == symbols[2]) {
-            return  SYMBOL_TWO_OF_KIND_MULTIPLIERS.getOrDefault(symbols[0], 0f);
+            return  SYMBOL_TWO_OF_KIND_MULTIPLIERS.getOrDefault(symbols[0], 0.0);
         }
         if (symbols[1] == symbols[2]) {
-            return  SYMBOL_TWO_OF_KIND_MULTIPLIERS.getOrDefault(symbols[1], 0f);
+            return  SYMBOL_TWO_OF_KIND_MULTIPLIERS.getOrDefault(symbols[1], 0.0);
         }
 
 
-        return SYMBOL_ONE_OF_KIND_MULTIPLIERS.getOrDefault(symbols[0], 0f) +
-                SYMBOL_ONE_OF_KIND_MULTIPLIERS.getOrDefault(symbols[1], 0f) +
-                SYMBOL_ONE_OF_KIND_MULTIPLIERS.getOrDefault(symbols[2], 0f);
+        return SYMBOL_ONE_OF_KIND_MULTIPLIERS.getOrDefault(symbols[0], 0.0) +
+                SYMBOL_ONE_OF_KIND_MULTIPLIERS.getOrDefault(symbols[1], 0.0) +
+                SYMBOL_ONE_OF_KIND_MULTIPLIERS.getOrDefault(symbols[2], 0.0);
     }
 
     public static GamblingSymbol[] rollSymbols() {

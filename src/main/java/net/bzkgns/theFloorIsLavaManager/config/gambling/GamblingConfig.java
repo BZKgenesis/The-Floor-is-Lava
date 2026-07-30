@@ -23,20 +23,20 @@ public class GamblingConfig  implements ConfigSection<GamblingConfig> {
     private double diamondJackpot = 50;
     private double sevenJackpot = 100;
 
-    private double ceriseTwoKind = 0.5;
-    private double citronTwoKind = 0.75;
+    private double ceriseTwoKind = 1.0;
+    private double citronTwoKind = 1.125;
     private double raisinTwoKind = 1.25;
     private double clocheTwoKind = 1.5;
     private double etoileTwoKind = 5;
     private double diamondTwoKind = 10;
     private double sevenTwoKind = 20;
 
-    private double ceriseOneKind = 0;
-    private double citronOneKind = 0;
+    private double ceriseOneKind = 0.05;
+    private double citronOneKind = 0.075;
     private double raisinOneKind = 0.1;
     private double clocheOneKind = 0.15;
     private double etoileOneKind = 0.2;
-    private double diamondOneKind = 0.25;
+    private double diamondOneKind = 0.35;
     private double sevenOneKind = 0.5;
 
     private static final List<ConfigKey<GamblingConfig, ?>> KEYS = List.of(

@@ -10,7 +10,7 @@ public enum GamblingSymbol {
     RAISIN("raisin", MiniMessage.miniMessage().deserialize("<sprite:\"minecraft:items\":item/copper_ingot>")), //Component.text("\uD83C\uDF47",NamedTextColor.DARK_PURPLE)
     CLOCHE("cloche", MiniMessage.miniMessage().deserialize("<sprite:\"minecraft:items\":item/iron_ingot>")), //Component.text("\uD83D\uDD14",NamedTextColor.GOLD)
     ETOILE("etoile", MiniMessage.miniMessage().deserialize("<sprite:\"minecraft:items\":item/gold_ingot>")), //Component.text("⭐",NamedTextColor.YELLOW)
-    DIAMANT("diamant", MiniMessage.miniMessage().deserialize("<sprite:\"minecraft:items\":item/diamond>")), //Component.text("\uD83D\uDC8E",NamedTextColor.AQUA)
+    DIAMOND("diamant", MiniMessage.miniMessage().deserialize("<sprite:\"minecraft:items\":item/diamond>")), //Component.text("\uD83D\uDC8E",NamedTextColor.AQUA)
     SEVEN("seven", Component.text("7", NamedTextColor.GREEN));
     private final Component symbol;
     private final String name;

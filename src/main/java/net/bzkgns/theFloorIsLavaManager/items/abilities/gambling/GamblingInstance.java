@@ -35,7 +35,7 @@ public class GamblingInstance {
     private final GamblingColumn column3;
     private final int value;
     private final Integer gambleStopTaskId;
-    private final Float gainMultiplier;
+    private final Double gainMultiplier;
     private final Price gain;
 
     private final int gamblingTpTaskId;

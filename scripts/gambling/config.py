@@ -39,6 +39,7 @@ SYMBOL_MAPPING = {
 import os
 
 def load(filepath: str = "config.yaml"):
+    print(filepath)
     """Charge les paramètres depuis un fichier YAML.
 
     Retourne:
