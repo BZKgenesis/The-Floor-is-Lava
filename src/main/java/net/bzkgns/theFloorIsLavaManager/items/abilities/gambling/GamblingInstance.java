@@ -20,6 +20,12 @@ import java.util.Random;
 public class GamblingInstance {
     private final static float DISPLAYS_DISTANCE = 0.85f;
 
+    // Animation d'entrée/sortie : distance (en unités monde) parcourue
+    // depuis/vers le bas, et durée en ticks de chaque phase.
+    private static final float DROP_DISTANCE = 1.2f;
+    private static final int INTRO_TICKS = 20;
+    private static final int OUTRO_TICKS = 15;
+
     private final Player player;
     private final TextDisplay betDisplay;
     private final TextDisplay gainDisplay;
@@ -33,6 +39,13 @@ public class GamblingInstance {
     private final Price gain;
 
     private final int gamblingTpTaskId;
+
+    // État de l'animation globale d'entrée/sortie
+    private int introTick = 0;
+    private boolean introDone = false;
+    private boolean exiting = false;
+    private int exitTick = 0;
+
     public GamblingInstance(Player player, Price bet) {
         System.out.println("Creating GamblingInstance for player: " + player.getName());
         this.player = player;
@@ -88,9 +101,14 @@ public class GamblingInstance {
         this.column1 = new GamblingColumn(player, new Random().nextInt(GamblingSymbol.values().length), rolledSymbols[0].ordinal(),1);
         this.column2 = new GamblingColumn(player, new Random().nextInt(GamblingSymbol.values().length), rolledSymbols[1].ordinal(),2);
         this.column3 = new GamblingColumn(player, new Random().nextInt(GamblingSymbol.values().length), rolledSymbols[2].ordinal(),3);
-        column1.start();
-        column2.start();
-        column3.start();
+
+        // On ne lance le spin des colonnes qu'une fois l'animation d'entrée
+        // terminée, pour un effet "la machine arrive puis se met en marche".
+        Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(), () -> {
+            column1.start();
+            column2.start();
+            column3.start();
+        }, INTRO_TICKS);
 
         gamblingTpTaskId = player.getServer().getScheduler().scheduleSyncRepeatingTask(TheFloorIsLavaManager.getInstance(), this::tpElements, 0L, 1L);
         gambleStopTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(TheFloorIsLavaManager.getInstance(),this::stopGambling, 1L,1L);
@@ -116,20 +134,63 @@ public class GamblingInstance {
             }
             Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
                     this::showGain, 10L);
+            // Au lieu de détruire directement, on déclenche l'animation de
+            // sortie ; la vraie destruction aura lieu à la fin de celle-ci.
             Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
-                    this::destroy, 60L);
+                    this::beginExit, 60L);
         }
     }
 
+    /**
+     * Démarre la phase de sortie : yOffset repart de 0 vers -DROP_DISTANCE
+     * (ease-in) pendant OUTRO_TICKS, puis la destruction réelle a lieu.
+     */
+    private void beginExit() {
+        exiting = true;
+        exitTick = 0;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLavaManager.getInstance(),
+                this::destroy, OUTRO_TICKS);
+    }
+
+    /**
+     * Calcule le décalage vertical global à appliquer à tous les éléments
+     * pour l'animation d'entrée (montée depuis le bas) et de sortie
+     * (redescente). Retourne 0 une fois l'entrée terminée et tant que la
+     * sortie n'a pas commencé.
+     */
+    private float computeYOffset() {
+        if (!introDone) {
+            int t = Math.min(introTick, INTRO_TICKS);
+            float p = (float) t / INTRO_TICKS;
+            float eased = 1 - (float) Math.pow(1 - p, 3); // ease-out cubique
+            introTick++;
+            if (t >= INTRO_TICKS) {
+                introDone = true;
+                return 0f;
+            }
+            return -DROP_DISTANCE * (1 - eased);
+        }
+
+        if (exiting) {
+            float p = Math.min(1f, (float) exitTick / OUTRO_TICKS);
+            float eased = p * p * p; // ease-in cubique
+            exitTick++;
+            return -DROP_DISTANCE * eased;
+        }
+
+        return 0f;
+    }
 
     private void tpElements(){
-        placeElement(gainDisplay, -0.75f, -0.15f);
-        placeElement(betDisplay, -0.75f, 0.15f);
-        placeElement(itemDisplay, 0f, 0.0f);
+        float yOffset = computeYOffset();
+
+        placeElement(gainDisplay, -0.75f, -0.15f + yOffset);
+        placeElement(betDisplay, -0.75f, 0.15f + yOffset);
+        placeElement(itemDisplay, 0f, 0.0f + yOffset);
         float OFFSET_COLUMN = -0.0375f/2f;
-        column1.getTextDisplays().forEach(textDisplay -> placeElement(textDisplay, OFFSET_COLUMN+0.35f, 0f));
-        column2.getTextDisplays().forEach(textDisplay -> placeElement(textDisplay, OFFSET_COLUMN+0f, 0f));
-        column3.getTextDisplays().forEach(textDisplay -> placeElement(textDisplay, OFFSET_COLUMN-0.35f, 0f));
+        column1.getTextDisplays().forEach(textDisplay -> placeElement(textDisplay, OFFSET_COLUMN+0.35f, yOffset));
+        column2.getTextDisplays().forEach(textDisplay -> placeElement(textDisplay, OFFSET_COLUMN+0f, yOffset));
+        column3.getTextDisplays().forEach(textDisplay -> placeElement(textDisplay, OFFSET_COLUMN-0.35f, yOffset));
     }
 
     private void destroyElements(){
