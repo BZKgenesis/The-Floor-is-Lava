@@ -75,6 +75,11 @@ public class TheFloorIslavaListener implements Listener {
     }
 
     @EventHandler
+    public void onExplosion(EntityExplodeEvent event) {
+        event.setYield(0);
+    }
+
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
         player.setFlyingFallDamage(TriState.TRUE);
