@@ -1,5 +1,6 @@
 package net.bzkgns.theFloorIsLavaManager.items.abilities.gambling;
 
+import net.bzkgns.theFloorIsLavaManager.config.gambling.GamblingConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -26,5 +27,53 @@ public enum GamblingSymbol {
 
     public String getName() {
         return name;
+    }
+
+    public double getProbability(GamblingConfig config) {
+        return switch (this) {
+            case CERISE -> config.getCeriseProbability();
+            case CITRON -> config.getCitronProbability();
+            case RAISIN -> config.getRaisinProbability();
+            case CLOCHE -> config.getClocheProbability();
+            case ETOILE -> config.getEtoileProbability();
+            case DIAMOND -> config.getDiamondProbability();
+            case SEVEN -> config.getSevenProbability();
+        };
+    }
+
+    public double getTwoGain(GamblingConfig config) {
+        return switch (this) {
+            case CERISE -> config.getCeriseTwoKind();
+            case CITRON -> config.getCitronTwoKind();
+            case RAISIN -> config.getRaisinTwoKind();
+            case CLOCHE -> config.getClocheTwoKind();
+            case ETOILE -> config.getEtoileTwoKind();
+            case DIAMOND -> config.getDiamondTwoKind();
+            case SEVEN -> config.getSevenTwoKind();
+        };
+    }
+
+    public double getOneGain(GamblingConfig config) {
+        return switch (this) {
+            case CERISE -> config.getCeriseOneKind();
+            case CITRON -> config.getCitronOneKind();
+            case RAISIN -> config.getRaisinOneKind();
+            case CLOCHE -> config.getClocheOneKind();
+            case ETOILE -> config.getEtoileOneKind();
+            case DIAMOND -> config.getDiamondOneKind();
+            case SEVEN -> config.getSevenOneKind();
+        };
+    }
+
+    public double getJackpotGain(GamblingConfig config) {
+        return switch (this) {
+            case CERISE -> config.getCeriseJackpot();
+            case CITRON -> config.getCitronJackpot();
+            case RAISIN -> config.getRaisinJackpot();
+            case CLOCHE -> config.getClocheJackpot();
+            case ETOILE -> config.getEtoileJackpot();
+            case DIAMOND -> config.getDiamondJackpot();
+            case SEVEN -> config.getSevenJackpot();
+        };
     }
 }

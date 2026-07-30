@@ -155,6 +155,23 @@ dialog:
     bet_button: "Place bet"
     bet_button_desc: "Click to place your bet"
     cancel_bet_desc: "Click to cancel your bet"
+    info_text: "For more information about the probabilities and gains, "
+    info_button: "<yellow><u>Click here</u>"
+    info:
+      title: "Gambling information"
+      rtp: "RTP (Return to Player)"
+      probabilities:
+        title: "Probabilities"
+        header: "Symbol      Probability"
+      jackpot:
+        title: "Jackpot 3 identical symbols"
+        header: "Symbol       Gain"
+      two_kind:
+        title: "2 identical symbols"
+        header: "Symbol       Gain"
+      one_kind:
+        title: "If there is no pair of identical symbols, the gain is the sum of the values of the symbols"
+        header: "Symbol       Gain"
 
 button:
   create_team: "Create a team"

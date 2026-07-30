@@ -155,6 +155,23 @@ dialog:
     bet_button: "Parier"
     bet_button_desc: "Cliquer pour parier vos ressources."
     cancel_bet_desc: "Cliquer pour annuler le pari."
+    info_text: "Pour plus d'information sur les probabilités "
+    info_button: "<yellow><u>Cliquez ici</u>"
+    info:
+      title: "Information sur les probabilités et gains"
+      rtp: "RTP (Retour au joueur)"
+      probabilities:
+        title: "Probabilité des symboles"
+        header: "Symbole  Proba"
+      jackpot:
+        title: "Jackpot 3 symboles identiques"
+        header: "Symbole  Gain"
+      two_kind:
+        title: "2 symboles identiques"
+        header: "Symbole  Gain"
+      one_kind:
+        title: "Si aucune pair, le gain est la somme des 3 valeurs"
+        header: "Symbole  Gain"
 
 button:
   create_team: "Créer une équipe"
