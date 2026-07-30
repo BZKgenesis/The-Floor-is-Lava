@@ -4,6 +4,8 @@ import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.GoalKey;
 import com.destroystokyo.paper.entity.ai.GoalType;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import org.bukkit.NamespacedKey;
@@ -15,9 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 
 public class ThrowableIronGolemGoal implements Goal<@NotNull IronGolem> {
-    private static final int MAX_DISTANCE = 50; // The maximum distance the camel will follow the player.
-    private static final float ATTACK_DISTANCE = 2.0f; // The distance at which the camel will attack the player.
-    private static final int ATTACK_COOLDOWN = 20; // The cooldown between attacks in ticks (20 ticks = 1 second).
+    private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
 
 
     private static final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
@@ -57,7 +57,10 @@ public class ThrowableIronGolemGoal implements Goal<@NotNull IronGolem> {
             return;
         }
 
-        ironGolem.getNearbyEntities(MAX_DISTANCE,MAX_DISTANCE,MAX_DISTANCE).stream()
+        ironGolem.getNearbyEntities(
+                    itemsConfig.getThrowableIronGolemMaxDistance(),
+                    itemsConfig.getThrowableIronGolemMaxDistance(),
+                    itemsConfig.getThrowableIronGolemMaxDistance()).stream()
                 .filter(entity -> entity instanceof Player && entity.isValid() && !entity.isDead())
                 .filter(entity -> {
                     Player nearbyPlayer = (Player) entity;
@@ -72,9 +75,9 @@ public class ThrowableIronGolemGoal implements Goal<@NotNull IronGolem> {
                 .ifPresent(nearbyPlayer -> {
                     ironGolem.getPathfinder().moveTo(nearbyPlayer);
                     ironGolem.lookAt(nearbyPlayer);
-                    if (ironGolem.getLocation().distance(nearbyPlayer.getLocation()) < ATTACK_DISTANCE) {
+                    if (ironGolem.getLocation().distance(nearbyPlayer.getLocation()) < itemsConfig.getThrowableIronGolemAttackDistance()) {
                         ironGolem.attack(nearbyPlayer);
-                        attackCooldown = ATTACK_COOLDOWN;
+                        attackCooldown = itemsConfig.getThrowableIronGolemAttackCooldown();
                     }
                 });
     }

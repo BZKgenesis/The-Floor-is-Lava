@@ -1,5 +1,7 @@
 package net.bzkgns.theFloorIsLavaManager.items.abilities;
 
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamData;
 import net.bzkgns.theFloorIsLavaManager.teams.TeamManager;
 import net.kyori.adventure.text.Component;
@@ -20,16 +22,14 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class HealCampInstance {
-
-    private static final int MAX_ALIVE_TICKS = 20 * 60 * 5; // 5 minutes in ticks
-    private static final int APPLICATION_DELAY = 20 * 5; // 5 seconds in ticks
+    private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
     private static final Vector3fc WEIRD_TRANSFORMATION_TRANSLATION = new Vector3f(-0.125f, 0.01f, 0.625f + 0.25f*0.0625f);
     private static final Vector3fc WEIRD_TRANSFORMATION_SCALE = new Vector3f(10f, 10f*0.57f,10f);
 
     private final TextDisplay textDisplay;
     private final AreaEffectCloud areaEffectCloud;
     private final TextDisplay timeTextDisplay;
-    private Integer aliveTicks = MAX_ALIVE_TICKS; // 5 minutes in ticks
+    private Integer aliveTicks = itemsConfig.getHealCampMaxAliveTicks(); // 5 minutes in ticks
     private final Location location;
 
     public HealCampInstance(Location location, float size, Player player) {
@@ -50,9 +50,9 @@ public class HealCampInstance {
 
         this.areaEffectCloud = world.spawn(location.clone().add(0.5f,0,0.5f), AreaEffectCloud.class);
         this.areaEffectCloud.setBasePotionType(PotionType.HEALING);
-        this.areaEffectCloud.setReapplicationDelay(APPLICATION_DELAY);
+        this.areaEffectCloud.setReapplicationDelay(itemsConfig.getHealCampApplicationDelay());
         this.areaEffectCloud.setWaitTime(0);
-        this.areaEffectCloud.setDuration(MAX_ALIVE_TICKS); // 5 minutes
+        this.areaEffectCloud.setDuration(itemsConfig.getHealCampMaxAliveTicks()); // 5 minutes
         this.areaEffectCloud.setRadius(size/2f);
         if (data != null) data.getVanillaTeam().addEntities(areaEffectCloud);
 

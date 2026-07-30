@@ -1,7 +1,9 @@
 package net.bzkgns.theFloorIsLavaManager.listener;
 
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
+import net.bzkgns.theFloorIsLavaManager.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLavaManager.items.items.SnowballPlateItem;
+import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.utils.BlockUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,6 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 
 public class SnowballListener implements Listener {
+    private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
     private final TheFloorIsLavaManager plugin = TheFloorIsLavaManager.getInstance();
 
     @EventHandler
@@ -34,7 +37,7 @@ public class SnowballListener implements Listener {
         if (!(snowball.getShooter() instanceof Player p)) return;
 
         Location loc = snowball.getLocation().getBlock().getLocation();
-        fillAround(loc, 4, BlockUtils.getWoolBlockByPlayer(p));
+        fillAround(loc, itemsConfig.getSnowBallPlateFillRadius(), BlockUtils.getWoolBlockByPlayer(p));
     }
 
     @EventHandler
