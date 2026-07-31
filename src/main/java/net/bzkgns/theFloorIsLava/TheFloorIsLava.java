@@ -22,7 +22,7 @@ import net.bzkgns.theFloorIsLava.managers.GameManager;
 import net.bzkgns.theFloorIsLava.items.*;
 import net.bzkgns.theFloorIsLava.items.items.PopupTowerItem;
 import net.bzkgns.theFloorIsLava.items.items.TeamInventoryItem;
-import net.bzkgns.theFloorIsLava.items.items.TeamRespawnItem;
+import net.bzkgns.theFloorIsLava.items.items.TeamRespawnAnchorItem;
 import net.bzkgns.theFloorIsLava.managers.ResourcePackManager;
 import net.bzkgns.theFloorIsLava.sidebar.SidebarManager;
 import net.bzkgns.theFloorIsLava.tasks.ThrowableIronGolemTask;
@@ -53,9 +53,6 @@ import static net.bzkgns.theFloorIsLava.TheFloorIsLavaCommands.registerTflComman
 
 public final class TheFloorIsLava extends JavaPlugin {
 
-    public static final String LOBBY_WORLD = "tfl_lobby";
-    public static final String GAME_WORLD = "tfl_game";
-    public static final String MAPS_FOLDER = "TheFloorIsLava-maps";
 
     public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
 
@@ -76,6 +73,7 @@ public final class TheFloorIsLava extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        WorldManager.MAPS_FOLDER.mkdir();
         try {
             scoreboardLibrary = ScoreboardLibrary.loadScoreboardLibrary(this);
         } catch (NoPacketAdapterAvailableException e) {
@@ -107,17 +105,17 @@ public final class TheFloorIsLava extends JavaPlugin {
         KitManager.getInstance().loadKits();
         ItemManager.registerAll(
                 new BatteItem(),
-                new CiseauxItem(),
+                new ShearsItem(),
                 new EggBridgeItem(),
                 new PopupTowerItem(),
                 new SnowballPlateItem(),
                 new TeamInventoryItem(),
-                new TeamRespawnItem(),
+                new TeamRespawnAnchorItem(),
                 new TeamManagerItem(),
                 new GiveAllItem(),
                 new InfiniteWoolItem(),
                 new FeatherFallingBootsItem(),
-                new FireBallCustomItem(),
+                new FireBallItem(),
                 new TntItem(),
                 new ParachuteItem(),
                 new HealCampItem(),
@@ -126,7 +124,7 @@ public final class TheFloorIsLava extends JavaPlugin {
                 new FoodItem(),
                 new GamblingItem()
         );
-        if (Bukkit.getWorld(GAME_WORLD) == null) {
+        if (Bukkit.getWorld(WorldManager.GAME_WORLD) == null) {
             getLogger().info("Creation du monde de jeu...");
             try {
                 worldManager.resetRandomWorld();

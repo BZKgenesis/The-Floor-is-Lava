@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 public class ParachuteItem extends CustomItem {
     public ParachuteItem() {
         super("parachute",
-                "items.parachute.display_name",
-                "items.parachute.lore",
                 Rarity.RARE,
                 Material.FEATHER,
                 true);

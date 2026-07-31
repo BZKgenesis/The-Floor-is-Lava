@@ -7,8 +7,6 @@ public class ShopItem extends CustomItem {
 
     public ShopItem() {
         super("shop",
-                "items.new_shop.display_name",
-                "items.new_shop.lore",
                 Rarity.COMMON,
                 Material.BOOK,
                 true);

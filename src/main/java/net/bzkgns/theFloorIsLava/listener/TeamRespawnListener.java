@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLava.listener;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.items.items.TeamRespawnItem;
+import net.bzkgns.theFloorIsLava.items.items.TeamRespawnAnchorItem;
 import net.bzkgns.theFloorIsLava.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
@@ -24,7 +24,7 @@ public class TeamRespawnListener implements Listener {
         ItemStack blockPlaced = event.getItemInHand();
         Location location = block.getLocation();
 
-        if (new TeamRespawnItem().isItem(blockPlaced)) {
+        if (new TeamRespawnAnchorItem().isItem(blockPlaced)) {
             TeamData team = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
             if (team == null) {
                 player.sendActionBar(Messages.component(player, "error.no_team_cannot_place_anchor"));

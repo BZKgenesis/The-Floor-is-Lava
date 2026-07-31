@@ -18,8 +18,6 @@ public class BatteItem extends CustomItem {
     private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
     public BatteItem() {
         super("batte",
-                "items.batte.display_name",
-                "items.batte.lore",
                 Rarity.COMMON,
                 Material.STICK,
                 true);

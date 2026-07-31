@@ -47,7 +47,6 @@ public class GamblingInstance {
     private int exitTick = 0;
 
     public GamblingInstance(Player player, Price bet) {
-        System.out.println("Creating GamblingInstance for player: " + player.getName());
         this.player = player;
         World world = player.getWorld();
         Transformation transformationBasiqueBlock = new Transformation(new Vector3f(0,-0.35f,-0.05f),
@@ -97,7 +96,6 @@ public class GamblingInstance {
 
         this.gainMultiplier = GamblingEngine.calculateGain(rolledSymbols);
         this.gain = bet.mul(gainMultiplier);
-        System.out.println("Rolled symbols for player " + player.getName() + ": " + rolledSymbols[0].getName() + ", " + rolledSymbols[1].getName() + ", " + rolledSymbols[2].getName());
         this.column1 = new GamblingColumn(player, new Random().nextInt(GamblingSymbol.values().length), rolledSymbols[0].ordinal(),1);
         this.column2 = new GamblingColumn(player, new Random().nextInt(GamblingSymbol.values().length), rolledSymbols[1].ordinal(),2);
         this.column3 = new GamblingColumn(player, new Random().nextInt(GamblingSymbol.values().length), rolledSymbols[2].ordinal(),3);

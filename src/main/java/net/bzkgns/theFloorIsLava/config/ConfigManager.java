@@ -131,7 +131,6 @@ public class ConfigManager<T extends ConfigSection<T>> {
         Object value = fileConfig.get(config.getName() + "." + key.getKey());
 
         if (value != null) {
-            System.out.println(key.getKey() + " : " + value);
             key.set(config, (R)value);
         }
     }

@@ -262,7 +262,7 @@ items:
   batte:
     display_name: "Batte"
     lore: "Une batte de baseball pour repousser les autres joueurs"
-  ciseaux:
+  shears:
     display_name: "Ciseaux"
     lore: "Permet de couper les blocs de laine et de les récupérer"
   egg_bridge:

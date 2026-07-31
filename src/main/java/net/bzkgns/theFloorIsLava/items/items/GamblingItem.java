@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 public class GamblingItem extends CustomItem {
     public GamblingItem() {
         super("gambling",
-                "items.gambling.display_name",
-                "items.gambling.lore",
                 Rarity.LEGENDARY,
                 Material.EMERALD,
                 true);

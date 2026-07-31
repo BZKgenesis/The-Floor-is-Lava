@@ -40,10 +40,10 @@ public abstract class CustomItem {
         LEGENDARY
     }
 
-    protected CustomItem(String key, String display_name_translation_key, String description_translation_key, Rarity rarity, Material material, boolean glint) {
+    protected CustomItem(String key, Rarity rarity, Material material, boolean glint) {
         this.key = new NamespacedKey(plugin,key);
-        this.display_name_translation_key = display_name_translation_key;
-        this.description_translation_key = description_translation_key;
+        this.display_name_translation_key = String.format("items.%s.display_name", key);
+        this.description_translation_key = String.format("items.%s.lore", key);
         this.rarity = rarity;
         this.material = material;
         this.glint = glint;

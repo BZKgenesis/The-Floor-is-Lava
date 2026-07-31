@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 public class ThrowableIronGolemItem extends CustomItem {
     public ThrowableIronGolemItem() {
         super("throwable_iron_golem",
-                "items.throwable_iron_golem.display_name",
-                "items.throwable_iron_golem.lore",
                 Rarity.LEGENDARY,
                 Material.EGG,
                 true);

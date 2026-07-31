@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLava.listener;
 
 import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
-import net.bzkgns.theFloorIsLava.items.items.FireBallCustomItem;
+import net.bzkgns.theFloorIsLava.items.items.FireBallItem;
 import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
@@ -24,7 +24,7 @@ public class FireBallCustomListener implements Listener {
     @EventHandler
     public void onFireBallUse(PlayerInteractEvent event) {
         if (event.getItem() == null) return;
-        if (! new FireBallCustomItem().isItem(event.getItem())) return;
+        if (! new FireBallItem().isItem(event.getItem())) return;
         if (!event.getAction().isRightClick()) return;
 
         Player player = event.getPlayer();

@@ -13,12 +13,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-public class CiseauxItem extends CustomItem {
+public class ShearsItem extends CustomItem {
     private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
-    public CiseauxItem() {
-        super( "ciseaux",
-                "items.ciseaux.display_name",
-                "items.ciseaux.lore",
+    public ShearsItem() {
+        super( "shears",
                 Rarity.COMMON,
                 Material.SHEARS,
                 true);

@@ -34,12 +34,15 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import java.util.logging.Level;
 
-import static net.bzkgns.theFloorIsLava.TheFloorIsLava.*;
-
 public class WorldManager {
 
     private final TheFloorIsLava plugin;
+
+    public static final NamespacedKey LOBBY_WORLD = new NamespacedKey("tfl","lobby");
+    public static final NamespacedKey GAME_WORLD =  new NamespacedKey("tfl","game");
+
     private Structure spawnStructure = null;
+    public static final File MAPS_FOLDER = new File(TheFloorIsLava.getInstance().getDataFolder(), "maps");
 
     public WorldManager(){
         this.plugin = TheFloorIsLava.getInstance();
@@ -52,8 +55,6 @@ public class WorldManager {
     }
 
     private final ConfigManager<MapConfig> currentMapConfigManager;
-
-    private boolean resettingWorld = false;
 
     public boolean isGameWorldLoaded = false;
 
@@ -73,7 +74,6 @@ public class WorldManager {
         isGameWorldLoaded = false;
         plugin.getGameManager().stopGame();
 
-        resettingWorld = true;
 
         World oldWorld = getGameWorld();
         List<Player> players;
@@ -83,7 +83,6 @@ public class WorldManager {
             World lobby = getLobbyWorld();
 
             if(lobby == null){
-                resettingWorld = false;
                 throw new NoLobbyFoundException("Impossible de réinitialiser le monde, le monde lobby est introuvable.");
             }
 
@@ -117,7 +116,6 @@ public class WorldManager {
         World newWorld = Bukkit.createWorld(creator);
 
         if (newWorld == null) {
-            resettingWorld = false;
             throw new NoWorldCreatedException("Le monde n'a pas pu être créé. Vérifiez les logs pour plus d'informations.");
         }
 
@@ -127,7 +125,6 @@ public class WorldManager {
             initializeLoadedMapWorld(newWorld);
         }
 
-        resettingWorld = false;
     }
 
     private void initializeLoadedMapWorld(World world) {
@@ -385,10 +382,8 @@ public class WorldManager {
     }
 
     private void extractZip(File zipFile, File destination) throws IOException {
-        if (!destination.exists()) {
-            if (!destination.mkdirs()){
-                throw new IOException("Impossible de créer le dossier de destination : " + destination.getAbsolutePath());
-            }
+        if (!destination.exists() && !destination.mkdirs()) {
+            throw new IOException("Impossible de créer le dossier de destination : " + destination.getAbsolutePath());
         }
 
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile.toPath()))) {
@@ -404,12 +399,13 @@ public class WorldManager {
                 }
 
                 if (entry.isDirectory()) {
-                    if (!outFile.mkdirs()){
+                    if (!outFile.isDirectory() && !outFile.mkdirs()) {
                         throw new IOException("Impossible de créer le dossier : " + outFile.getAbsolutePath());
                     }
                 } else {
-                    if(!outFile.getParentFile().mkdirs()){
-                        throw new IOException("Impossible de créer le dossier parent : " + outFile.getParentFile().getAbsolutePath());
+                    File parent = outFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Impossible de créer le dossier parent : " + parent.getAbsolutePath());
                     }
                     Files.copy(zis, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
@@ -419,38 +415,25 @@ public class WorldManager {
     }
 
     private Path resolveSourceDimension(Path mapRoot) {
+        Path dimensionsFolder = mapRoot.resolve("dimensions");
 
-        Path tflGameDim = mapRoot.resolve(GAME_WORLD);
-
-        if (Files.isDirectory(tflGameDim)) {
-            plugin.getLogger().info("Dimension \"" + GAME_WORLD + "\" trouvee dans la map, utilisation de celle-ci.");
-            return tflGameDim;
-        }
-
-        Path overworldDim = mapRoot.resolve("overworld");
-
-        if (Files.isDirectory(overworldDim)) {
-            plugin.getLogger().info("Dimension \"" + GAME_WORLD + "\" introuvable, utilisation du dossier \"overworld\" trouve dans la map.");
-            return overworldDim;
-        }
-
-        // Recherche approfondie du fichier "level.dat" pour ignorer le dossier parent inutile du zip
-        try (Stream<Path> stream = Files.walk(mapRoot)) {
-            Optional<Path> levelDatPath = stream
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equals("level.dat"))
-                    .findFirst();
-
-            if (levelDatPath.isPresent()) {
-                Path trueRoot = levelDatPath.get().getParent().resolve("dimensions").resolve("minecraft").resolve("overworld");
-                plugin.getLogger().info("Fichier level.dat trouve. Utilisation du dossier : " + trueRoot.getFileName());
-                return trueRoot;
+        if (Files.isDirectory(dimensionsFolder)) {
+            Path tflGameDim = dimensionsFolder.resolve("tfl").resolve("game");
+            if (Files.isDirectory(tflGameDim)) {
+                plugin.getLogger().info("Dimension \"" + GAME_WORLD.asString() + "\" trouvee dans la map, utilisation de celle-ci.");
+                return tflGameDim;
             }
-        } catch (IOException e) {
-            plugin.getLogger().warning("Erreur lors de la recherche du fichier level.dat : " + e.getMessage());
+
+            Path overworldDim = dimensionsFolder.resolve("minecraft").resolve("overworld");
+            if (Files.isDirectory(overworldDim)) {
+                plugin.getLogger().info("Dimension \"" + GAME_WORLD.asString() + "\" introuvable, utilisation de \"overworld\".");
+                return overworldDim;
+            }
+
+            plugin.getLogger().warning("Dossier \"dimensions\" trouve mais ni tfl/game ni minecraft/overworld ne sont presents.");
         }
 
-        plugin.getLogger().info("Dimension introuvable et aucun level.dat detecte, utilisation de la racine de la map par defaut.");
+        // Cas 1 : la map EST directement le dossier de dimension (data/, entities/, poi/, region/)
         return mapRoot;
     }
 
@@ -459,30 +442,25 @@ public class WorldManager {
         plugin.getGameManager().stopGame();
 
         isGameWorldLoaded = false;
-        resettingWorld = true;
 
         World oldWorld = getGameWorld();
         File destination;
 
-        // Si le monde n'existe pas, on le crée temporairement pour récupérer l'architecture de dossier moderne de Paper
+        // Si le monde n'existe pas, on le crée temporairement
         if (oldWorld == null) {
             oldWorld = Bukkit.createWorld(new WorldCreator(GAME_WORLD));
             if (oldWorld == null) {
-                resettingWorld = false;
                 throw new NoWorldCreatedException("Aucun monde de jeu n'existe et le plugin n'a pas pu en créer un temporaire pour récupérer le chemin du dossier de dimension.");
             }
         }
 
-        // C'est la clé du problème : on récupère le vrai dossier utilisé par Paper (ex: world/dimensions/minecraft/tfl_game)
         destination = oldWorld.getWorldFolder();
+
         List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
         World lobby = getLobbyWorld();
-
         if(lobby == null){
-            resettingWorld = false;
             throw new NoLobbyFoundException("Impossible de réinitialiser le monde, le monde lobby est introuvable.");
         }
-
         World finalOldWorld = oldWorld;
         players.stream()
                 .filter(p -> p.getWorld().equals(finalOldWorld))
@@ -493,19 +471,22 @@ public class WorldManager {
                 });
 
         // On décharge le monde et on vide le VRAI dossier de dimension
-        Bukkit.unloadWorld(oldWorld, false);
+        if(Bukkit.unloadWorld(oldWorld, false)){
+            plugin.getLogger().info("Monde \"" + oldWorld.getName() + "\" déchargé avec succès.");
+        } else {
+            throw new NoWorldUnloadedException("Le monde \"" + oldWorld.getName() + "\" n'a pas pu être déchargé.");
+        }
         deleteRecursively(destination);
 
         File mapsFolder = new File(
-                Bukkit.getWorldContainer(),
-                "TheFloorIsLava-maps"
+                TheFloorIsLava.getInstance().getDataFolder(),
+                "maps"
         );
 
         File mapFolder = new File(mapsFolder,mapName);
         plugin.getLogger().info(mapFolder.getAbsolutePath());
 
         if(!mapFolder.exists()){
-            resettingWorld = false;
             throw new NoMapFoundException("La map \"" + mapName + "\" est introuvable dans le dossier \"" + mapsFolder.getAbsolutePath() + "\".");
         }
 
@@ -519,21 +500,34 @@ public class WorldManager {
                 Path sourceDimension = resolveSourceDimension(mapFolder.toPath());
                 // Copie directe dans le dossier de dimension (bypass le système de migration legacy buggé)
                 copyDirectory(sourceDimension, destination.toPath());
-                copyDirectory(sourceDimension.getParent().getParent().getParent().resolve("data"), destination.toPath().resolve("data"));
+                if (!sourceDimension.equals(mapFolder.toPath())) {
+                    Path dataSource = mapFolder.toPath().resolve("data");
+                    if (Files.isDirectory(dataSource)) {
+                        copyDirectory(dataSource, destination.toPath().resolve("data"));
+                    } else {
+                        plugin.getLogger().warning("Aucun dossier \"data\" trouve a la racine de la map \"" + mapFolder.toPath() + "\".");
+                    }
+                }
 
             } else if (mapFolder.isFile() && mapFolder.getName().endsWith(".zip")) {
                 tempExtractDir = Files.createTempDirectory("tfl_map_extract_");
                 extractZip(mapFolder, tempExtractDir.toFile());
                 Path sourceDimension = resolveSourceDimension(tempExtractDir);
                 copyDirectory(sourceDimension, destination.toPath());
-                copyDirectory(sourceDimension.getParent().getParent().getParent().resolve("data"), destination.toPath().resolve("data"));
+                if (!sourceDimension.equals(tempExtractDir)) {
+                    Path dataSource = tempExtractDir.resolve("data");
+                    if (Files.isDirectory(dataSource)) {
+                        copyDirectory(dataSource, destination.toPath().resolve("data"));
+                    } else {
+                        plugin.getLogger().warning("Aucun dossier \"data\" trouve a la racine de la map \"" + tempExtractDir + "\".");
+                    }
+                }
 
             } else {
                 throw new ErrorIOWorldAssetsException("Le fichier de map \"" + mapFolder.getAbsolutePath() + "\" n'est ni un dossier ni un fichier zip valide.");
             }
 
         } catch(IOException e) {
-            resettingWorld = false;
             throw new ErrorIOWorldAssetsException("Erreur lors de la copie des fichiers de la map \"" + mapFolder.getAbsolutePath() + "\" vers le dossier de dimension \"" + destination.getAbsolutePath() + "\".", e);
         } finally {
             if (tempExtractDir != null) {
@@ -560,21 +554,16 @@ public class WorldManager {
         return file.delete();
     }
 
-    @SuppressWarnings("unused")
-    public boolean isResettingWorld(){
-        return resettingWorld;
-    }
-
     public World getLobbyWorld(){
-        return Bukkit.getWorld(TheFloorIsLava.LOBBY_WORLD);
+        return Bukkit.getWorld(LOBBY_WORLD);
     }
 
     public World getGameWorld(){
-        return Bukkit.getWorld(TheFloorIsLava.GAME_WORLD);
+        return Bukkit.getWorld(GAME_WORLD);
     }
 
     public Set<String> getMapsNames() {
-        return Stream.of(Objects.requireNonNull(new File(MAPS_FOLDER).listFiles()))
+        return Stream.of(Objects.requireNonNull(MAPS_FOLDER.listFiles()))
                 .map(File::getName)
                 .collect(Collectors.toSet());
     }
@@ -691,7 +680,7 @@ public class WorldManager {
     public void initLobbyWorld() {
         TheFloorIsLava.getInstance().getLogger().info("Initialisation du monde lobby...");
         plugin.getLogger().info("Le monde lobby existe deja, suppression de l'ancien monde...");
-        Path lobbyPath = Bukkit.getWorldContainer().toPath().resolve("world/dimensions/minecraft").resolve(LOBBY_WORLD);
+        Path lobbyPath = Bukkit.getWorldContainer().toPath().resolve("world/dimensions").resolve(LOBBY_WORLD.getNamespace()).resolve(LOBBY_WORLD.getKey());
         plugin.getLogger().info(lobbyPath.toFile().getAbsolutePath());
         Bukkit.unloadWorld(getLobbyWorld(), false);
         deleteRecursively(lobbyPath.toFile());

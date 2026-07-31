@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 public class TeamManagerItem extends CustomItem {
     public TeamManagerItem() {
         super("team_manager",
-                "items.team_manager.display_name",
-                "items.team_manager.lore",
                 Rarity.EPIC,
                 Material.PAPER,
                 true

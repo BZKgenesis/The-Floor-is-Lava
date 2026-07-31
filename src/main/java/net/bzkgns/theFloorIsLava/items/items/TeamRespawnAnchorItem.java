@@ -5,11 +5,9 @@ import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.items.abilities.TeamRespawnManager;
 import org.jetbrains.annotations.Nullable;
 
-public class TeamRespawnItem extends CustomItem {
-    public TeamRespawnItem() {
-        super("team_respawn",
-                "items.team_respawn_anchor.display_name",
-                "items.team_respawn_anchor.lore",
+public class TeamRespawnAnchorItem extends CustomItem {
+    public TeamRespawnAnchorItem() {
+        super("team_respawn_anchor",
                 Rarity.RARE,
                 TeamRespawnManager.respawnAnchorMaterial,
                 true

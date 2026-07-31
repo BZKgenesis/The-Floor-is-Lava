@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 public class HealCampItem extends CustomItem {
     public HealCampItem() {
         super("heal_camp",
-                "items.heal_camp.display_name",
-                "items.heal_camp.lore",
                 Rarity.LEGENDARY,
                 Material.CAMPFIRE,
                 true);

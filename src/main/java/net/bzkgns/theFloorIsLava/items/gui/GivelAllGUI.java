@@ -4,7 +4,7 @@ import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.items.items.*;
 import net.bzkgns.theFloorIsLava.items.items.PopupTowerItem;
 import net.bzkgns.theFloorIsLava.items.items.TeamInventoryItem;
-import net.bzkgns.theFloorIsLava.items.items.TeamRespawnItem;
+import net.bzkgns.theFloorIsLava.items.items.TeamRespawnAnchorItem;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.utils.GuiUtils;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
@@ -28,15 +28,15 @@ public class GivelAllGUI implements Listener {
 
     private static final CustomItem[] AVAILABLE_ITEMS = new CustomItem[]{
             new BatteItem(),
-            new CiseauxItem(),
+            new ShearsItem(),
             new EggBridgeItem(),
             new SnowballPlateItem(),
             new PopupTowerItem(),
-            new TeamRespawnItem(),
+            new TeamRespawnAnchorItem(),
             new TeamInventoryItem(),
             new InfiniteWoolItem(),
             new FeatherFallingBootsItem(),
-            new FireBallCustomItem(),
+            new FireBallItem(),
             new TntItem(),
             new ParachuteItem(),
             new HealCampItem(),

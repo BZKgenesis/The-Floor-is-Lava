@@ -262,7 +262,7 @@ items:
   batte:
     display_name: "Baseball bat"
     lore: "Allows you to hit players and knock them back"
-  ciseaux:
+  shears:
     display_name: "Shears"
     lore: "Allows you to cut wool faster"
   egg_bridge:

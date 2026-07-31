@@ -20,8 +20,6 @@ public class TntItem extends CustomItem {
             tntTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new TntTask(), 1, 1);
         }
         super("tnt",
-                "items.tnt.display_name",
-                "items.tnt.lore",
                 Rarity.RARE,
                 Material.TNT,
                 true);

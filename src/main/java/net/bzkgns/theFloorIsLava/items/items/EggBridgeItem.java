@@ -21,8 +21,6 @@ public class EggBridgeItem extends CustomItem {
             );
         }
         super("egg_bridge",
-                "items.egg_bridge.display_name",
-                "items.egg_bridge.lore",
                 Rarity.RARE,
                 Material.EGG,
                 true

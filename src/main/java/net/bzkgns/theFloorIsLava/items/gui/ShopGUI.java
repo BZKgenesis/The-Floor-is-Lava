@@ -174,9 +174,7 @@ public class ShopGUI implements Listener {
             inv.setItem(USABLE_SIZE_BUY_MENU+8, navItem(Messages.component(p, "gui.shop.next_page"), ArrowDirection.RIGHT));
 
         p.openInventory(inv);
-
     }
-
 
     private static int getMaxBuyPages(){
         return ItemManager.getAllBuyableItemStacks(Bukkit.getServer()).size()/ USABLE_SIZE_BUY_MENU;
@@ -189,8 +187,6 @@ public class ShopGUI implements Listener {
     private static int page(InventoryClickEvent event) {
         if (event.getInventory().getHolder() instanceof PageMenuHolder holder) {
             return holder.getPage();
-        }else{
-            System.out.println("Inventory is not a PageMenuHolder");
         }
         return 0;
     }
@@ -224,7 +220,6 @@ public class ShopGUI implements Listener {
         }
         if (event.getSlot() >= USABLE_SIZE_BUY_MENU) return;
         int idx = event.getSlot() + page(event)* USABLE_SIZE_BUY_MENU;
-        System.out.println(idx + " page: " + page(event) + " slot: " + event.getSlot() + " size: " + ItemManager.getAllBuyableItemStacks(player).size());
         if (idx >= ItemManager.getAllBuyableItemStacks(player).size()) return;
 
         CustomItem item = ItemManager.getAllBuyableItemStacks(player).get(idx);
@@ -232,12 +227,10 @@ public class ShopGUI implements Listener {
         if (player.getGameMode() != GameMode.CREATIVE){
             if (plugin.getGameManager().getMoneyManager().subtractBalance(player.getUniqueId(), item.getPrice())) {
                 player.getInventory().addItem(item.giveItem(player));
-                Messages.send(player, "shop.exchange_success");
-                player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
+                Messages.sendPing(player, "shop.exchange_success");
                 openBuyMenu(player, page(event));
             }else{
-                Messages.send(player, "shop.not_enough_ingredients");
-                playError(player);
+                Messages.sendError(player, "shop.not_enough_ingredients");
             }
         }
     }

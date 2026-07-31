@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 public class TeamInventoryItem extends CustomItem {
     public TeamInventoryItem() {
         super("team_inv",
-                "items.team_inv.display_name",
-                "items.team_inv.lore",
                 Rarity.EPIC,
                 Material.ENDER_CHEST,
                 true

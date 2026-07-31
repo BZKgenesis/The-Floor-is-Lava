@@ -22,8 +22,6 @@ public class FeatherFallingBootsItem extends CustomItem {
     private static final ItemsConfig itemsConfig = (ItemsConfig) ConfigRegistry.getConfigManager("items").getConfig();
     public FeatherFallingBootsItem() {
         super("feather_falling_boots",
-                "items.feather_falling_boots.display_name",
-                "items.feather_falling_boots.lore",
                 Rarity.RARE,
                 Material.IRON_BOOTS,
                 true);

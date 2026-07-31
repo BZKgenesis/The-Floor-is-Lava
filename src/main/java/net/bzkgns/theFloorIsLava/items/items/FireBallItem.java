@@ -5,11 +5,9 @@ import net.bzkgns.theFloorIsLava.items.CustomItem;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
-public class FireBallCustomItem extends CustomItem {
-    public FireBallCustomItem() {
-        super("fireball_custom",
-                "items.fireball.display_name",
-                "items.fireball.lore",
+public class FireBallItem extends CustomItem {
+    public FireBallItem() {
+        super("fireball",
                 Rarity.RARE,
                 Material.FIRE_CHARGE,
                 true);

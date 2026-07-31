@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 public class SnowballPlateItem extends CustomItem {
     public SnowballPlateItem() {
         super("snowball_plate",
-                "items.snowball_plate.display_name",
-                "items.snowball_plate.lore",
                 Rarity.RARE,
                 Material.SNOWBALL,
                 true
