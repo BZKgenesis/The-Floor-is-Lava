@@ -45,7 +45,6 @@ def load(filepath: str = "config.yaml"):
     Retourne:
         PROBABILITIES, JACKPOT_MULTIPLIERS, TWO_KIND_MULTIPLIERS, ONE_KIND_MULTIPLIERS
     """
-    print("📁 Python cherche dans le dossier :", os.getcwd())
     with open(filepath, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 

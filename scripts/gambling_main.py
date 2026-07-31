@@ -12,16 +12,24 @@ from .gambling.gambling_sim_gui import launch_gui
 ################################################################################
 #                                   MAIN                                       #
 ################################################################################
+
+def rtp_command(_):
+    print(f"RTP {compute_rtp()}")
+
+def simulation_command(_):
+    result = simulate()
+    print(f"%winner {result["winners_ratio"]:.3f}")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     sub = parser.add_subparsers(required=True)
 
     rtp = sub.add_parser("rtp")
-    rtp.set_defaults(func=compute_rtp)
+    rtp.set_defaults(func=rtp_command)
 
     sim = sub.add_parser("simulation")
-    sim.set_defaults(func=simulate)
+    sim.set_defaults(func=simulation_command)
 
     parser_gui = sub.add_parser("gui")
     parser_gui.set_defaults(func=launch_gui)

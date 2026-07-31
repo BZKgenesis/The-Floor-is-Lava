@@ -1,6 +1,5 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
 from .config import (
     SYMBOLS,
     PROBABILITIES,
@@ -16,7 +15,7 @@ from .config import (
 ################################################################################
 
 
-def compute_rtp(_):
+def compute_rtp():
 
     probs = (
         PROBABILITIES[:, None, None]
@@ -25,17 +24,15 @@ def compute_rtp(_):
     )
 
     rtp = np.sum(probs * GAIN_TABLE)
-
-    print(f"RTP : {rtp:.6f}")
-    print(f"RTP : {rtp*100:.2f}%")
-    print(f"Perte joueur : {(1-rtp)*100:.2f}%")
+    
+    return rtp
 
 ################################################################################
 #                              SIMULATION                                      #
 ################################################################################
 
 
-def simulate(_):
+def simulate():
 
     START_MONEY = 10_000
     NB_PLAYERS = 10000
@@ -63,12 +60,7 @@ def simulate(_):
         money *= (1 - BET_RATIO + BET_RATIO * gains[:, i])
         history[:, i + 1] = money
 
-    winners = np.count_nonzero(money > START_MONEY)
+    winners_ratio = np.count_nonzero(money > START_MONEY)/NB_PLAYERS
 
-    print(f"Joueurs gagnants : {100*winners/NB_PLAYERS:.2f}%")
-
-    plt.plot(history.T)
-    plt.xlabel("Nombre de paris")
-    plt.ylabel("Argent")
-    plt.show()
+    return {"history":history, "winners_ratio":winners_ratio}
 
