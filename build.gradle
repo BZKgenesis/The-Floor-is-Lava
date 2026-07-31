@@ -44,7 +44,7 @@ tasks {
 tasks.shadowJar {
     relocate(
             "net.megavex.scoreboardlibrary",
-            "net.bzkgns.theFloorIsLavaManager.libs.scoreboardlibrary"
+            "net.bzkgns.theFloorIsLava.libs.scoreboardlibrary"
     )
 }
 
