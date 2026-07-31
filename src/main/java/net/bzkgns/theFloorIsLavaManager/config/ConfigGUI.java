@@ -6,6 +6,7 @@ import net.bzkgns.theFloorIsLavaManager.lang.Messages;
 import net.bzkgns.theFloorIsLavaManager.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLavaManager.managers.DangerManager;
 import net.bzkgns.theFloorIsLavaManager.utils.GuiUtils;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.bzkgns.theFloorIsLavaManager.utils.menu.ConfigMenuHolder;
 import net.bzkgns.theFloorIsLavaManager.utils.menu.MenuHolder;
 import net.kyori.adventure.audience.Audience;
@@ -60,7 +61,7 @@ public class ConfigGUI implements Listener {
         meta.displayName(LangManager.getInstance().get(audience, "item.config_name", Placeholder.parsed("param" , key.getKey())));
         if (key.get(config) instanceof Number number) {
             meta.lore(List.of(
-                    LangManager.getInstance().get(audience, "item_lore.config_value", Placeholder.parsed("value", number.toString())),
+                    LangManager.getInstance().get(audience, "item_lore.config_value", Placeholder.parsed("value", TextUtils.autoClean(number))),
                     LangManager.getInstance().get(audience, "item_lore.config_description", Placeholder.parsed("description", key.getDescription())),
                     LangManager.getInstance().get(audience, "item_lore.config_increase"),
                     LangManager.getInstance().get(audience, "item_lore.config_decrease")

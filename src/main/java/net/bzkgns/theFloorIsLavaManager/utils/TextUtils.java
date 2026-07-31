@@ -92,4 +92,47 @@ public class TextUtils {
         return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
+    public static String autoClean(Number text) {
+        return switch (text) {
+            case null -> "";
+            case Integer _ -> String.valueOf(text.intValue());
+            case Double v -> String.valueOf(autoCleanDouble(v));
+            case Float v -> String.valueOf(autoCleanFloat(v));
+            case Long l -> String.valueOf(autoCleanDouble(l));
+            default -> text.toString();
+        };
+    }
+
+    private static float autoCleanFloat(float valeur) {
+        return (float) autoCleanDouble(valeur);
+    }
+
+    private static double autoCleanDouble(double valeur) {
+        if (Double.isNaN(valeur) || Double.isInfinite(valeur) || valeur == 0) {
+            return valeur;
+        }
+
+        // 1. Convertir en texte
+        String text = String.valueOf(valeur);
+
+        // 2. Si on détecte une longue suite de '0' (ex: 0.20000007851 -> 0.2)
+        text = text.replaceAll("(0{4,})[0-9]*$", "");
+
+        // 3. Si on détecte une longue suite de '9' (ex: 0.01249999994 -> 0.0125)
+        // On remplace la séquence de 9 par un arrondi propre
+        if (text.contains("9999")) {
+            // On utilise un formatage court pour résorber les .9999
+            text = String.format(java.util.Locale.US, "%.8f", valeur)
+                    .replaceAll("0+$", "")
+                    .replaceAll("\\.$", "");
+        }
+
+        // Supprime un éventuel point décimal résiduel à la fin
+        if (text.endsWith(".")) {
+            text = text.substring(0, text.length() - 1);
+        }
+
+        return Double.parseDouble(text);
+    }
+
 }

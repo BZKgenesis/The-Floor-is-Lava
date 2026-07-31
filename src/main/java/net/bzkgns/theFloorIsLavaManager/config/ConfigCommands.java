@@ -8,6 +8,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLavaManager.TheFloorIsLavaManager;
 import net.bzkgns.theFloorIsLavaManager.lang.Messages;
+import net.bzkgns.theFloorIsLavaManager.utils.TextUtils;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 
@@ -88,9 +89,14 @@ public class ConfigCommands {
             return Command.SINGLE_SUCCESS;
         }
 
+        Object value = key.get(configManager.getConfig());
+        String valueString = value == null ? "" : value.toString();
+        if (value instanceof Number number)
+            valueString = TextUtils.autoClean(number);
+
         Messages.send(ctx.getSource().getSender(), "gui.config_value",
                 Placeholder.unparsed("param", key.getKey()),
-                Placeholder.unparsed("value", key.get(configManager.getConfig()).toString()));
+                Placeholder.unparsed("value", valueString));
 
         return Command.SINGLE_SUCCESS;
     }
