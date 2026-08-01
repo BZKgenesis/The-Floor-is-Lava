@@ -121,11 +121,9 @@ public class WorldManager {
         }
 
         if (placeDefaultSpawnStructure) {
-            initializeGameWorld(newWorld);
-        } else {
-            initializeLoadedMapWorld(newWorld);
+            placeGameSpawnStructure(newWorld);
         }
-
+        initializeGameWorld(newWorld);
     }
 
     private void initializeLoadedMapWorld(World world) {
@@ -153,7 +151,7 @@ public class WorldManager {
         currentMapConfigManager.loadFromFile(ConfigLoader.pluginConfigFile("defaultMapConfig"));
     }
 
-    private void initializeGameWorld(World world) throws WorldGenerationException {
+    private void placeGameSpawnStructure(World world)  throws WorldGenerationException {
         StructureManager manager = Bukkit.getStructureManager();
         spawnStructure = null;
 
@@ -164,13 +162,12 @@ public class WorldManager {
         } catch (IOException e) {
             throw new ErrorIOWorldAssetsException("Impossible de charger la structure de spawn par défaut.", e);
         }
-
-
         oldSpawn = world.getSpawnLocation();
+    }
 
-        world.setGameRule(GameRules.RESPAWN_RADIUS,0);
-        world.setTime(0);
-        world.setGameRule(GameRules.ADVANCE_TIME,false);
+    private void initializeGameWorld(World world) {
+
+        initializeLoadedMapWorld(world);
         world.getWorldBorder().setSize(100000);
     }
 

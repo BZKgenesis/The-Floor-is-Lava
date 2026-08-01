@@ -2,7 +2,12 @@ package net.bzkgns.theFloorIsLava.statistics.visual;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.statistics.StatisticType;
+import net.bzkgns.theFloorIsLava.teams.TeamData;
+import net.bzkgns.theFloorIsLava.teams.TeamManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -97,10 +102,18 @@ public class RankingInstance {
         for (Map.Entry<UUID, Integer> entry : top.entrySet()) {
             Player player = Bukkit.getPlayer(entry.getKey());
             if (player != null) {
-                Location displayLocation = location.clone().add(0, 0.5 + i * 0.3, 0);
+                Location displayLocation = location.clone().add(0, 0.5 + (top.size() - i - 1) * 0.3, 0);
                 int finalI = i;
                 TextDisplay display = location.getWorld().spawn(displayLocation, TextDisplay.class, textDisplay -> {
-                    textDisplay.text(Component.text((finalI + 1) + ". " + player.getName() + ": " + entry.getValue()));
+                    TextComponent rank = switch (finalI) {
+                        case 0 -> Component.text("🥇 ", NamedTextColor.GOLD);
+                        case 1 -> Component.text("🥈 ", NamedTextColor.GRAY);
+                        case 2 -> Component.text("🥉 ");
+                        default -> Component.text((finalI + 1) + ". ");
+                    };
+                    TeamData teamData = TeamManager.getInstance().getPlayerTeam(player.getUniqueId());
+                    TextColor color = teamData==null ? NamedTextColor.WHITE : teamData.getColor();
+                    textDisplay.text(rank.append(Component.text( player.getName(),color).append(Component.text(": " + entry.getValue(), NamedTextColor.WHITE))));
                     textDisplay.getPersistentDataContainer().set(new NamespacedKey(plugin, "rankingId"), org.bukkit.persistence.PersistentDataType.INTEGER, RankingInstance.addInstance(this));
                 });
                 rankDisplay.add(display);
