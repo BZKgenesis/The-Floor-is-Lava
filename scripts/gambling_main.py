@@ -18,7 +18,7 @@ def rtp_command(_):
 
 def simulation_command(_):
     result = simulate()
-    print(f"%winner {result["winners_ratio"]:.3f}")
+    print(f"%winner {result['winners_ratio']:.3f}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -16,6 +16,7 @@ import net.bzkgns.theFloorIsLava.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.items.abilities.gambling.GamblingEngine;
 import net.bzkgns.theFloorIsLava.items.abilities.gambling.GamblingInstance;
+import net.bzkgns.theFloorIsLava.items.abilities.gambling.GamblingManager;
 import net.bzkgns.theFloorIsLava.items.abilities.gambling.GamblingSymbol;
 import net.bzkgns.theFloorIsLava.items.items.GamblingItem;
 import net.bzkgns.theFloorIsLava.lang.Messages;
@@ -57,8 +58,9 @@ public class GamblingListener implements Listener {
         if (!new GamblingItem().isItem(item)) return;
 
         event.setCancelled(true);
-
-
+        if (GamblingManager.getInstance().isPlayerInGambling(event.getPlayer().getUniqueId())) {
+            return;
+        }
         openGambleMenu(event.getPlayer());
     }
 

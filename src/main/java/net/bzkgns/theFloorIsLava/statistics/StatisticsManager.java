@@ -3,9 +3,7 @@ package net.bzkgns.theFloorIsLava.statistics;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class StatisticsManager implements Listener {
 
@@ -52,5 +50,14 @@ public class StatisticsManager implements Listener {
 
     public Map<UUID, PlayerStatistics> getCache() {
         return cache;
+    }
+
+    public LinkedHashMap<UUID, Integer> getTop(StatisticType type, int limit) {
+        LinkedHashMap<UUID, Integer> top = new LinkedHashMap<>();
+        cache.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue().get(type), e1.getValue().get(type))).limit(limit)
+                .forEachOrdered(entry -> top.put(entry.getKey(), entry.getValue().get(type)));
+
+        return top;
     }
 }

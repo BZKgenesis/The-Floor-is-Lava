@@ -47,6 +47,7 @@ public class GamblingInstance {
     private int exitTick = 0;
 
     public GamblingInstance(Player player, Price bet) {
+        GamblingManager.getInstance().addPlayerToGambling(player.getUniqueId());
         this.player = player;
         World world = player.getWorld();
         Transformation transformationBasiqueBlock = new Transformation(new Vector3f(0,-0.35f,-0.05f),
@@ -146,6 +147,7 @@ public class GamblingInstance {
     private void beginExit() {
         exiting = true;
         exitTick = 0;
+        GamblingManager.getInstance().removePlayerFromGambling(player.getUniqueId());
         Bukkit.getScheduler().scheduleSyncDelayedTask(TheFloorIsLava.getInstance(),
                 this::destroy, OUTRO_TICKS);
     }

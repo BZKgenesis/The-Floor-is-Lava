@@ -9,6 +9,7 @@ import net.bzkgns.theFloorIsLava.exception.*;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.managers.GameManager;
+import net.bzkgns.theFloorIsLava.statistics.visual.RankingInstance;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -715,6 +716,8 @@ public class WorldManager {
         lobby.setSpawnLocation(spawn);
 
         placeStructuresAtLobby();
+
+        new RankingInstance(spawn.clone().add(0,1,-5));
 
         plugin.getLogger().info("Monde lobby charge !");
     }

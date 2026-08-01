@@ -25,6 +25,7 @@ import net.bzkgns.theFloorIsLava.items.items.TeamInventoryItem;
 import net.bzkgns.theFloorIsLava.items.items.TeamRespawnAnchorItem;
 import net.bzkgns.theFloorIsLava.managers.ResourcePackManager;
 import net.bzkgns.theFloorIsLava.sidebar.SidebarManager;
+import net.bzkgns.theFloorIsLava.statistics.visual.RankingListener;
 import net.bzkgns.theFloorIsLava.tasks.ThrowableIronGolemTask;
 import net.bzkgns.theFloorIsLava.vein_miner.VeinMinerListener;
 import net.bzkgns.theFloorIsLava.world.WorldManager;
@@ -73,7 +74,7 @@ public final class TheFloorIsLava extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        WorldManager.MAPS_FOLDER.mkdir();
+        boolean _ = WorldManager.MAPS_FOLDER.mkdir();
         try {
             scoreboardLibrary = ScoreboardLibrary.loadScoreboardLibrary(this);
         } catch (NoPacketAdapterAvailableException e) {
@@ -164,6 +165,7 @@ public final class TheFloorIsLava extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new AutoSmelt(), this);
         getServer().getPluginManager().registerEvents(new VeinMinerListener(), this);
+        getServer().getPluginManager().registerEvents(new RankingListener(), this);
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new ThrowableIronGolemTask(), 0L, 1L);
 
