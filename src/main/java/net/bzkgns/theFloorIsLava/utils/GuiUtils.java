@@ -46,26 +46,24 @@ public class GuiUtils {
         LEFT, RIGHT
     }
 
-    public static ItemStack navItem(Component name, ArrowDirection direction) {
+    public static ItemStack navItem(Player p, ArrowDirection direction) {
         ItemStack it = new ItemStack(Material.ARROW);
         switch (direction){
             case LEFT -> {
                 it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("left"));
                 ItemMeta meta = it.getItemMeta();
                 meta.getPersistentDataContainer().set(new NamespacedKey(TheFloorIsLava.getInstance(), "buttonId"), PersistentDataType.STRING, "left");
+                meta.displayName(Messages.component(p, "gui.shop.previous_page"));
                 it.setItemMeta(meta);
             }
             case RIGHT -> {
                 it.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString("right"));
                 ItemMeta meta = it.getItemMeta();
                 meta.getPersistentDataContainer().set(new NamespacedKey(TheFloorIsLava.getInstance(), "buttonId"), PersistentDataType.STRING, "right");
+                meta.displayName(Messages.component(p, "gui.shop.next_page"));
                 it.setItemMeta(meta);
             }
         }
-
-        ItemMeta meta = it.getItemMeta();
-        meta.displayName(name);
-        it.setItemMeta(meta);
         return it;
     }
 

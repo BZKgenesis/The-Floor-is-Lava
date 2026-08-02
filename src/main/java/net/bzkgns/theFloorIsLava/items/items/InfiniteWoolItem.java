@@ -1,9 +1,7 @@
 package net.bzkgns.theFloorIsLava.items.items;
 
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import org.bukkit.Material;
-import org.jetbrains.annotations.Nullable;
 
 public class InfiniteWoolItem extends CustomItem {
     public InfiniteWoolItem() {
@@ -14,9 +12,4 @@ public class InfiniteWoolItem extends CustomItem {
         );
     }
 
-
-    @Override
-    public @Nullable Price getPrice() {
-        return new Price(60,20,0);
-    }
 }

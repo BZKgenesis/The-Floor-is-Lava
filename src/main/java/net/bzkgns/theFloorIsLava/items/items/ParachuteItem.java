@@ -1,12 +1,10 @@
 package net.bzkgns.theFloorIsLava.items.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ParachuteItem extends CustomItem {
@@ -25,10 +23,5 @@ public class ParachuteItem extends CustomItem {
                 1
         );
         return itemStack;
-    }
-
-    @Override
-    public @Nullable Price getPrice() {
-        return new Price(12,18,0);
     }
 }

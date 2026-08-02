@@ -115,6 +115,8 @@ gui:
 item:
   config_name: "<yellow><param>"
   info_team: "Information de l'équipe"
+  config_page_indicator: "<gray>Page <current>/<total>"
+  config_list_field_name: "<element> - <field>"
 
 item_lore:
   team_name: "<yellow>Nom de l'équipe: <white><team>"
@@ -375,6 +377,31 @@ config:
       jump_strength: "Modificateur de force de saut des bottes de chute. ADD_SCALAR"
       safe_fall_distance: "Modificateur de distance de chute sécurisée des bottes de chute. ADD_SCALAR"
       enchantment_level: "Niveau d'enchantement chute amortie des bottes de chute"
+  sellable_items:
+    field:
+      quantity:
+        description: "Quantité de l'item à vendre"
+      resource:
+        description: "Coût en ressources de l'item"
+      material:
+        description: "Coût en matériaux de l'item"
+  buyable_items:
+    custom:
+      field:
+        quantity:
+          description: "Quantité de l'item à acheter"
+        resource:
+          description: "Coût en ressources de l'item"
+        material:
+          description: "Coût en matériaux de l'item"
+    vanilla:
+      field:
+        quantity:
+          description: "Quantité de l'item à acheter"
+        resource:
+          description: "Coût en ressources de l'item"
+        material:
+          description: "Coût en matériaux de l'item"
 
 money:
   resource: "<gray>Ressources:"

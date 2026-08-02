@@ -3,9 +3,8 @@ package net.bzkgns.theFloorIsLava.items.items;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
-import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
+import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
 import net.kyori.adventure.audience.Audience;
@@ -14,8 +13,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.*;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemStack;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FeatherFallingBootsItem extends CustomItem {
@@ -60,11 +59,5 @@ public class FeatherFallingBootsItem extends CustomItem {
                 DataComponentTypes.MAX_STACK_SIZE,
                 1);
         return item;
-    }
-
-
-    @Override
-    public @Nullable Price getPrice() {
-        return new Price(10,35,0);
     }
 }

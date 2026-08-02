@@ -1,12 +1,10 @@
 package net.bzkgns.theFloorIsLava.items.items;
 
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.tasks.TntTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.jetbrains.annotations.Nullable;
 
 public class TntItem extends CustomItem {
 
@@ -23,10 +21,5 @@ public class TntItem extends CustomItem {
                 Rarity.RARE,
                 Material.TNT,
                 true);
-    }
-
-    @Override
-    public @Nullable Price getPrice() {
-        return new Price(25,35,0);
     }
 }

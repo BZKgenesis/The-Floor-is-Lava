@@ -1,7 +1,6 @@
 package net.bzkgns.theFloorIsLava.items.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
@@ -9,7 +8,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ThrowableIronGolemItem extends CustomItem {
@@ -29,10 +27,5 @@ public class ThrowableIronGolemItem extends CustomItem {
         }
         itemStack.setData(DataComponentTypes.ITEM_MODEL, key);
         return itemStack;
-    }
-
-    @Override
-    public @Nullable Price getPrice() {
-        return new Price(50,50,0);
     }
 }

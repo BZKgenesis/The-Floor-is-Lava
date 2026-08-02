@@ -128,21 +128,62 @@ public class ConfigManager<T extends ConfigSection<T>> {
             ConfigKey<T,R> key
     ) {
 
-        Object value = fileConfig.get(config.getName() + "." + key.getKey());
+        String path = config.getName() + "." + key.getKey();
+
+        if (key instanceof ListConfigKey<?, ?> listKey) {
+            loadListKey(fileConfig, path, (ListConfigKey<T, ?>) listKey);
+            return;
+        }
+
+        Object value = fileConfig.get(path);
 
         if (value != null) {
             key.set(config, (R)value);
         }
     }
 
+    private <E> void loadListKey(
+            FileConfiguration fileConfig,
+            String path,
+            ListConfigKey<T, E> key
+    ) {
+        List<?> rawList = fileConfig.getList(path);
+
+        if (rawList == null) return;
+
+        List<E> values = rawList.stream()
+                .filter(o -> o instanceof Map)
+                .map(o -> key.getDeserializer().apply((Map<?, ?>) o))
+                .collect(Collectors.toList());
+
+        key.set(config, values);
+    }
+
+    @SuppressWarnings("unchecked")
     private <R> void saveKey(
             FileConfiguration fileConfig,
             ConfigKey<T,R> key
     ) {
-        fileConfig.set(
-                config.getName() + "." + key.getKey(),
-                key.get(config)
-        );
+        String path = config.getName() + "." + key.getKey();
+
+        if (key instanceof ListConfigKey<?, ?> listKey) {
+            saveListKey(fileConfig, path, (ListConfigKey<T, ?>) listKey);
+            return;
+        }
+
+        fileConfig.set(path, key.get(config));
+    }
+
+    private <E> void saveListKey(
+            FileConfiguration fileConfig,
+            String path,
+            ListConfigKey<T, E> key
+    ) {
+        List<Map<String, Object>> serialized = key.get(config).stream()
+                .map(key.getSerializer())
+                .collect(Collectors.toList());
+
+        fileConfig.set(path, serialized);
     }
 
     public T getConfig() {

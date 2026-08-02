@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLava.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
+import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -60,7 +60,7 @@ public abstract class CustomItem {
         this.itemStack = itemStack.clone();
     }
 
-    protected ItemStack createBaseItemStack(Audience audience){
+    protected final ItemStack createBaseItemStack(Audience audience){
         if (itemStack != null) {
             return itemStack.clone();
         }
@@ -101,12 +101,12 @@ public abstract class CustomItem {
     }
 
 
-    public String getKey(){
+    public final String getKey(){
         return key.getKey();
     }
 
     @Nullable
-    public Price getPrice(){
-        return null;
+    public final Price getPrice(){
+        return TheFloorIsLava.getInstance().getGameManager().getShopConfigManager().getConfig().getBuyPriceCustomItem(this.key.getKey());
     }
 }

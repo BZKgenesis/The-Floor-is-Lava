@@ -1,16 +1,17 @@
 package net.bzkgns.theFloorIsLava.managers;
 
-import net.bzkgns.theFloorIsLava.config.gambling.GamblingConfig;
-import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
-import net.bzkgns.theFloorIsLava.currency.MoneyManager;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.config.ConfigLoader;
 import net.bzkgns.theFloorIsLava.config.ConfigManager;
 import net.bzkgns.theFloorIsLava.config.danger.DangerConfig;
+import net.bzkgns.theFloorIsLava.config.gambling.GamblingConfig;
 import net.bzkgns.theFloorIsLava.config.game.GameConfig;
 import net.bzkgns.theFloorIsLava.config.game.GameConfigKeys;
+import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLava.config.map.MapConfig;
 import net.bzkgns.theFloorIsLava.config.map.MapConfigKeys;
+import net.bzkgns.theFloorIsLava.config.shop.ShopConfig;
+import net.bzkgns.theFloorIsLava.currency.MoneyManager;
 import net.bzkgns.theFloorIsLava.items.items.ShopItem;
 import net.bzkgns.theFloorIsLava.kits.KitManager;
 import net.bzkgns.theFloorIsLava.lang.LangManager;
@@ -50,6 +51,7 @@ public class GameManager {
     private BossBar bossbar;
 
     private final ConfigManager<GameConfig> gameConfigManager;
+    private final ConfigManager<ShopConfig> shopConfigManager;
 
     private int phaseRisingTask = -1;
     private final List<Integer> alertTasks = new ArrayList<>();
@@ -77,10 +79,15 @@ public class GameManager {
                 new GamblingConfig()
         );
 
+        this.shopConfigManager = ConfigLoader.load(
+                new ShopConfig()
+        );
+
         ConfigRegistry.addConfig(gameConfigManager);
         ConfigRegistry.addConfig(itemsConfigManager);
         ConfigRegistry.addConfig(dangerConfigManager);
         ConfigRegistry.addConfig(gamblingConfigManager);
+        ConfigRegistry.addConfig(shopConfigManager);
         this.dangerManager = new DangerManager(dangerConfigManager);
         playerInGame = new ArrayList<>();
     }
@@ -488,6 +495,10 @@ public class GameManager {
 
     public MoneyManager getMoneyManager() {
         return moneyManager;
+    }
+
+    public ConfigManager<ShopConfig> getShopConfigManager() {
+        return shopConfigManager;
     }
 
 }

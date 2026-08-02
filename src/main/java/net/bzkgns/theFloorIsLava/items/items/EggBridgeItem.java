@@ -1,12 +1,10 @@
 package net.bzkgns.theFloorIsLava.items.items;
 
-import net.bzkgns.theFloorIsLava.currency.Price;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.tasks.EggBridgeTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.jetbrains.annotations.Nullable;
 
 public class EggBridgeItem extends CustomItem {
 
@@ -26,12 +24,5 @@ public class EggBridgeItem extends CustomItem {
                 true
         );
 
-    }
-
-
-
-    @Override
-    public @Nullable Price getPrice() {
-        return new Price(30,45,0);
     }
 }

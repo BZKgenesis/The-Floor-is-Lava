@@ -115,6 +115,8 @@ gui:
 item:
   config_name: "<yellow><param>"
   info_team: "Team information"
+  config_page_indicator: "<gray>Page <current>/<total>"
+  config_list_field_name: "<element> - <field>"
 
 item_lore:
   team_name: "<yellow>Team name: <white><name>"
@@ -375,6 +377,31 @@ config:
       jump_strength: "Modifier for jump strength when jumping with feather falling boots. ADD_SCALAR"
       safe_fall_distance: "Maximum distance (blocks) that can be fallen without taking damage when wearing feather falling boots"
       enchantment_level: "Level of feather falling enchantment on the boots"
+  sellable_items:
+    field:
+      quantity:
+        description: "Quantity of the item to sell"
+      resource:
+        description: "Resource cost of the item"
+      material:
+        description: "Material cost of the item"
+  buyable_items:
+    custom:
+      field:
+        quantity:
+          description: "Quantity of the item to buy"
+        resource:
+          description: "Resource cost of the item"
+        material:
+          description: "Material cost of the item"
+    vanilla:
+      field:
+        quantity:
+          description: "Quantity of the item to buy"
+        resource:
+          description: "Resource cost of the item"
+        material:
+          description: "Material cost of the item"
 
 money:
   resource: "<gray>Resources:"
