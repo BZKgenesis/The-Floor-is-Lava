@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLava.listener;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.items.items.PopupTowerItem;
 import net.bzkgns.theFloorIsLava.items.abilities.PopupTower;
+import net.bzkgns.theFloorIsLava.items.items.PopupTowerItem;
 import net.bzkgns.theFloorIsLava.statistics.StatisticType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;

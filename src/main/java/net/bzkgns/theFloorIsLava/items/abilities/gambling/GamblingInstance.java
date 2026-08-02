@@ -11,9 +11,9 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
-import org.joml.*;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
-import java.lang.Math;
 import java.util.Random;
 
 @SuppressWarnings("UnstableApiUsage")

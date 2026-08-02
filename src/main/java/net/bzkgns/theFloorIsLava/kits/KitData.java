@@ -2,7 +2,6 @@ package net.bzkgns.theFloorIsLava.kits;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Equippable;
-
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

@@ -3,7 +3,10 @@ package net.bzkgns.theFloorIsLava.statistics;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class StatisticsManager implements Listener {
 

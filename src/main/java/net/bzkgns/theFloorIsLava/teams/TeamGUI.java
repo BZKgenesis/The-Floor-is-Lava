@@ -1,6 +1,8 @@
 package net.bzkgns.theFloorIsLava.teams;
 
 import io.papermc.paper.connection.PlayerGameConnection;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.event.player.PlayerCustomClickEvent;
@@ -9,12 +11,10 @@ import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.managers.GameState;
 import net.bzkgns.theFloorIsLava.utils.BlockUtils;
-import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -36,7 +36,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static net.bzkgns.theFloorIsLava.utils.GuiUtils.*;
-import static net.bzkgns.theFloorIsLava.utils.TextUtils.*;
+import static net.bzkgns.theFloorIsLava.utils.TextUtils.plainText;
 
 @SuppressWarnings("UnstableApiUsage")
 public class TeamGUI implements Listener {

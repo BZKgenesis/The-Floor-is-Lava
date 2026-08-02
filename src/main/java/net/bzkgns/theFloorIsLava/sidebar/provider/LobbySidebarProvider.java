@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLava.sidebar.provider;
 
-import net.bzkgns.theFloorIsLava.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
+import net.bzkgns.theFloorIsLava.currency.PlayerBalance;
 import net.bzkgns.theFloorIsLava.kits.KitData;
 import net.bzkgns.theFloorIsLava.kits.KitManager;
 import net.bzkgns.theFloorIsLava.lang.Messages;

@@ -2,9 +2,6 @@ package net.bzkgns.theFloorIsLava.items.gui;
 
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.items.items.*;
-import net.bzkgns.theFloorIsLava.items.items.PopupTowerItem;
-import net.bzkgns.theFloorIsLava.items.items.TeamInventoryItem;
-import net.bzkgns.theFloorIsLava.items.items.TeamRespawnAnchorItem;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.utils.GuiUtils;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
@@ -17,9 +14,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
-import static net.bzkgns.theFloorIsLava.utils.SoundUtils.*;
+import static net.bzkgns.theFloorIsLava.utils.SoundUtils.playError;
 
 
 public class GivelAllGUI implements Listener {

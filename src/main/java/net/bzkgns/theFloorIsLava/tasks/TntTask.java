@@ -2,7 +2,10 @@ package net.bzkgns.theFloorIsLava.tasks;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.plugin.Plugin;
 

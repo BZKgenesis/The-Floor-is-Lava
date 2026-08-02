@@ -10,6 +10,9 @@ import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.managers.GameManager;
 import net.bzkgns.theFloorIsLava.statistics.visual.RankingInstance;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
 import org.bukkit.*;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
@@ -20,20 +23,17 @@ import org.bukkit.structure.StructureManager;
 import org.bukkit.util.BoundingBox;
 
 import java.io.File;
-import java.nio.file.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import java.util.logging.Level;
 
 public class WorldManager {
 

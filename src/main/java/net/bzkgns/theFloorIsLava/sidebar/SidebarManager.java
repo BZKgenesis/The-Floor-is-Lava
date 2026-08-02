@@ -42,7 +42,7 @@ public class SidebarManager {
 
         SidebarSession session = sidebars.remove(player.getUniqueId());
 
-        session.getSidebar().removePlayer(player);
+        session.sidebar().removePlayer(player);
     }
 
     public void update(Player player) {
@@ -53,7 +53,7 @@ public class SidebarManager {
             return;
         }
 
-        session.getProvider().apply(session.getSidebar());
+        session.provider().apply(session.sidebar());
     }
 
     public void updateAll() {

@@ -2,7 +2,6 @@ package net.bzkgns.theFloorIsLava.utils;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 public class SoundUtils {

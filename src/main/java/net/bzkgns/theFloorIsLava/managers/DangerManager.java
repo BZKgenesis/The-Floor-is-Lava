@@ -1,13 +1,16 @@
 package net.bzkgns.theFloorIsLava.managers;
 
+import net.bzkgns.theFloorIsLava.TheFloorIsLava;
+import net.bzkgns.theFloorIsLava.config.ConfigManager;
+import net.bzkgns.theFloorIsLava.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLava.config.danger.DangerConfigKeys;
 import net.bzkgns.theFloorIsLava.items.abilities.TeamRespawnManager;
-import net.bzkgns.theFloorIsLava.config.ConfigManager;
-import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.config.danger.DangerConfig;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.joml.Vector3i;

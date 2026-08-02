@@ -1,8 +1,8 @@
 package net.bzkgns.theFloorIsLava.sidebar.provider;
 
+import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLava.currency.PlayerBalance;
-import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.lang.Messages;
 import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.sidebar.SidebarProvider;

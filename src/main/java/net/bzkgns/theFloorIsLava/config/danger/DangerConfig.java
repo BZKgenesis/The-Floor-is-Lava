@@ -1,6 +1,7 @@
 package net.bzkgns.theFloorIsLava.config.danger;
 
-import net.bzkgns.theFloorIsLava.config.*;
+import net.bzkgns.theFloorIsLava.config.ConfigKey;
+import net.bzkgns.theFloorIsLava.config.ConfigSection;
 
 import java.util.List;
 
