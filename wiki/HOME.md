@@ -81,7 +81,8 @@ Fichiers de configuration disponibles :
 - `game.yml` : Contient les paramètres relatifs au déroulé d'une partie.
 - `danger.yml` : Contient les paramètres relatifs à la montée de la lave.
 - `items.yml` : Contient les paramètres relatifs aux objets disponibles dans le jeu.
-- `gambling.yml` : Contient les paramètres relatifs aux probabilités et gains de l'objet de pari (Un outil dédié est disponible pour simuler et configurer ses paramètres).
+- `shop.yml` : Contient les paramètres relatifs aux prix de ventes et d'achats des items.
+- `gambling.yml` : Contient les paramètres relatifs aux probabilités et gains de l'objet de pari (Voir section [parie](#pari)) (Un outil dédié est disponible pour simuler et configurer ses paramètres (Voir [outils](#outil-de-simulation-de-pari))).
 - `defaultMapConfig.yml` : Contient les paramètres relatifs à la configuration par défaut des maps.
 
 Chaque paramètre numérique peut être modifié en jeu via la commande `/tfl config <section> set <valeur>`.
@@ -89,6 +90,31 @@ Une interface est également disponible pour configurer les paramètres de mani�
 
 > [!CAUTION]
 > La modification des paramètres n'est effective que jusqu'au prochain redémarrage du serveur. Pour rendre les modifications permanentes, vous devez sauvegarder la configuration via la commande `/tfl config <section> save`, ce qui écrasera le fichier de configuration correspondant.
+
+### paramètres de shop
+
+Vous pouvez rajouter des items à l'achat en rajoutant des lignes dans le fichier `shop.yml` avec le format suivant :
+```yaml
+shop:
+  buyable_items:
+    vanilla:
+    - id: "<nom de l'item en snake case en majuscules>"
+      material: <prix en matériaux>
+      resource: <prix en ressources>
+      quantity: <quantité d'item acheté>
+```
+
+Vous pouvez rajouter des items à la vente en rajoutant des lignes dans le fichier `shop.yml` avec le format suivant :
+```yaml
+shop:
+  sellable_items:
+  - id: "<nom de l'item en snake case en majuscules>"
+    material: <prix en matériaux>
+    resource: <prix en ressources>
+```
+
+L'interface de modification de paramètres en jeu ne permet pas de rajouter ou de supprimer des items, il est donc nécessaire de modifier le fichier `shop.yml` pour cela.
+Vous pouvez néanmoins modifier les prix des items déjà présents via l'interface de configuration en jeu (n'oubliez pas de sauvegarder les modifications avec `/tfl config shop save` pour qu'elles soient permanentes).
 
 ### Langue
 Le plugin est disponible en plusieurs langues, le choix de la langue se fait automatiquement en fonction de la langue de jeu du joueur.
