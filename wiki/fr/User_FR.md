@@ -1,6 +1,9 @@
 # The Floor is Lava WIKI
 Bienvenue dans le wiki du plugin The Floor is Lava, vous trouverez ici toutes les informations disponibles sur le plugin, ses fonctionnalités, et comment l'utiliser.
 
+The Floor is Lava est un mini-jeu compétitif où les joueurs doivent récolter des ressources avant que la lave commence à monter progressivement.
+Les équipes doivent construire rapidement, acheter des objets dans la boutique et éliminer leurs adversaires tout en survivant à la montée de la lave.
+
 ## Installation
 
 Le plugin est compatible avec les serveurs Minecraft (26.1+) utilisant Paper. Pour l'installer, suivez ces étapes :
@@ -8,8 +11,7 @@ Le plugin est compatible avec les serveurs Minecraft (26.1+) utilisant Paper. Po
 2. Placez le fichier JAR dans le dossier `plugins` de votre serveur Minecraft.
 3. Redémarrez votre serveur pour que le plugin soit chargé.
 
-> [!TIP]
-> Vous pouvez rajouter le plugin [TreeFeller](https://modrinth.com/plugin/thizzyz-tree-feller) pour couper les arbres plus rapidement et ainsi récolter plus de ressources.
+> Vous pouvez ajouter le plugin [TreeFeller](https://modrinth.com/plugin/thizzyz-tree-feller) pour couper les arbres plus rapidement et ainsi récolter plus de ressources.
 
 ## Fonctionnalités
 
@@ -61,18 +63,6 @@ Les joueurs peuvent créer des équipes, rejoindre des équipes existantes, et g
 - `/tfl config <section> save` : Sauvegarde les paramètres de configuration dans le fichier correspondant.
 - `/tfl config <section> list` : Permet de lister tous les paramètres de configuration disponibles pour une section.
 
-#### Commandes de debug
-- `/tfl debug dangerState` : Permet de connaître l'état actuel de la montée de la lave.
-- `/tfl debug gamble computeRtp` : Permet de calculer le RTP actuel du système de pari.
-- `/tfl debug gameState` : Permet de connaître l'état actuel de la partie.
-- `/tfl debug kit` : Permet de lister tous les kits disponibles.
-- `/tfl debug kit <nom kit>` : Permet de connaître les détails d'un kit spécifique.
-- `/tfl debug oreCount <rayon>` : Permet de compter le nombre de minerais dans un rayon autour du joueur. Utile pour régler les paramètres liés à l'économie.
-- `/tfl debug playerKits` : Permet de connaître les kits équipés par les joueurs.
-- `/tfl debug playerStats` : Permet d'afficher toutes les statistiques des joueurs (c'est plus pour voir si la base de donnée fonctionne correctement que vraiment récupérer des stats).
-- `/tfl debug respawnTeam` : Permet de lister les ancres de réapparition d'équipe et leurs positions.
-- `/tfl debug team` : Permet de lister toutes les équipes et leurs membres.
-
 ## Configuration
 
 ### Paramètres de jeu
@@ -84,7 +74,7 @@ Fichiers de configuration disponibles :
 - `danger.yml` : Contient les paramètres relatifs à la montée de la lave.
 - `items.yml` : Contient les paramètres relatifs aux objets disponibles dans le jeu.
 - `shop.yml` : Contient les paramètres relatifs aux prix de ventes et d'achats des items.
-- `gambling.yml` : Contient les paramètres relatifs aux probabilités et gains de l'objet de pari (Voir section [parie](#pari)) (Un outil dédié est disponible pour simuler et configurer ses paramètres (Voir [outils](#outil-de-simulation-de-pari))).
+- `gambling.yml` : Contient les paramètres relatifs aux probabilités et gains de l'objet de pari (Voir section [pari](#pari)) (Un outil dédié est disponible pour simuler et configurer ses paramètres (Voir [outils](#outil-de-simulation-de-pari))).
 - `defaultMapConfig.yml` : Contient les paramètres relatifs à la configuration par défaut des maps.
 
 Chaque paramètre numérique peut être modifié en jeu via la commande `/tfl config <section> set <valeur>`.
@@ -93,9 +83,8 @@ Une interface est également disponible pour configurer les paramètres de mani�
 > [!CAUTION]
 > La modification des paramètres n'est effective que jusqu'au prochain redémarrage du serveur. Pour rendre les modifications permanentes, vous devez sauvegarder la configuration via la commande `/tfl config <section> save`, ce qui écrasera le fichier de configuration correspondant.
 
-### paramètres de shop
-
-Vous pouvez rajouter des items à l'achat en rajoutant des lignes dans le fichier `shop.yml` avec le format suivant :
+### paramètres de la boutique
+Vous pouvez ajouter des items à l'achat en ajoutant des lignes dans le fichier `shop.yml` avec le format suivant :
 ```yaml
 shop:
   buyable_items:
@@ -106,7 +95,7 @@ shop:
       quantity: <quantité d'item acheté>
 ```
 
-Vous pouvez rajouter des items à la vente en rajoutant des lignes dans le fichier `shop.yml` avec le format suivant :
+Vous pouvez ajouter des items à la vente en ajoutant des lignes dans le fichier `shop.yml` avec le format suivant :
 ```yaml
 shop:
   sellable_items:
@@ -115,7 +104,7 @@ shop:
     resource: <prix en ressources>
 ```
 
-L'interface de modification de paramètres en jeu ne permet pas de rajouter ou de supprimer des items, il est donc nécessaire de modifier le fichier `shop.yml` pour cela.
+L'interface de modification de paramètres en jeu ne permet pas de ajouter ou de supprimer des items, il est donc nécessaire de modifier le fichier `shop.yml` pour cela.
 Vous pouvez néanmoins modifier les prix des items déjà présents via l'interface de configuration en jeu (n'oubliez pas de sauvegarder les modifications avec `/tfl config shop save` pour qu'elles soient permanentes).
 
 ### Langue
@@ -128,31 +117,6 @@ Si le message est global et ne peut pas être traduit indépendamment de la lang
 #### Gestion de map personnalisée
 
 Les maps personnalisées doivent être placées dans le dossier `plugins/TheFloorIsLava/maps/`.
-Elles doivent être soit un dossier contenant les fichiers de la map, soit un fichier zip contenant les fichiers de la map.
-Les maps doivent suivre la structure de fichier de Minecraft 26.1+.
-Structure d'une map personnalisée :
-```
-maps/
-└── <nom de la map>/
-    ├── data/
-    ├── dimensions/
-    │   ├── tfl/
-    │   │   └── game/ (Si cette dimension n'est pas trouvée, le plugin utilisera l'overworld par défaut)
-    │   └── minecraft/
-    │       └── overworld/ (Si tfl:game n'est pas trouvé)
-    └── mapConfig.yml (fichier de configuration de la map, si il n'est pas présent, le plugin utilisera la configuration par défaut)
-```
-
-Ou alors uniquement la dimension :
-```
-maps/
-└── <nom de la map>/
-    ├── data/
-    ├── entities/
-    ├── poi/
-    ├── region/
-    └── mapConfig.yml (fichier de configuration de la map, si il n'est pas présent, le plugin utilisera la configuration par défaut)
-```
 
 Pour charger une map personnalisée, les opérateurs peuvent utiliser la commande `/tfl map reset map <nom de la map>`.
 Les paramètres de la map sont alors chargés depuis le fichier `mapConfig.yml` de la map.
@@ -282,50 +246,3 @@ Sur plusieurs paris, les probabilités sont réglées pour que le joueur soit ga
 Certaines statistiques sont enregistrées pour chaque joueur.
 
 WIP
-
-## Outils
-
-Des outils sont disponibles pour les développeurs et les opérateurs pour faciliter la configuration et le développement du plugin.
-Ces outils sont des scripts Python accessibles sur le dépôt GitHub du plugin.
-
-### Installation
-
-Pour utiliser les outils, il vous faut d'abord cloner le dépôt GitHub.
-
-Déplacez-vous dans le dossier où vous souhaitez cloner le dépôt et exécutez la commande suivante :
-```bash
-git clone https://github.com/BZKgenesis/The-Floor-is-Lava.git
-```
-
-Créez un environnement virtuel Python et activez-le :
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Sur Linux/Mac
-.venv\Scripts\activate  # Sur Windows
-```
-
-Installez les dépendances nécessaires :
-```bash
-pip install -r requirements.txt
-```
-
-### Utilisation
-
-#### Outil de simulation de pari
-
-Le script de simulation de pari est sous la forme d'un module Python.
-Pour ouvrir l'interface graphique, exécutez la commande suivante :
-```bash
-python -m scripts.gambling_main gui
-```
-
-#### Outil de détection de traduction manquante
-
-Le script de détection de traduction manquante scanne tout le projet grâce à des règles regex à la recherche de clés de traduction qui ne seraient pas dans les fichiers de configuration de langue.
-Cet outil n'est pas infaillible mais permet de détecter le plus gros des traductions manquantes.
-
-```bash
-python -m scripts.lang_scan
-```
-
-Le script affiche le nombre de clés de traduction manquantes et les écrit dans un fichier `translation_candidates.txt` dans le dossier `scripts/` du projet.
