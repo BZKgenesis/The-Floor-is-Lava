@@ -111,5 +111,11 @@ public class BlockUtils {
         }
     }
 
+    public static void filterProtectedBlocks(List<Block> blocks) {
+        blocks.removeIf(block ->
+                !BlockUtils.canPlaceBlock(block.getLocation())
+        );
+    }
+
 
 }

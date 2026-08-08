@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.config.shop;
 import net.bzkgns.theFloorIsLava.config.ConfigKey;
 import net.bzkgns.theFloorIsLava.config.ConfigSection;
 import net.bzkgns.theFloorIsLava.config.ListConfigKey;
-import net.bzkgns.theFloorIsLava.currency.Price;
+import net.bzkgns.theFloorIsLava.game.currency.Price;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.listener;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLava.items.items.SnowballPlateItem;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.utils.BlockUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;

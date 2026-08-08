@@ -5,8 +5,8 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.lang.Messages;
-import net.bzkgns.theFloorIsLava.managers.GameState;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
+import net.bzkgns.theFloorIsLava.game.GameState;
 import org.bukkit.entity.Player;
 
 public class TeamCommands {

@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.items.gui;
 
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.items.items.*;
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import net.bzkgns.theFloorIsLava.utils.GuiUtils;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
 import org.bukkit.Bukkit;

@@ -10,27 +10,28 @@ import net.bzkgns.theFloorIsLava.config.ConfigManager;
 import net.bzkgns.theFloorIsLava.config.game.GameConfig;
 import net.bzkgns.theFloorIsLava.config.game.GameConfigKeys;
 import net.bzkgns.theFloorIsLava.exception.WorldGenerationException;
+import net.bzkgns.theFloorIsLava.game.PvpManager;
 import net.bzkgns.theFloorIsLava.items.ItemManager;
 import net.bzkgns.theFloorIsLava.items.abilities.HealCampManager;
 import net.bzkgns.theFloorIsLava.items.gui.GivelAllGUI;
 import net.bzkgns.theFloorIsLava.items.gui.ShopGUI;
 import net.bzkgns.theFloorIsLava.items.items.*;
-import net.bzkgns.theFloorIsLava.kits.KitChoiceGUI;
-import net.bzkgns.theFloorIsLava.kits.KitCommands;
-import net.bzkgns.theFloorIsLava.kits.KitManager;
-import net.bzkgns.theFloorIsLava.lang.LangManager;
+import net.bzkgns.theFloorIsLava.game.kits.KitChoiceGUI;
+import net.bzkgns.theFloorIsLava.game.kits.KitCommands;
+import net.bzkgns.theFloorIsLava.game.kits.KitManager;
+import net.bzkgns.theFloorIsLava.config.lang.LangManager;
 import net.bzkgns.theFloorIsLava.listener.*;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
-import net.bzkgns.theFloorIsLava.managers.GameManager;
-import net.bzkgns.theFloorIsLava.managers.ResourcePackManager;
-import net.bzkgns.theFloorIsLava.sidebar.SidebarManager;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.game.GameManager;
+import net.bzkgns.theFloorIsLava.resources.ResourcePackManager;
+import net.bzkgns.theFloorIsLava.game.sidebar.SidebarManager;
 import net.bzkgns.theFloorIsLava.statistics.DatabaseManager;
 import net.bzkgns.theFloorIsLava.statistics.StatisticsManager;
 import net.bzkgns.theFloorIsLava.statistics.visual.RankingListener;
-import net.bzkgns.theFloorIsLava.tasks.ThrowableIronGolemTask;
+import net.bzkgns.theFloorIsLava.items.tasks.ThrowableIronGolemTask;
 import net.bzkgns.theFloorIsLava.teams.TeamGUI;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
-import net.bzkgns.theFloorIsLava.vein_miner.VeinMinerListener;
+import net.bzkgns.theFloorIsLava.listener.VeinMinerListener;
 import net.bzkgns.theFloorIsLava.world.WorldManager;
 import net.kyori.adventure.text.Component;
 import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
@@ -54,8 +55,6 @@ import static net.bzkgns.theFloorIsLava.TheFloorIsLavaCommands.registerTflComman
 public final class TheFloorIsLava extends JavaPlugin {
 
 
-    public static final String[] RECIPES_KEY = {"batte", "eggBridge", "patate", "blocs_en_plus", "ciseaux", "enderPearl", "popupTower", "teamInv", "snowballPlate"};
-
     private GameManager gameManager;
     private ResourcePackManager resourcePackManager;
     private WorldManager worldManager;
@@ -63,8 +62,6 @@ public final class TheFloorIsLava extends JavaPlugin {
     private DatabaseManager databaseManager;
     private SidebarManager sidebarManager;
     private ScoreboardLibrary scoreboardLibrary;
-
-    public static boolean pvp;
 
     public static TheFloorIsLava getInstance() {
         return JavaPlugin.getPlugin(TheFloorIsLava.class);
@@ -138,33 +135,34 @@ public final class TheFloorIsLava extends JavaPlugin {
         resourcePackManager = new ResourcePackManager(this);
         resourcePackManager.load();
 
+        PvpManager.setPvpEnabled(true);
+
+        Bukkit.getPluginManager().registerEvents(new TheFloorIslavaListener(), this);
+
         Bukkit.getPluginManager().registerEvents(new PopupTowerListener(), this);
         Bukkit.getPluginManager().registerEvents(new TeamRespawnListener(), this);
         Bukkit.getPluginManager().registerEvents(new TeamInventoryListener(), this);
         Bukkit.getPluginManager().registerEvents(new GivelAllGUI(), this);
-        getServer().getPluginManager().registerEvents(new ShopGUI(), this);
+        Bukkit.getPluginManager().registerEvents(new ShopGUI(), this);
         Bukkit.getPluginManager().registerEvents(new InfiniteWoolListener(), this);
-        pvp = true;
+        Bukkit.getPluginManager().registerEvents(new TeamGUI(this), this);
+        Bukkit.getPluginManager().registerEvents(new ConfigGUI(this), this);
+        Bukkit.getPluginManager().registerEvents(new KitChoiceGUI(), this);
+        Bukkit.getPluginManager().registerEvents(new FireBallCustomListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TntListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ParachuteListener(), this);
+        Bukkit.getPluginManager().registerEvents(new SnowballListener(), this);
+        Bukkit.getPluginManager().registerEvents(new EggBridgeListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TeamManagerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
+        Bukkit.getPluginManager().registerEvents(new HealCampListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ThrowableIronGolemListener(), this);
+        Bukkit.getPluginManager().registerEvents(new NewShopListener(), this);
+        Bukkit.getPluginManager().registerEvents(new GamblingListener(), this);
 
-        getServer().getPluginManager().registerEvents(new TheFloorIslavaListener(this), this);
-        getServer().getPluginManager().registerEvents(new TeamGUI(this), this);
-        getServer().getPluginManager().registerEvents(new ConfigGUI(this), this);
-        getServer().getPluginManager().registerEvents(new KitChoiceGUI(), this);
-        getServer().getPluginManager().registerEvents(new FireBallCustomListener(), this);
-        getServer().getPluginManager().registerEvents(new TntListener(), this);
-        getServer().getPluginManager().registerEvents(new ParachuteListener(), this);
-        getServer().getPluginManager().registerEvents(new SnowballListener(), this);
-        getServer().getPluginManager().registerEvents(new EggBridgeListener(), this);
-        getServer().getPluginManager().registerEvents(new TeamManagerListener(), this);
-        getServer().getPluginManager().registerEvents(new ShopListener(), this);
-        getServer().getPluginManager().registerEvents(new HealCampListener(), this);
-        getServer().getPluginManager().registerEvents(new ThrowableIronGolemListener(), this);
-        getServer().getPluginManager().registerEvents(new NewShopListener(), this);
-        getServer().getPluginManager().registerEvents(new GamblingListener(), this);
-
-        getServer().getPluginManager().registerEvents(new AutoSmelt(), this);
-        getServer().getPluginManager().registerEvents(new VeinMinerListener(), this);
-        getServer().getPluginManager().registerEvents(new RankingListener(), this);
+        Bukkit.getPluginManager().registerEvents(new AutoSmelt(), this);
+        Bukkit.getPluginManager().registerEvents(new VeinMinerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new RankingListener(), this);
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new ThrowableIronGolemTask(), 0L, 1L);
 
@@ -282,50 +280,3 @@ public final class TheFloorIsLava extends JavaPlugin {
         return scoreboardLibrary;
     }
 }
-
-/*
-/summon armor_stand ~ ~-1.5 ~
-    {
-        NoGravity:1b,
-        Silent:1b,
-        Invulnerable:1b,
-        Invisible:1b,
-        Tags:["tfl_spawn_mannequin"],
-        attributes:[
-            {
-                id:"minecraft:scale",
-                base:.5
-            }
-        ],
-        Passengers:[
-            {
-                id:"minecraft:mannequin",
-                NoGravity:1b,
-                Silent:1b,
-                Invulnerable:1b,
-                immovable:true,
-                hide_description:false,
-                Rotation:[180F,0F],
-                Tags:["tfl_spawn_mannequin"],
-                attributes:[
-                    {
-                        id:"minecraft:scale",
-                        base:.5
-                    }
-                ],
-                profile:{
-                    "name":"BZK_genesis",
-                    "id":[I;674201676,-138196797,-1254556747,-1700660538],
-                    "properties":[
-                        {
-                            "name":"textures",
-                            "value":"ewogICJ0aW1lc3RhbXAiIDogMTc4Mzk4MDA5MjMzOCwKICAicHJvZmlsZUlkIiA6ICIyODJmODA0Y2Y3YzM0OGMzYjUzOGZiYjU5YWExZmFjNiIsCiAgInByb2ZpbGVOYW1lIiA6ICJCWktfZ2VuZXNpcyIsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS81OTQ1MDI2MmNiODMzYmRhNWViY2VhN2U2N2ExOWJkNGQ0NmJiYzVmOTRhNDMyMDEzNmUwYmM4OTU5MWI0YzlkIgogICAgfQogIH0KfQ=="
-                        }
-                    ]
-                },
-                description:"Créateur"
-            }
-        ],
-        Rotation:[180F,0F]
-    }
- */

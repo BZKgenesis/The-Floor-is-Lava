@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.items.abilities;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;

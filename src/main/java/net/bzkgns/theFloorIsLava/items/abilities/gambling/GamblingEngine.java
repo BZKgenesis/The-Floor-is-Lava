@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLava.items.abilities.gambling;
 
 import net.bzkgns.theFloorIsLava.config.gambling.GamblingConfigKeys;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
 
 import java.util.Map;
 

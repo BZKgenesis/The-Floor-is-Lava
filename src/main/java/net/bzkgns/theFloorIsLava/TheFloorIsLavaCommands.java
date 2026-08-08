@@ -13,10 +13,10 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.bzkgns.theFloorIsLava.config.map.MapConfigKeys;
 import net.bzkgns.theFloorIsLava.debug.DebugCommands;
 import net.bzkgns.theFloorIsLava.items.ItemManager;
-import net.bzkgns.theFloorIsLava.lang.Messages;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
-import net.bzkgns.theFloorIsLava.managers.DangerManager;
-import net.bzkgns.theFloorIsLava.managers.GameManager;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.game.RisingManager;
+import net.bzkgns.theFloorIsLava.game.GameManager;
 import net.bzkgns.theFloorIsLava.teams.TeamCommands;
 import net.bzkgns.theFloorIsLava.world.ResetWorldCommands;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -27,14 +27,14 @@ import static net.bzkgns.theFloorIsLava.config.ConfigCommands.registerConfigNode
 
 @SuppressWarnings("SameReturnValue")
 public class TheFloorIsLavaCommands {
-    private static int getLevel(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
-        double level = dangerManager.getDangerLevel();
+    private static int getLevel(CommandContext<CommandSourceStack> ctx, RisingManager risingManager){
+        double level = risingManager.getDangerLevel();
         Messages.send(ctx.getSource().getSender(), "command.danger_level", Placeholder.unparsed("level", String.valueOf(level)));
         return Command.SINGLE_SUCCESS;
     }
-    private static int setLevel(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
+    private static int setLevel(CommandContext<CommandSourceStack> ctx, RisingManager risingManager){
         int level = IntegerArgumentType.getInteger(ctx, "couche");
-        dangerManager.setDangerLevel(level);
+        risingManager.setDangerLevel(level);
         Messages.send(ctx.getSource().getSender(), "command.danger_level_set", Placeholder.unparsed("level", String.valueOf(level)));
         return Command.SINGLE_SUCCESS;
     }
@@ -51,30 +51,30 @@ public class TheFloorIsLavaCommands {
         Messages.send(ctx.getSource().getSender(), "command.game_stopping");
         return Command.SINGLE_SUCCESS;
     }
-    private static int pause(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
-        if (!dangerManager.pause()){
-            Messages.send(ctx.getSource().getSender(), "error.pause_failed", Placeholder.unparsed("state", dangerManager.getState().toString()));
+    private static int pause(CommandContext<CommandSourceStack> ctx, RisingManager risingManager){
+        if (!risingManager.pause()){
+            Messages.send(ctx.getSource().getSender(), "error.pause_failed", Placeholder.unparsed("state", risingManager.getState().toString()));
             return Command.SINGLE_SUCCESS;
         }
         Messages.send(ctx.getSource().getSender(), "command.game_paused");
         return Command.SINGLE_SUCCESS;
     }
-    private static int resume(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
-        if (!dangerManager.resume()){
+    private static int resume(CommandContext<CommandSourceStack> ctx, RisingManager risingManager){
+        if (!risingManager.resume()){
             Messages.send(ctx.getSource().getSender(), "error.no_pause_to_resume");
             return Command.SINGLE_SUCCESS;
         }
         Messages.send(ctx.getSource().getSender(), "command.game_resumed");
         return Command.SINGLE_SUCCESS;
     }
-    private static int setIncreaseAmount(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
+    private static int setIncreaseAmount(CommandContext<CommandSourceStack> ctx, RisingManager risingManager){
         double vitesse = DoubleArgumentType.getDouble(ctx, "nbTick");
-        dangerManager.setIncreaseAmount(vitesse);
+        risingManager.setIncreaseAmount(vitesse);
         Messages.send(ctx.getSource().getSender(), "command.speed_set", Placeholder.unparsed("speed", String.valueOf(vitesse)));
         return Command.SINGLE_SUCCESS;
     }
-    private static int getSpeed(CommandContext<CommandSourceStack> ctx, DangerManager dangerManager){
-        double speed = dangerManager.getIncreaseAmount();
+    private static int getSpeed(CommandContext<CommandSourceStack> ctx, RisingManager risingManager){
+        double speed = risingManager.getIncreaseAmount();
         Messages.send(ctx.getSource().getSender(), "command.speed_current", Placeholder.unparsed("speed", String.valueOf(speed)));
         return Command.SINGLE_SUCCESS;
     }
@@ -202,7 +202,4 @@ public class TheFloorIsLavaCommands {
         ConfigRegistry.getConfigManager("map").set(MapConfigKeys.CENTER_X.getKey(), x.toString());
         ConfigRegistry.getConfigManager("map").set(MapConfigKeys.CENTER_Z.getKey(), z.toString());
     }
-
-
-
 }

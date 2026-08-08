@@ -322,7 +322,7 @@ config:
     min-nb-teams: "Nombre minimum d'équipes pour démarrer la partie"
     default-lang: "Langue par défaut du serveur"
     starting-countdown: "Durée (secondes) du compte à rebours avant le début de la partie"
-  danger:
+  rising:
     start-level: "Niveau Y de départ de la lave"
     end-level: "Niveau Y final de la lave"
     surface-level: "Niveau Y de la surface (change la vitesse de montée)"

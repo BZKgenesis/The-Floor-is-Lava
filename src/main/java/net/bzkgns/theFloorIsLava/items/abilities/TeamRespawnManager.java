@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.items.abilities;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

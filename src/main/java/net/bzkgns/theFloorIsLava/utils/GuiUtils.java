@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

@@ -1,6 +1,6 @@
 package net.bzkgns.theFloorIsLava.utils;
 
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

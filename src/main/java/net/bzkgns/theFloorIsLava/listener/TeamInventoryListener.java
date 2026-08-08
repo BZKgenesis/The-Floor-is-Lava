@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.listener;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.abilities.TeamInventoryManager;
 import net.bzkgns.theFloorIsLava.items.items.TeamInventoryItem;
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

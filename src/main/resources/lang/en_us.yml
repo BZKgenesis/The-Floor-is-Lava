@@ -322,7 +322,7 @@ config:
     min-nb-teams: "Minimum number of teams required to start the game"
     default-lang: "Server's default language"
     starting-countdown: "Starting countdown (seconds) before the game starts"
-  danger:
+  rising:
     start-level: "Starting Y level of the lava"
     end-level: "Final Y level of the lava"
     surface-level: "Y level of the surface (changes the rising speed)"

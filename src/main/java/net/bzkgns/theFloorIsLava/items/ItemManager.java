@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.items;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.config.shop.ShopSellItem;
-import net.bzkgns.theFloorIsLava.currency.Price;
+import net.bzkgns.theFloorIsLava.game.currency.Price;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

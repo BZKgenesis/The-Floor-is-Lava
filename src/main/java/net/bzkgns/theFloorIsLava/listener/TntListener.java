@@ -3,7 +3,7 @@ package net.bzkgns.theFloorIsLava.listener;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLava.items.items.TntItem;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
 import net.bzkgns.theFloorIsLava.utils.BlockUtils;

@@ -1,6 +1,6 @@
 package net.bzkgns.theFloorIsLava.config;
 
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import org.bukkit.Bukkit;
 
 import java.util.function.BiConsumer;

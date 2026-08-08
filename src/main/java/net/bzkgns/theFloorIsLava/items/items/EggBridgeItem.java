@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.items.items;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
-import net.bzkgns.theFloorIsLava.tasks.EggBridgeTask;
+import net.bzkgns.theFloorIsLava.items.tasks.EggBridgeTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 

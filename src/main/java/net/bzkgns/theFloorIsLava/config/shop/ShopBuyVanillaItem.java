@@ -1,6 +1,6 @@
 package net.bzkgns.theFloorIsLava.config.shop;
 
-import net.bzkgns.theFloorIsLava.currency.Price;
+import net.bzkgns.theFloorIsLava.game.currency.Price;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;

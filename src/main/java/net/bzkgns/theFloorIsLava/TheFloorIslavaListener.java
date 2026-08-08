@@ -8,17 +8,16 @@ import net.bzkgns.theFloorIsLava.items.ItemManager;
 import net.bzkgns.theFloorIsLava.items.abilities.TeamRespawnManager;
 import net.bzkgns.theFloorIsLava.items.items.GiveAllItem;
 import net.bzkgns.theFloorIsLava.items.items.TeamManagerItem;
-import net.bzkgns.theFloorIsLava.kits.KitManager;
-import net.bzkgns.theFloorIsLava.lang.Messages;
-import net.bzkgns.theFloorIsLava.managers.DangerManager;
-import net.bzkgns.theFloorIsLava.managers.GameManager;
-import net.bzkgns.theFloorIsLava.managers.GameState;
-import net.bzkgns.theFloorIsLava.sidebar.provider.GameSidebarProvider;
-import net.bzkgns.theFloorIsLava.sidebar.provider.LobbySidebarProvider;
+import net.bzkgns.theFloorIsLava.game.kits.KitManager;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
+import net.bzkgns.theFloorIsLava.game.RisingManager;
+import net.bzkgns.theFloorIsLava.game.GameManager;
+import net.bzkgns.theFloorIsLava.game.GameState;
+import net.bzkgns.theFloorIsLava.game.sidebar.provider.GameSidebarProvider;
+import net.bzkgns.theFloorIsLava.game.sidebar.provider.LobbySidebarProvider;
 import net.bzkgns.theFloorIsLava.statistics.StatisticType;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
-import net.bzkgns.theFloorIsLava.utils.BlockUtils;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,17 +25,13 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -44,7 +39,6 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -54,12 +48,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static net.bzkgns.theFloorIsLava.utils.BlockUtils.getWoolBlockByPlayer;
-
 @SuppressWarnings("UnstableApiUsage")
 public class TheFloorIslavaListener implements Listener {
 
-    private final TheFloorIsLava plugin;
+    private final TheFloorIsLava plugin = TheFloorIsLava.getInstance();
 
     private final Map<UUID, Location> deathLocations = new HashMap<>();
 
@@ -72,11 +64,7 @@ public class TheFloorIslavaListener implements Listener {
                     Material.LEATHER_BOOTS
             );
 
-
-    public TheFloorIslavaListener(TheFloorIsLava plugin) {
-        this.plugin = plugin;
-    }
-
+    //No cobble/obsidian generation
     @EventHandler
     public void onBlockForm(BlockFormEvent event) {
         Material newType = event.getNewState().getType();
@@ -87,6 +75,7 @@ public class TheFloorIslavaListener implements Listener {
         }
     }
 
+    //No item drops
     @EventHandler
     public void onExplosion(EntityExplodeEvent event) {
         event.setYield(0);
@@ -147,15 +136,8 @@ public class TheFloorIslavaListener implements Listener {
             }
             case ENDING -> event.getPlayer().setGameMode(GameMode.SPECTATOR);
         }
-        discoverRecipes(event.getPlayer());
         if(event.getPlayer().getWorld().equals(plugin.getServer().getWorld("minecraft:overworld"))){
             Messages.send(event.getPlayer(), "error.not_here");
-        }
-    }
-
-    private void discoverRecipes(Player player){
-        for (String recipe_key : TheFloorIsLava.RECIPES_KEY){
-            player.discoverRecipe(new NamespacedKey(plugin,recipe_key));
         }
     }
 
@@ -169,7 +151,6 @@ public class TheFloorIslavaListener implements Listener {
             }
         }
     }
-
 
     @EventHandler
     public void onPlayerEquip(PlayerArmorChangeEvent event){
@@ -187,36 +168,6 @@ public class TheFloorIslavaListener implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        plugin.getStatisticsManager().load(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        plugin.getStatisticsManager().unload(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlaced(BlockPlaceEvent event){
-        if (!BlockUtils.canPlaceBlock(event.getBlockPlaced().getLocation())) {
-            event.setCancelled(true);
-            return;
-        }
-        Player player = event.getPlayer();
-        Block block = event.getBlockPlaced();
-        if (block.getType().toString().endsWith("WOOL")){
-            block.setType(getWoolBlockByPlayer(player));
-        }
-    }
-
-    @EventHandler
-    public void onBroke(BlockBreakEvent event){
-        if (!BlockUtils.canPlaceBlock(event.getBlock().getLocation())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
     public void onPickupWool(PlayerAttemptPickupItemEvent e){
         Item item = e.getItem();
         ItemStack stack = item.getItemStack();
@@ -224,32 +175,7 @@ public class TheFloorIslavaListener implements Listener {
             item.setItemStack(new ItemStack(Material.LIGHT_GRAY_WOOL, stack.getAmount()));
         }
     }
-    @EventHandler
-    public void onEntityExplode(EntityExplodeEvent event) {
-        filterProtectedBlocks(event.blockList());
-    }
 
-    @EventHandler
-    public void onBlockExplode(BlockExplodeEvent event) {
-        filterProtectedBlocks(event.blockList());
-    }
-
-    private void filterProtectedBlocks(List<Block> blocks) {
-        blocks.removeIf(block ->
-                !BlockUtils.canPlaceBlock(block.getLocation())
-        );
-    }
-
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onPlayerDamage(EntityDamageEvent e){
-        if (e.getEntity() instanceof Player && e.getDamageSource().getCausingEntity()!=null){
-            if (e.getDamageSource().getCausingEntity() instanceof Player){
-                if (!TheFloorIsLava.pvp){
-                    e.setCancelled(true);
-                }
-            }
-        }
-    }
 
     @EventHandler
     public void onFallDamage(EntityDamageEvent event) {
@@ -391,7 +317,7 @@ public class TheFloorIslavaListener implements Listener {
                     return;
                 }
                 switch (TheFloorIsLava.getInstance().getGameManager().getDangerManager().getState()){
-                    case DangerManager.DangerState.PREPARATION -> Bukkit.getScheduler().runTask(plugin, () -> {
+                    case RisingManager.DangerState.PREPARATION -> Bukkit.getScheduler().runTask(plugin, () -> {
                         Location respawnLocation = player.getRespawnLocation();
                         if (respawnLocation != null){
                             player.teleport(respawnLocation);
@@ -400,7 +326,7 @@ public class TheFloorIslavaListener implements Listener {
                         }
                         player.setGameMode(GameMode.SURVIVAL);
                     });
-                    case DangerManager.DangerState.RISING -> Bukkit.getScheduler().runTask(plugin, () -> {
+                    case RisingManager.DangerState.RISING -> Bukkit.getScheduler().runTask(plugin, () -> {
                         if (deathLocation != null){
                             player.teleport(deathLocation);
                         }else{

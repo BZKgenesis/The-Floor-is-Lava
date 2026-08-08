@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.listener;
 
 import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
 import net.bzkgns.theFloorIsLava.items.items.FireBallItem;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
 import org.bukkit.Bukkit;

@@ -1,10 +1,10 @@
 package net.bzkgns.theFloorIsLava.items.gui;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.currency.PlayerBalance;
-import net.bzkgns.theFloorIsLava.currency.Price;
+import net.bzkgns.theFloorIsLava.game.currency.PlayerBalance;
+import net.bzkgns.theFloorIsLava.game.currency.Price;
 import net.bzkgns.theFloorIsLava.items.ItemManager;
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import net.bzkgns.theFloorIsLava.utils.GuiUtils;
 import net.bzkgns.theFloorIsLava.utils.menu.MenuHolder;
 import net.bzkgns.theFloorIsLava.utils.menu.PageMenuHolder;

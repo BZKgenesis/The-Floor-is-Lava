@@ -1,7 +1,7 @@
 package net.bzkgns.theFloorIsLava.items.abilities;
 
 import net.bzkgns.theFloorIsLava.config.items.ItemsConfig;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;
 import net.kyori.adventure.text.Component;

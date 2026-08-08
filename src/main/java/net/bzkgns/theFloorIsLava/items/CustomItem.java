@@ -2,8 +2,8 @@ package net.bzkgns.theFloorIsLava.items;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.currency.Price;
-import net.bzkgns.theFloorIsLava.lang.Messages;
+import net.bzkgns.theFloorIsLava.game.currency.Price;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

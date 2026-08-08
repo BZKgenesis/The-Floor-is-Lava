@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.teams;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.abilities.TeamRespawnManager;
-import net.bzkgns.theFloorIsLava.managers.DangerManager;
+import net.bzkgns.theFloorIsLava.game.RisingManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -61,7 +61,7 @@ public class TeamData {
     }
 
     public boolean isEliminated() {
-        if (TheFloorIsLava.getInstance().getGameManager().getDangerManager().getState() != DangerManager.DangerState.RISING)
+        if (TheFloorIsLava.getInstance().getGameManager().getDangerManager().getState() != RisingManager.DangerState.RISING)
             return false;
         if (TeamRespawnManager.getInstance().hasRespawnPoint(this.getId())) {
             return false;

@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.listener;
 
 import com.destroystokyo.paper.entity.ai.Goal;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
-import net.bzkgns.theFloorIsLava.goals.ThrowableIronGolemGoal;
+import net.bzkgns.theFloorIsLava.items.goals.ThrowableIronGolemGoal;
 import net.bzkgns.theFloorIsLava.items.items.ThrowableIronGolemItem;
 import net.bzkgns.theFloorIsLava.teams.TeamData;
 import net.bzkgns.theFloorIsLava.teams.TeamManager;

@@ -2,7 +2,7 @@ package net.bzkgns.theFloorIsLava.listener;
 
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.items.TeamManagerItem;
-import net.bzkgns.theFloorIsLava.managers.GameState;
+import net.bzkgns.theFloorIsLava.game.GameState;
 import net.bzkgns.theFloorIsLava.teams.TeamGUI;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

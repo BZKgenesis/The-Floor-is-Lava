@@ -3,10 +3,9 @@ package net.bzkgns.theFloorIsLava.config;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
 import net.bzkgns.theFloorIsLava.items.CustomItem;
 import net.bzkgns.theFloorIsLava.items.ItemManager;
-import net.bzkgns.theFloorIsLava.lang.LangManager;
-import net.bzkgns.theFloorIsLava.lang.Messages;
-import net.bzkgns.theFloorIsLava.managers.ConfigRegistry;
-import net.bzkgns.theFloorIsLava.managers.DangerManager;
+import net.bzkgns.theFloorIsLava.config.lang.LangManager;
+import net.bzkgns.theFloorIsLava.config.lang.Messages;
+import net.bzkgns.theFloorIsLava.game.RisingManager;
 import net.bzkgns.theFloorIsLava.utils.GuiUtils;
 import net.bzkgns.theFloorIsLava.utils.TextUtils;
 import net.bzkgns.theFloorIsLava.utils.menu.ConfigMenuHolder;
@@ -278,9 +277,9 @@ public class ConfigGUI implements Listener {
 
         event.setCancelled(true);
 
-        DangerManager dangerManager = plugin.getGameManager().getDangerManager();
+        RisingManager risingManager = plugin.getGameManager().getDangerManager();
 
-        if (!dangerManager.canEditConfig()) {
+        if (!risingManager.canEditConfig()) {
             Messages.send(player, "error.cannot_modify_config_during_game");
             player.closeInventory();
             return;
