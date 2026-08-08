@@ -14,8 +14,11 @@ public class GameConfig implements ConfigSection<GameConfig> {
     private boolean keepInventoryDuringPreparation = true;
     private double fallDamageReduction = 0.5;
     private int minNbTeam = 1;
-    private String default_lang = "fr_fr";
+    private String default_lang = "en_us";
     private int startingCountdown = 10;
+    private Boolean useResourcePackOverride = false;
+    private String resourcePackUrlOverride = "";
+    private String resourcePackSHA1Override = "";
 
     private static final List<ConfigKey<GameConfig, ?>> KEYS = List.of(
             GameConfigKeys.LAVA_RISING_DELAY,
@@ -27,7 +30,10 @@ public class GameConfig implements ConfigSection<GameConfig> {
             GameConfigKeys.FALL_DAMAGE_REDUCTION,
             GameConfigKeys.MIN_NB_TEAM,
             GameConfigKeys.DEFAULT_LANG,
-            GameConfigKeys.STARTING_COUNTDOWN
+            GameConfigKeys.STARTING_COUNTDOWN,
+            GameConfigKeys.USE_RESOURCE_PACK_OVERRIDE,
+            GameConfigKeys.RESOURCE_PACK_URL_OVERRIDE,
+            GameConfigKeys.RESOURCE_PACK_SHA1_OVERRIDE
 
     );
 
@@ -60,6 +66,15 @@ public class GameConfig implements ConfigSection<GameConfig> {
 
     public int getStartingCountdown() { return startingCountdown; }
     public void setStartingCountdown(int v) { this.startingCountdown = v; }
+
+    public Boolean isUseResourcePackOverride() { return useResourcePackOverride; }
+    public void setUseResourcePackOverride(Boolean v) { this.useResourcePackOverride = v; }
+
+    public String getResourcePackUrlOverride() { return resourcePackUrlOverride; }
+    public void setResourcePackUrlOverride(String v) { this.resourcePackUrlOverride = v; }
+
+    public String getResourcePackSHA1Override() { return resourcePackSHA1Override; }
+    public void setResourcePackSHA1Override(String v) { this.resourcePackSHA1Override = v; }
 
     @Override
     public String getName() {

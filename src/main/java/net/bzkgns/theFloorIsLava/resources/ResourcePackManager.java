@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.bzkgns.theFloorIsLava.TheFloorIsLava;
+import net.bzkgns.theFloorIsLava.config.ConfigRegistry;
+import net.bzkgns.theFloorIsLava.config.game.GameConfigKeys;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -28,12 +30,28 @@ public class ResourcePackManager {
     private String sha1;
 
     public void load() {
+        Boolean useCustomResourcePack = ConfigRegistry.getConfigManager("game")
+                .getBoolean(GameConfigKeys.USE_RESOURCE_PACK_OVERRIDE.getKey());
+        String resourcePackUrl = ConfigRegistry.getConfigManager("game")
+                .getString(GameConfigKeys.RESOURCE_PACK_URL_OVERRIDE.getKey());
+        String resourcePackSha1 = ConfigRegistry.getConfigManager("game")
+                .getString(GameConfigKeys.RESOURCE_PACK_SHA1_OVERRIDE.getKey());
+        if (useCustomResourcePack){
+            if (resourcePackUrl != null && !resourcePackUrl.isEmpty() &&
+                    resourcePackSha1 != null && !resourcePackSha1.isEmpty()) {
+                downloadUrl = resourcePackUrl;
+                sha1 = resourcePackSha1;
+                plugin.getLogger().info("Using overridden resource pack URL and SHA1 from config.");
+                return;
+            }else{
+                plugin.getLogger().warning("Resource pack override is enabled, but URL or SHA1 is missing. Falling back to GitHub release.");
+            }
+
+        }
         try(HttpClient client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build()) {
 
-
-            // 1 Récupération des informations de la release
             HttpRequest releaseRequest = HttpRequest.newBuilder()
                     .uri(URI.create(API_URL))
                     .header("Accept", "application/vnd.github+json")
@@ -64,7 +82,6 @@ public class ResourcePackManager {
                 );
             }
 
-            // Premier fichier attaché à la release
             JsonObject asset = assets.get(0).getAsJsonObject();
 
             downloadUrl =
@@ -76,7 +93,7 @@ public class ResourcePackManager {
             );
 
 
-            // 2 Téléchargement du zip
+            // zip file download
             HttpRequest downloadRequest =
                     HttpRequest.newBuilder()
                             .uri(URI.create(downloadUrl))
@@ -97,30 +114,24 @@ public class ResourcePackManager {
 
             byte[] pack = downloadResponse.body();
 
-            // 3 Calcul SHA1
+            // SHA1 hash calculation
             MessageDigest md =
                     MessageDigest.getInstance("SHA-1");
 
-
             byte[] hash = md.digest(pack);
-
             sha1 = HexFormat.of()
                     .formatHex(hash);
-
             plugin.getLogger().info(
                     "Resource pack SHA1: " + sha1
             );
 
         } catch(Exception e){
-
             plugin.getLogger().log(
                     Level.WARNING,
                     "Failed to load resource pack",
                     e
             );
-
         }
-
     }
 
     @Nullable

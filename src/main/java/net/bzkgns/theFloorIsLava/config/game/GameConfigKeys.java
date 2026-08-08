@@ -96,5 +96,32 @@ public final class GameConfigKeys {
                     Integer::parseInt
             );
 
+    public static final ConfigKey<GameConfig, Boolean> USE_RESOURCE_PACK_OVERRIDE =
+            new ConfigKey<>(
+                    "use-resource-pack-override",
+                    "config.game.use-resource-pack-override",
+                    GameConfig::isUseResourcePackOverride,
+                    GameConfig::setUseResourcePackOverride,
+                    Boolean::parseBoolean
+            );
+
+    public static final ConfigKey<GameConfig, String> RESOURCE_PACK_URL_OVERRIDE =
+            new ConfigKey<>(
+                    "resource-pack-url-override",
+                    "config.game.resource-pack-url-override",
+                    GameConfig::getResourcePackUrlOverride,
+                    GameConfig::setResourcePackUrlOverride,
+                    String::valueOf
+            );
+
+    public static final ConfigKey<GameConfig, String> RESOURCE_PACK_SHA1_OVERRIDE =
+            new ConfigKey<>(
+                    "resource-pack-sha1-override",
+                    "config.game.resource-pack-sha1-override",
+                    GameConfig::getResourcePackSHA1Override,
+                    GameConfig::setResourcePackSHA1Override,
+                    String::valueOf
+            );
+
 
 }
